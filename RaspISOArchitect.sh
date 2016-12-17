@@ -1,7 +1,11 @@
 #!/bin/bash
 
+############################Globals############################
 LASTANSWER=""
 
+###############################################################
+#############################################################################################################
+############################Used to ask a question and waiting answer true or false##########################
 function askQuestion(){
     echo "$1 (y/n)"
     read answer
@@ -25,11 +29,41 @@ function askQuestion(){
         LASTANSWER=false
     fi
 }
+################################################################################################################
+########################################-help function##########################################################
+function usage(){
+    if [ "$1" == "launch" ]
+    then
+        echo "Usage : RaspISOArchitect /path/to/image/or/iso";
+    fi
+}
+################################################################################################################
+########################################To handle options ######################################################
+function handleOptions(){
+    while [ $# -gt 0 ]
+    do  
+        case "$1" in
+            --help) usage "launch"; exit 0
+            ;;
+            -h) usage "launch"; exit 0
+            ;;
+            *) echo "Could'nt recognize option, exitting ..."; exit 0
+            ;;
+            --*) echo "Could'nt recognize option, exitting ..."; exit 0
+            ;;
+        esac
+        shift
+    done
+}
+################################################################################################################
+################################################################################################################
 
-askQuestion "Do you want to terminate this program ?"
-if [ $LASTANSWER ] 
+
+echo "Welcome on RaspISO(IMG)Architect !"
+if [ -z "$1" ]
 then
-    echo "yes"
-else
-    echo "nope"
+    usage "launch"
+    exit 1;
 fi
+
+handleOptions $@
