@@ -47,7 +47,7 @@ function handleOptions(){
             ;;
             -h) usage "launch"; exit 0
             ;;
-            *) echo "Could'nt recognize option, exitting ..."; exit 0
+            -*) echo "Could'nt recognize option, exitting ..."; exit 0
             ;;
             --*) echo "Could'nt recognize option, exitting ..."; exit 0
             ;;
@@ -56,6 +56,18 @@ function handleOptions(){
     done
 }
 ################################################################################################################
+
+function mountImage(){
+    local image=$1
+    local parts=`fdisk -l -o Start $image | cut -d' ' -f1,3 | tail -n2`
+    echo $parts
+    IFS='' read -r -a array <<< "$parts"
+
+    echo ${array[0]}
+    local sectors="${array[0]}"
+
+    echo $mainpartoffset
+}
 ################################################################################################################
 
 
@@ -67,3 +79,5 @@ then
 fi
 
 handleOptions $@
+
+mountImage $1
