@@ -2,6 +2,9 @@
 
 ############################Globals############################
 LASTANSWER=""
+IMAGE_NAME=""
+WORKING_PATH=""
+NUMBER_REGEX='^[0-9]+$'
 
 ###############################################################
 #############################################################################################################
@@ -29,6 +32,36 @@ function askQuestion(){
         LASTANSWER=false
     fi
 }
+
+function askNumberQuestion(){
+    local range=$1
+    echo $range
+    read answer
+    while ! [[ $answer =~ $NUMBER_REGEX ]]
+    do
+        echo "Bad anwser, retry or quit (Ctrl-C or q)"
+        echo $1
+        read answer
+        if [ "$answer" == "q" ] 
+        then
+            echo "Exitting"
+            exit 1 
+        fi
+    done
+    while [ "$answer" -gt "$range" ] || [ "$answer" -lt "$((1))" ]
+    do
+        echo "Bad anwser, retry or quit (Ctrl-C or q)"
+        echo $1
+        read answer
+        if [ "$answer" == "q" ] 
+        then
+            echo "Exitting"
+            exit 1 
+        fi
+    done
+
+    echo "$answer"
+}
 ################################################################################################################
 ########################################-help function##########################################################
 function usage(){
@@ -55,23 +88,32 @@ function handleOptions(){
         shift
     done
 }
+
+function menu(){
+    case "$1" in
+        main) echo "Welcome on RaspISO(IMG)Architect !"; echo "You gave the image $IMAGE_NAME";
+              echo "1. Mount image manually (requires root password)";
+              echo "2. Use kpartx (install it if not installed) to mount image";
+              echo -n "Your choice : ";
+              echo $(askNumberQuestion 2);
+              ;;
+    esac
+}
 ################################################################################################################
 
 function mountImage(){
     local image=$1
-    local parts=`fdisk -l -o Start $image | cut -d' ' -f1,3 | tail -n2`
-    echo $parts
-    IFS='' read -r -a array <<< "$parts"
+    local part=`fdisk -l -o Start $image | cut -d' ' -f1,3 | tail -n1`  
+    WORKING_PATH="/tmp/raspiso/$IMAGE_NAME"
 
-    echo ${array[0]}
-    local sectors="${array[0]}"
+    mkdir -p $WORKING_PATH
+    sudo mount -v -o offset=$((512*$part)) -t ext4 $image $WORKING_PATH
 
-    echo $mainpartoffset
+    ls $WORKING_PATH
 }
 ################################################################################################################
 
 
-echo "Welcome on RaspISO(IMG)Architect !"
 if [ -z "$1" ]
 then
     usage "launch"
@@ -80,4 +122,9 @@ fi
 
 handleOptions $@
 
-mountImage $1
+IMAGE_NAME=`basename $1`
+
+
+menu "main"
+
+#mountImage $1
