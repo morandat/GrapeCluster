@@ -1,9 +1,7 @@
-from GrapeCluster.Rasparchitect.architect.core import imageManipulator
+from Rasparchitect.architect import archicore
 
-x = imageManipulator("../../../Pidora-2014-R3.img")
+x = archicore.ImageManipulator("../../../raspbian-jessie.img")
 
-returned = x.command("pwd");
-print(returned)
+returned = x.open()
 
-x.open()
-x.close()
+print(archicore.command(["ls", "/tmp"]))
