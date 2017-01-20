@@ -1,7 +1,8 @@
-from Rasparchitect.architect import archicore
+from GrapeCluster.Rasparchitect.architect import archicore
 
-x = archicore.ImageManipulator("../../../raspbian-jessie.img")
+x = archicore.ImageManipulator("../../../Pidora-2014-R3.img")
 
 returned = x.open()
-
-print(archicore.command(["ls", "/tmp"]))
+val = returned.splitlines()
+end = val[8].split()
+print(returned)

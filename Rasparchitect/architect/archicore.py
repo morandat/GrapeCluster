@@ -23,9 +23,19 @@ class ImageManipulator:
 
     def open(self):
         try:
-            command(["mkdir", "-p", "/tmp/"+self.filename.])
-            print(self.isopath)
-            return command(["fdisk", "-l", self.isopath])
+            #Create directory at /tmp if not existing
+            command(["mkdir", "-p", "/tmp/"+str(self.filename.split(".")[0])])
+            fdisk = command(["fdisk", "-l", self.isopath])
+            iter = len(fdisk)
+            while iter != 0:
+                if(fdisk[iter].find("Device")):
+                    break
+                iter -= 1
+
+            iter += 2
+            imgPart = fdisk[iter].split()
+
+            return fdisk
         except OSError as e:
             print(e)
 
