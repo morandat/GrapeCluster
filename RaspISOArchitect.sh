@@ -5,12 +5,13 @@ LASTANSWER=""
 IMAGE_NAME=""
 WORKING_PATH=""
 NUMBER_REGEX='^[0-9]+$'
+QUESTIONSRANGE=0
 
 ###############################################################
 #############################################################################################################
 ############################Used to ask a question and waiting answer true or false##########################
 function askQuestion(){
-    echo "$1 (y/n)"
+    echo -n "$1 (y/n) "
     read answer
     while [ "$answer" != "y" ] && [ "$answer" != "n" ] && [ "$answer" != "Y" ] && [ "$answer" != "N" ]
     do
@@ -33,9 +34,17 @@ function askQuestion(){
     fi
 }
 
+function askContinue(){
+    askQuestion "Do you wish to continue ?"
+    if [ $LASTANSWER == false ]
+    then
+        echo "Exitting ..."
+        exit
+    fi
+}
+
 function askNumberQuestion(){
     local range=$1
-    echo $range
     read answer
     while ! [[ $answer =~ $NUMBER_REGEX ]]
     do
@@ -89,16 +98,21 @@ function handleOptions(){
     done
 }
 
-function menu(){
+function showMenu(){
     case "$1" in
-        main) echo "Welcome on RaspISO(IMG)Architect !"; echo "You gave the image $IMAGE_NAME";
-              echo "1. Mount image manually (requires root password)";
-              echo "2. Use kpartx (install it if not installed) to mount image";
-              echo -n "Your choice : ";
-              echo $(askNumberQuestion 2);
-              ;;
+            main) echo "Welcome on RaspISO(IMG)Architect !"; echo "You gave the image $IMAGE_NAME";
+                echo "1. Mount image manually (requires root password)";
+                echo "2. Use kpartx (install it if not installed) to mount image";
+                echo -n "Your choice : ";
+                ;;
     esac
+} >&2
+
+function menu(){
+    showMenu $1
+    echo $(askNumberQuestion 2);
 }
+
 ################################################################################################################
 
 function mountImage(){
@@ -106,6 +120,7 @@ function mountImage(){
     local part=`fdisk -l -o Start $image | cut -d' ' -f1,3 | tail -n1`  
     WORKING_PATH="/tmp/raspiso/$IMAGE_NAME"
 
+    echo $part
     mkdir -p $WORKING_PATH
     sudo mount -v -o offset=$((512*$part)) -t ext4 $image $WORKING_PATH
 
@@ -120,11 +135,26 @@ then
     exit 1;
 fi
 
+if [ "$EUID" -ne 0 ]
+  then 
+    echo "Please run as root. This script is going to mount, modify and unmount ISO images in /tmp/raspiso."
+    echo "No modification to the system will be done."
+    exit
+fi
+
 handleOptions $@
 
-IMAGE_NAME=`basename $1`
+fullfile=`basename $1`
+IMAGE_NAME="${fullfile%.*}"
 
 
-menu "main"
+choice="`menu main`"
+echo $choice
 
-#mountImage $1
+mountImage $1
+
+while [ true ]
+do
+    read cmd
+    $cmd
+done
