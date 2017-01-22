@@ -117,12 +117,13 @@ function menu(){
 
 function mountImage(){
     local image=$1
-    local part=`fdisk -l -o Start $image | cut -d' ' -f1,3 | tail -n1`  
-    WORKING_PATH="/tmp/raspiso/$IMAGE_NAME"
+    local part=`fdisk -l -o Start $image | cut -d' ' -f1,3 | tail -n1`
+    mkdir -p tmp  
+    WORKING_PATH="./tmp/$IMAGE_NAME"
 
     echo $part
     mkdir -p $WORKING_PATH
-    sudo mount -v -o offset=$((512*$part)) -t ext4 $image $WORKING_PATH
+    fuseiso -o offset=$((512*$part)) -t ext4 $image $WORKING_PATH
 
     ls $WORKING_PATH
 }
@@ -135,26 +136,9 @@ then
     exit 1;
 fi
 
-if [ "$EUID" -ne 0 ]
-  then 
-    echo "Please run as root. This script is going to mount, modify and unmount ISO images in /tmp/raspiso."
-    echo "No modification to the system will be done."
-    exit
-fi
-
 handleOptions $@
 
 fullfile=`basename $1`
 IMAGE_NAME="${fullfile%.*}"
 
-
-choice="`menu main`"
-echo $choice
-
 mountImage $1
-
-while [ true ]
-do
-    read cmd
-    $cmd
-done
