@@ -10,6 +10,7 @@ FILE=""
 DESTINATION=""
 MOUNTOPT=0
 DIRECTORY=""
+WORKING_PATH=""
 
 #If no parameter given, wtf ?
 if [ -z "$1" ]; then
@@ -57,7 +58,7 @@ done
 
 
 #If no file is given
-if [ "$FILE" == "" ]
+if [ "$FILE" == "" ] && [ $MOUNTOPT -le 1 ]
 then    
     usage 
     exit 1
@@ -72,17 +73,25 @@ then
 		if [ "$DESTINATION" == "" ]
 		then
 			DESTINATION="./.armmanager"
+			filename=`basename $FILE`
+			WORKING_PATH="$DESTINATION/${filename%.*}"
+		else
+			$WORKING_PATH=$DESTINATION
 		fi
+
 		#Create directory for destination
-		mkdir -p $DESTINATION
-		echo "Command \``"
-		guestmount -a $FILE -m /dev/sda2 $DESTINATION
+		mkdir -p $WORKING_PATH
+		part=`fdisk -l -o Start $FILE | cut -d' ' -f1,3 | tail -n1`
+		offset=$((512*$part))
+
+		echo "Mount command needs root permission, you will be asked to enter root password."
+		sudo mount -o offset=$offset -t ext4 $FILE $WORKING_PATH
 		if [ $? -ne 0 ]
 		then
 			echo "Something went wrong when trying to mount"
 			exit 1
 		else
-			echo "Successfully mounted $FILE to $DESTINATION"
+			echo "Successfully mounted $FILE to $WORKING_PATH"
 		fi
 	else
 		echo "Please give a valid file ... (img/iso)"
@@ -93,5 +102,5 @@ fi
 
 if [ $MOUNTOPT -eq 2 ]
 then
-	guestunmount $DESTINATION
+	sudo umount $DIRECTORY
 fi
