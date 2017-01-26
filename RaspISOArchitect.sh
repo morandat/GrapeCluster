@@ -123,7 +123,7 @@ function mountImage(){
 
     echo $part
     mkdir -p $WORKING_PATH
-    fuseiso -o offset=$((512*$part)) -t ext4 $image $WORKING_PATH
+    mount -o offset=$((512*$part)) -t ext4 $image $WORKING_PATH
 
     ls $WORKING_PATH
 }
@@ -136,7 +136,7 @@ then
     exit 1;
 fi
 
-handleOptions $@
+#handleOptions $@
 
 fullfile=`basename $1`
 IMAGE_NAME="${fullfile%.*}"

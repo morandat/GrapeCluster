@@ -71,10 +71,11 @@ then
 		#If no destination given
 		if [ "$DESTINATION" == "" ]
 		then
-			DESTINATION="./.armanager"
+			DESTINATION="./.armmanager"
 		fi
 		#Create directory for destination
 		mkdir -p $DESTINATION
+		echo "Command \``"
 		guestmount -a $FILE -m /dev/sda2 $DESTINATION
 		if [ $? -ne 0 ]
 		then
