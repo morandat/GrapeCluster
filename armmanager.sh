@@ -9,6 +9,14 @@ realpath() {
     [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
 }
 
+rootasked(){
+	if [ "$EUID" -ne 0 ]
+	then
+		echo `whoami`
+		echo "$1 command will need your root password ... please enter it as follows :"
+	fi
+}
+
 #Global Variables
 FILE=""
 DESTINATION=""
@@ -43,7 +51,7 @@ mount_image(){
 		part=`fdisk -l -o Start $FILE | cut -d' ' -f1,3 | tail -n1`
 		offset=$((512*$part))
 
-		echo "Mount command needs root permission, you will be asked to enter root password."
+		rootasked "Mount"
 		sudo mount -o offset=$offset -t ext4 $FILE $WORKING_PATH
 		if [ $? -ne 0 ]
 		then
@@ -56,23 +64,25 @@ mount_image(){
 		#Then we copy qemu executable to make translation for chroot
 		if [ ! MOUNT_ONLY ]
 		then
-			if [ -e "/usr/bin/qemu-arm-static" ]
-			then
-				echo "Adding qemu-arm-static to /usr/bin of the image ..."
-				cd $WORKING_PATH
-				cp --remove-destination /usr/bin/qemu-arm-static ./usr/bin/
-			else
-				echo "Couldn't find /usr/bin/qemu-arm-static which is required to translate from ARM to `uname -m`"
-				echo "Please install qemu-user and qemu-user-static (maybe search for qemu-extra depending on your linux distribution)"
-				echo "Use 'apt-get install qemu-user qemu-user-static'"
-				exit 1
-			fi
+			copy_qemu
 		fi
-
-		
 	else
 		echo "Please give a valid file ... (img/iso)"
 		usage
+		exit 1
+	fi
+}
+
+copy_qemu(){
+	if [ -e "/usr/bin/qemu-arm-static" ]
+	then
+		echo "Adding qemu-arm-static to /usr/bin of the image ..."
+		cd $WORKING_PATH
+		sudo cp --remove-destination /usr/bin/qemu-arm-static ./usr/bin/
+	else
+		echo "Couldn't find /usr/bin/qemu-arm-static which is required to translate from ARM to `uname -m`"
+		echo "Please install qemu-user and qemu-user-static (maybe search for qemu-extra depending on your linux distribution)"
+		echo "Use 'apt-get install qemu-user qemu-user-static'"
 		exit 1
 	fi
 }
@@ -81,7 +91,7 @@ unmount_image(){
 	if [ -d $WORKING_PATH ]
 	then
 		echo "Unmounting `realpath $WORKING_PATH` filesystem ..."
-		echo "Umount command needs root permission, you will be asked to enter root password."
+		rootasked "Umount"
 		sudo umount $WORKING_PATH
 		if [ $? -ne 0 ]
 		then
@@ -102,6 +112,17 @@ unmount_image(){
 
 chroot_image(){
 	cd $WORKING_PATH
+	if [ -e "./usr/bin/qemu-arm-static" ]
+	then
+		rootasked "chroot"
+		sudo chroot ./ /usr/bin/qemu-arm-static /bin/bash
+		echo "Successfully chrooted"
+	else
+		echo "Coudln't find qemu-arm-static executable in image, trying to copy it ..."
+		copy_qemu
+		echo "Retrying to chroot ..."
+		chroot_image
+	fi
 }
 
 #If no parameter given, wtf ?
@@ -157,6 +178,29 @@ do
 		-h|--help)
 			usage
 			exit 0
+		shift # past argument=value
+		;;
+		-c=*|--chroot=*|-c|--chroot)
+			FILE="${i#*=}"
+			if [ "$FILE" == "$i" ]
+			then
+				if [ -f ".wpath" ]
+				then
+					FILE=`cat .wpath`
+				else
+					echo "chroot option needs a directory path or at least needs to be used after having mounted a filesystem"
+					exit 1
+				fi
+			else 
+				if [ ! -e "$FILE" ]
+				then
+					echo "Please give an existing directory"
+					usage
+					exit 1
+				fi
+			fi
+			WORKING_PATH=$FILE
+			chroot_image
 		shift # past argument=value
 		;;
 		*)
