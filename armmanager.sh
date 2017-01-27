@@ -2,7 +2,7 @@
 
 #Usage function to print how to use
 usage() {
-	echo "armmanager [-m] [-u [<destination>]] <file> [-o <destination>]"
+	echo "armmanager [-m=<file>] [-u[=<destination>]] [-o=<destination>]"
 }
 
 realpath() {
@@ -27,7 +27,7 @@ mount_image(){
 			WORKING_PATH="$DESTINATION/${filename%.*}"
 			echo "Setting destination folder to default $WORKING_PATH"
 		else
-			$WORKING_PATH=$DESTINATION
+			WORKING_PATH=$DESTINATION
 			echo "Destination folder is : $WORKING_PATH"
 		fi
 
@@ -36,7 +36,7 @@ mount_image(){
 
 		#to save working path
 		#we could have used readlink or realpath, but this is special to "recent" linux, so for instance not for mac
-		echo `realpath $WORKING_PATH` > .wpath
+		echo -n `realpath $WORKING_PATH` > .wpath
 
 		#Seeking part to mount
 		echo "Mounting Linux partition of $FILE"
@@ -56,8 +56,9 @@ mount_image(){
 		#Then we copy qemu executable to make translation for chroot
 		if [ ! MOUNT_ONLY ]
 		then
-			if [ -e /usr/bin/qemu-arm-static ]
+			if [ -e "/usr/bin/qemu-arm-static" ]
 			then
+				echo "Adding qemu-arm-static to /usr/bin of the image ..."
 				cd $WORKING_PATH
 				cp --remove-destination /usr/bin/qemu-arm-static ./usr/bin/
 			else
@@ -77,11 +78,21 @@ mount_image(){
 }
 
 unmount_image(){
-	if [ -d $FILE ]
+	if [ -d $WORKING_PATH ]
 	then
 		echo "Unmounting `realpath $WORKING_PATH` filesystem ..."
 		echo "Umount command needs root permission, you will be asked to enter root password."
-		sudo umount $FILE
+		sudo umount $WORKING_PATH
+		if [ $? -ne 0 ]
+		then
+			echo "A problem occured when trying to unmount $WORKING_PATH"
+			exit 1
+		else
+			echo "Successfully unmounted $WORKING_PATH"
+			echo "Removing temporary file ..."
+			rm .wpath
+			rm -r $WORKING_PATH
+		fi
 	else
 		echo "Unmount target must be a directory"
 		usage
@@ -118,11 +129,11 @@ do
 		;;
 		-u=*|--umount=*|-u|--umount)
 			FILE="${i#*=}"
-			if [ "$FILE" == "" ]
+			if [ "$FILE" == "$i" ]
 			then
-				if [ -f .wpath]
+				if [ -f ".wpath" ]
 				then
-					WORKING_PATH=`cat .wpath`
+					FILE=`cat .wpath`
 				else
 					echo "umount option needs a directory path or at least needs to be used after having mounted a filesystem"
 					exit 1
