@@ -12,9 +12,12 @@ realpath() {
 rootasked(){
 	if [ "$EUID" -ne 0 ]
 	then
-		echo `whoami`
-		echo "$1 command will need your root password ... please enter it as follows :"
+		echo "Command $1 is going to be runned in sudo mode."
 	fi
+}
+
+command_exists(){
+    type "$1" &> /dev/null ;
 }
 
 #Global Variables
@@ -23,6 +26,7 @@ DESTINATION=""
 MOUNTOPT=0
 WORKING_PATH=""
 MOUNT_ONLY=false
+CHROOT=false
 
 mount_image(){
 	if [[ $FILE == *.img ]] || [[ $FILE == *.iso ]]
@@ -78,11 +82,12 @@ copy_qemu(){
 	then
 		echo "Adding qemu-arm-static to /usr/bin of the image ..."
 		cd $WORKING_PATH
+		rootasked "cp (in mounted filesystem)"
 		sudo cp --remove-destination /usr/bin/qemu-arm-static ./usr/bin/
 	else
 		echo "Couldn't find /usr/bin/qemu-arm-static which is required to translate from ARM to `uname -m`"
-		echo "Please install qemu-user and qemu-user-static (maybe search for qemu-extra depending on your linux distribution)"
-		echo "Use 'apt-get install qemu-user qemu-user-static'"
+		echo "Please install qemu, qemu-user and qemu-user-static (maybe search for qemu-extra depending on your linux distribution)"
+		echo "Use 'apt-get install qemu qemu-user qemu-user-static'"
 		exit 1
 	fi
 }
@@ -111,12 +116,43 @@ unmount_image(){
 }
 
 chroot_image(){
-	cd $WORKING_PATH
-	if [ -e "./usr/bin/qemu-arm-static" ]
+	if [ -e "$WORKING_PATH/usr/bin/qemu-arm-static" ]
 	then
-		rootasked "chroot"
-		sudo chroot ./ /usr/bin/qemu-arm-static /bin/bash
-		echo "Successfully chrooted"
+		if command_exists update-binfmts;
+		then
+			echo "Enabling Qemu ARM translation ..."
+			rootasked "binfmts"
+			sudo update-binfmts --enable qemu-arm
+
+			if [ $? -ne 0 ]
+			then
+				echo "There was a problem when trying to enable qemu ARM translation to your system."
+				echo "Please refer to binfmts and try to correct this issue"
+				exit 1
+			else
+				echo "Successfully enabled translation through Qemu"
+				#Not activated yet for debug
+				#if [ ! -e $WORKING_PATH/tmp/chroot_script.sh ]
+				#then
+					echo "Copying script for chroot once activated ..."
+					sudo cp --remove-destination chroot_script.sh $WORKING_PATH/tmp
+					if [ $? -ne 0 ]
+					then
+						echo "Couldn't copy script for manipulation inside the image."
+						echo "Please retry or copy it manually"
+						exit 1
+					fi
+				#fi
+				echo "Going to chroot into mounted raspberry pi filesystem ..."
+				echo "Careful ! Now only works for Raspbian"
+				rootasked "chroot"
+				sudo chroot $WORKING_PATH /usr/bin/qemu-arm-static /bin/bash /tmp/chroot_script.sh
+				echo "Finished chroot actions"
+			fi
+		else
+			echo "Please install binfmt-support in order to enable qemu ARM translation"
+			echo "Run 'apt-get install binfmt-support'"
+		fi
 	else
 		echo "Coudln't find qemu-arm-static executable in image, trying to copy it ..."
 		copy_qemu
@@ -200,7 +236,7 @@ do
 				fi
 			fi
 			WORKING_PATH=$FILE
-			chroot_image
+			CHROOT=true
 		shift # past argument=value
 		;;
 		*)
@@ -212,9 +248,14 @@ done
 #If no file is given
 
 #Mount the filesystem
-if [ $MOUNTOPT -le 1 ]
+if [ $MOUNTOPT -eq 1 ]
 then
 	mount_image
+fi
+
+if [ $CHROOT == true ]
+then
+	chroot_image
 fi
 
 if [ $MOUNTOPT -eq 2 ]
