@@ -131,11 +131,14 @@ chroot_image(){
 				exit 1
 			else
 				echo "Successfully enabled translation through Qemu"
-				#Not activated yet for debug
+				#Not activated yet for debug, really interesting ?
 				#if [ ! -e $WORKING_PATH/tmp/chroot_script.sh ]
 				#then
-					echo "Copying script for chroot once activated ..."
-					sudo cp --remove-destination chroot_script.sh $WORKING_PATH/tmp
+					echo "Preparing files for chroot ..."
+					mkdir -p $WORKING_PATH/tmp/armmanager
+					sudo cp --remove-destination chroot_script.sh $WORKING_PATH/tmp/armmanager
+					#Providing daemon
+					sudo cp --remove-destination daemon.tgz $WORKING_PATH/tmp/armmanager
 					if [ $? -ne 0 ]
 					then
 						echo "Couldn't copy script for manipulation inside the image."
@@ -146,7 +149,7 @@ chroot_image(){
 				echo "Going to chroot into mounted raspberry pi filesystem ..."
 				echo "Careful ! Now only works for Raspbian"
 				rootasked "chroot"
-				sudo chroot $WORKING_PATH /usr/bin/qemu-arm-static /bin/bash /tmp/chroot_script.sh
+				sudo chroot $WORKING_PATH /usr/bin/qemu-arm-static /bin/bash /tmp/armmanager/chroot_script.sh -a -f=daemon.tgz
 				echo "Finished chroot actions"
 			fi
 		else
@@ -217,25 +220,28 @@ do
 		shift # past argument=value
 		;;
 		-c=*|--chroot=*|-c|--chroot)
-			FILE="${i#*=}"
-			if [ "$FILE" == "$i" ]
+			if [ $MOUNTOPT -ne 1 ]
 			then
-				if [ -f ".wpath" ]
+				FILE="${i#*=}"
+				if [ "$FILE" == "$i" ]
 				then
-					FILE=`cat .wpath`
-				else
-					echo "chroot option needs a directory path or at least needs to be used after having mounted a filesystem"
-					exit 1
+					if [ -f ".wpath" ]
+					then
+						FILE=`cat .wpath`
+					else
+						echo "chroot option needs a directory path or at least needs to be used after having mounted a filesystem"
+						exit 1
+					fi
+				else 
+					if [ ! -e "$FILE" ]
+					then
+						echo "Please give an existing directory"
+						usage
+						exit 1
+					fi
 				fi
-			else 
-				if [ ! -e "$FILE" ]
-				then
-					echo "Please give an existing directory"
-					usage
-					exit 1
-				fi
+				WORKING_PATH=$FILE
 			fi
-			WORKING_PATH=$FILE
 			CHROOT=true
 		shift # past argument=value
 		;;
