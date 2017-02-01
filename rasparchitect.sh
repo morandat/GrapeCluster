@@ -6,7 +6,7 @@ command_exists(){
 }
 
 #we just modify the PATH ...
-echo "==> Raspbian Preparator"
+echo "======> Raspbian Preparator"
 echo "Modifying path ..."
 PATH=/bin:$PATH
 ACTIVATED=false
@@ -39,7 +39,7 @@ do
 	esac
 done
 
-echo "Installing dependencies ..."
+echo "======> Installing dependencies ..."
 echo "==> Updating package list"
 #apt-get update
 

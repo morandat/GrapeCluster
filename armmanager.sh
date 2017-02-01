@@ -29,6 +29,7 @@ MOUNT_ONLY=false
 CHROOT=false
 
 mount_image(){
+	echo "======> Mounting the image"
 	if [[ $FILE == *.img ]] || [[ $FILE == *.iso ]]
 	then
 		#If no destination given
@@ -78,6 +79,7 @@ mount_image(){
 }
 
 copy_qemu(){
+	echo "======> Preparing Qemu executable"
 	if [ -e "/usr/bin/qemu-arm-static" ]
 	then
 		echo "Adding qemu-arm-static to /usr/bin of the image ..."
@@ -93,6 +95,7 @@ copy_qemu(){
 }
 
 unmount_image(){
+	echo "======> Unmounting image"
 	if [ -d $WORKING_PATH ]
 	then
 		echo "Unmounting `realpath $WORKING_PATH` filesystem ..."
@@ -116,6 +119,7 @@ unmount_image(){
 }
 
 chroot_image(){
+	echo "======> Preparing and executing change of root"
 	if [ -e "$WORKING_PATH/usr/bin/qemu-arm-static" ]
 	then
 		if command_exists update-binfmts;
@@ -132,11 +136,11 @@ chroot_image(){
 			else
 				echo "Successfully enabled translation through Qemu"
 				#Not activated yet for debug, really interesting ?
-				#if [ ! -e $WORKING_PATH/tmp/chroot_script.sh ]
+				#if [ ! -e $WORKING_PATH/tmp/rasparchitect.sh ]
 				#then
 					echo "Preparing files for chroot ..."
 					mkdir -p $WORKING_PATH/tmp/armmanager
-					sudo cp --remove-destination chroot_script.sh $WORKING_PATH/tmp/armmanager
+					sudo cp --remove-destination rasparchitect.sh $WORKING_PATH/tmp/armmanager
 					#Providing daemon
 					sudo cp --remove-destination daemon.tgz $WORKING_PATH/tmp/armmanager
 					if [ $? -ne 0 ]
@@ -149,7 +153,7 @@ chroot_image(){
 				echo "Going to chroot into mounted raspberry pi filesystem ..."
 				echo "Careful ! Now only works for Raspbian"
 				rootasked "chroot"
-				sudo chroot $WORKING_PATH /usr/bin/qemu-arm-static /bin/bash /tmp/armmanager/chroot_script.sh -a -f=daemon.tgz
+				sudo chroot $WORKING_PATH /usr/bin/qemu-arm-static /bin/bash /tmp/armmanager/rasparchitect.sh -a -f=daemon.tgz
 				echo "Finished chroot actions"
 			fi
 		else
