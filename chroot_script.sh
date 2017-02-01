@@ -11,6 +11,7 @@ echo "Modifying path ..."
 PATH=/bin:$PATH
 ACTIVATED=false
 FILES=""
+EXEC_NAME=mockdaemon
 
 echo "Moving to /tmp/armmanager"
 cd /tmp/armmanager
@@ -64,14 +65,27 @@ then
     decomp_files=${ffiles%.*}
     if [ -e $decomp_files ]; then rm -rf $decomp_files; fi
     tar -xzf $FILES
-    if [ $? -ne 0 ]
+    if [ $? -eq 0 ]
     then
+        echo "Compiling sources ..."
+        make -C ./$decomp_files all
+        if [ $? -eq 0 ]
+        then
+            echo "Copying executable and launching script ..."
+            cp ./$decomp_files/$EXEC_NAME /usr/local/bin/$EXEC_NAME
+            chmod a+x ./$decomp_files/$EXEC_NAME.sh
+            cp ./$decomp_files/$EXEC_NAME.sh /etc/init.d/$EXEC_NAME
+            echo "Adding program to init.d services ..."
+            sudo update-rc.d $EXEC_NAME defaults > /home/pi/armmanager.log
+            echo "Enabling daemon ..."
+            sudo update-rc.d $EXEC_NAME enable >> /home/pi/armmanager.log
+        else
+            echo "A problem occured when trying to compile files"
+        fi
+    else
         echo "Impossible to extract files from targz file"
         exit 1
     fi
-
-    echo "Compiling sources ..."
-    make -C ./$decomp_files
 fi
 
 if [ ACTIVATED ]
