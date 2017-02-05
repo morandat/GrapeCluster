@@ -290,10 +290,10 @@ do
 		shift # past argument=value
 		;;
 		-co=*|--chroot-options=*)
-			FILE="${i#*=}"
-			if [ "$FILE" != "$i" ]
+			OPTIONS="${i#*=}"
+			if [ "$OPTIONS" != "$i" ]
 			then
-				IFS=',' read -r -a CHROOTOPTIONS <<< "$FILE"
+				IFS=',' read -r -a CHROOTOPTIONS <<< "$OPTIONS"
 				verify_chroot_options
 			fi
 		shift # past argument=value

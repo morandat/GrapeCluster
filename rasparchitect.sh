@@ -14,7 +14,7 @@ launch_bash(){
 #we just modify the PATH ...
 echo "======> Raspbian Preparator"
 echo "Modifying path ..."
-PATH=/bin:$PATH
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 FILES=""
 EXEC_NAME=mockdaemon
 CHROOT_ONLY=false
