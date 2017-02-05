@@ -24,6 +24,7 @@ command_exists(){
 FILE=""
 DESTINATION=""
 MOUNTOPT=0
+UMOUNTOPT=0
 WORKING_PATH=""
 MOUNT_ONLY=false
 CHROOT=false
@@ -35,6 +36,7 @@ mount_image(){
 	echo "======> Mounting the image"
 	if [[ $FILE == *.img ]] || [[ $FILE == *.iso ]]
 	then
+
 		#If no destination given
 		if [ "$DESTINATION" == "" ]
 		then $FINALOPTIONS
@@ -232,26 +234,29 @@ do
 			MOUNT_ONLY=true
 		;;
 		-u=*|--umount=*|-u|--umount)
-			FILE="${i#*=}"
-			if [ "$FILE" == "$i" ]
+			if [ $MOUNTOPT -ne 1 ]
 			then
-				if [ -f ".wpath" ]
+				DIRECTORY="${i#*=}"
+				if [ "$DIRECTORY" == "$i" ]
 				then
-					FILE=`cat .wpath`
-				else
-					echo "umount option needs a directory path or at least needs to be used after having mounted a filesystem"
-					exit 1
+					if [ -f ".wpath" ]
+					then
+						DIRECTORY=`cat .wpath`
+					else
+						echo "umount option needs a directory path or at least needs to be used after having mounted a filesystem"
+						exit 1
+					fi
+				else 
+					if [ ! -e "$DIRECTORY" ]
+					then
+						echo "Please give an existing file"
+						usage
+						exit 1
+					fi
 				fi
-			else 
-				if [ ! -e "$FILE" ]
-				then
-					echo "Please give an existing file"
-					usage
-					exit 1
-				fi
+				WORKING_PATH=$DIRECTORY
 			fi
-			WORKING_PATH=$FILE
-			MOUNTOPT=2
+			UMOUNTOPT=1
 		shift # past argument=value
 		;;
 		-o=*|--output=*)
@@ -307,8 +312,6 @@ do
 	esac
 done
 
-#If no file is given
-
 #Mount the filesystem
 if [ $MOUNTOPT -eq 1 ]
 then
@@ -320,7 +323,7 @@ then
 	chroot_image
 fi
 
-if [ $MOUNTOPT -eq 2 ]
+if [ $UMOUNTOPT -eq 1 ]
 then
 	unmount_image
 fi
