@@ -46,7 +46,7 @@ void exec_order(int order_code, char *buffer, ssize_t len) {
     args[len] = NULL;
     int start = 1;
     int j = 1;
-    /* slice arguments */
+    /* slice arguments like a cake, yummy */
     for (int i = 1; i < len-1; ++i) {
         if (buffer[i] == ';') {
             int length = i - start;

@@ -2,7 +2,7 @@ import smbus
 from RPi import GPIO
 from time import sleep
 import logging
-
+    
 
 BUSES = [0, 1]
 DSP_INTERUPT_PIN = 17
@@ -18,58 +18,6 @@ _log = logging.getLogger(__name__)
 buses = {}
 stacks = {}
 display = None
-
-# -------------------------------------------------------------------------------------
-#										ADDED
-# -------------------------------------------------------------------------------------
-
-class PiDevice(I2CDevice):
-	def __init__(self, nb, mac_add, i2c_add, pos):
-        self.nb = nb
-        self.mac = mac_add
-        self.i2c = i2c_add
-        self.pos = pos
-        self.stacks = {}
-        
-        for s in STACK_DEVICES:
-			#initialisation
-			
-    def __get_identify():
-        return 
-        
-    def __boot():
-        return 
-        
-    def __shutdown():
-        
-        
-    def __get_cpuusage():
-        return self.stacks[number].cpu;
-        
-	def is_master():
-			
-class Master(PiDevice):
-	def __init__(self, nb):
-        self.nb = nb
-        self.stacks = {}
-        for s in STACK_DEVICES:
-			#initialisation
-    
-    def __get_stack(self, number):
-        return self.stacks[number]
-
-class Slave(PiDevice):
-	def __init__(self):
-        for s in STACK_DEVICES:
-			#initialisation
-
-class IStack(): #Interface Stack
-	def get_stack_devices():
-		return raise NotImplementedError("Not implemented in interface")
-		
-	def get_pi_devices():
-		return raise NotImplementedError("Not implemented in interface")
-# -------------------------------------------------------------------------------------
 
 
 def _reverse_bits_of_byte(b):
