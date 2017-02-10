@@ -8,6 +8,7 @@ command_exists(){
 launch_bash(){
     echo "Launching bash emulator inside image"
     echo "Just use exit command to quit bash and chroot"
+    cd /
     bash
 }
 

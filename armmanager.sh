@@ -49,6 +49,15 @@ mount_image(){
 			echo "Destination folder is : $WORKING_PATH"
 		fi
 
+		df -h | grep $WORKING_PATH &> /dev/null
+		if [ $? -eq 0 ]
+		then
+			echo "The image you gave has already been mounted to $WORKING_PATH, please"
+			echo "give another destination, or use another image."
+			echo "Exitting ..."
+			exit 1
+		fi
+
 		#Create directory for destination
 		mkdir -p $WORKING_PATH
 
