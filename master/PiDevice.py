@@ -16,13 +16,11 @@ class PiDevice(I2CDevice):
     def get_identity(self):
         return json.dump(self)
 
-
     def get_ip_address(self):
         return self._ip_address
 
     def __boot(self):
         pass
-
 
     def __shutdown(self):
         pass
