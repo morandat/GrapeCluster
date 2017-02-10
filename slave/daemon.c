@@ -32,7 +32,7 @@ enum status {
 
 enum status curr_status = ACTIVE;
 
-char *orders[2] = {"ls ", "shutdown "};
+char *orders[2] = {"ls", "shutdown"};
 
 
 void exec_order(int order_code, char *buffer, ssize_t len) {

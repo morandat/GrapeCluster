@@ -5,7 +5,7 @@ from grape import I2CDevice
 
 class PiDevice(I2CDevice):
     def __init__(self, stack_nb, mac_add, ip_address, i2c_add, pos):
-        #To-Do: super(PiDevice, self).__init__(bus, prefix)
+        super(PiDevice, self).__init__(0, 0)#To-Do : bus, prefix
         self._stack_nb = stack_nb
         self._mac = mac_add
         self._i2c = i2c_add
@@ -27,6 +27,8 @@ class PiDevice(I2CDevice):
     def __shutdown(self):
         pass
 
+    def set_pos(self, pos):
+        self._pos = pos
 
     def get_cpu_usage(self):
         return psutil.cpu_freq()

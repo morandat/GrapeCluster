@@ -1,5 +1,5 @@
 import smbus
-from RPi import GPIO
+#from RPi import GPIO
 from time import sleep
 import logging
     
@@ -41,22 +41,6 @@ class ButtonPrinter(ButtonHandler):
         print("left")
     def on_right(self, display):
         print("right")
-
-class Stack(IStack): #has changed
-    def __init__(self, bus, prefix):
-        self._prefix = prefix
-        self._bus = bus
-        self.devices = {}
-        for dev in STACK_DEVICES:
-            if dev.probe(bus, prefix):
-                self.devices[dev] = dev(bus, prefix)
-        for dev in self.devices.itervalues():
-            try:
-                dev.setup()
-            except Exception as e:
-                _log.error("Unable to setup %s: %s", dev, e)
-    def __getitem__(self, kind):
-        return self.devices[kind]
 
 class I2CDevice(object):
     CLASS_ADDRESS = 0x00 # Should be defined in each subclass
@@ -241,9 +225,9 @@ class Display(I2CDevice):
         self._status = self.btn_status()
 
         # Interupt
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(DSP_INTERUPT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.add_event_detect(DSP_INTERUPT_PIN, GPIO.RISING, callback = self.interrupt)
+        #GPIO.setmode(GPIO.BCM)
+        #GPIO.setup(DSP_INTERUPT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        #GPIO.add_event_detect(DSP_INTERUPT_PIN, GPIO.RISING, callback = self.interrupt)
 
     def led(self, index, state):
         state = self._read_state()
