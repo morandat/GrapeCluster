@@ -6,6 +6,10 @@ app = Flask(__name__)
 def template_test():
     return render_template('template.html', my_string="Wheeeee!", my_list=[0,1,2,3,4,5])
 
+@app.route("/test")
+def template_debug():
+    return render_template('index.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
