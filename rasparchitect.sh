@@ -20,6 +20,7 @@ FILES=""
 EXEC_NAME=mockdaemon
 CHROOT_ONLY=false
 INSTALL_ONLY=false
+PACKAGEMANAGER="apt-get install -qq -o=Dpkg::Use-Pty=0"
 
 echo "Moving to /tmp/armmanager"
 cd /tmp/armmanager
@@ -67,13 +68,13 @@ then
     then
         echo "Installing gcc ..."
         #options, to limit output
-        apt-get install -qq -o=Dpkg::Use-Pty=0 gcc
+        `$PACKAGEMANAGER gcc`
     fi
 
     if ! command_exists make;
     then
-        echo "Installing build-essentials (make)"
-        apt-get install -qq -o=Dpkg::Use-Pty=0 build-essentials
+        echo "Installing build-essential (make)"
+        `$PACKAGEMANAGER build-essential`
     fi
 
     if [ -e "$FILES" ]
@@ -105,6 +106,28 @@ then
             echo "Impossible to extract files from targz file"
             exit 1
         fi
+
+        #Not sure if python really needs to be installed
+        #on slaves
+        echo "Checking python is installed ... "
+        if ! command_exists python;
+        then
+            echo -n "Installing python "
+            `$PACKAGEMANAGER python python-pip python-dev`
+        fi
+
+        echo "Checking pip is installed ... "
+        if ! command_exists pip;
+        then
+            echo -n "Installing pip ..."
+            `$PACKAGEMANAGER python-pip`
+            echo "Upgrading pip ..."
+            pip install --upgrade pip
+        fi
+        ##########################
+
+        echo "Cleaning eventual installation dependencies ..."
+        apt-get autoremove
 
         if [ $INSTALL_ONLY == false ]
         then
