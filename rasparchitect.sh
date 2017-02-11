@@ -12,6 +12,16 @@ launch_bash(){
     bash
 }
 
+check_and_install_package(){
+    echo -n "Checking $1 is installed ..."
+    if ! command_exists $2;
+    then
+        echo " Not installed ! Installing ..."
+        `$PACKAGEMANAGER $3`
+    fi
+    echo ""
+}
+
 #we just modify the PATH ...
 echo "======> Raspbian Preparator"
 echo "Modifying path ..."
@@ -21,6 +31,7 @@ EXEC_NAME=mockdaemon
 CHROOT_ONLY=false
 INSTALL_ONLY=false
 PACKAGEMANAGER="apt-get install -qq -o=Dpkg::Use-Pty=0"
+UPGRADE_CLEAN=false
 
 echo "Moving to /tmp/armmanager"
 cd /tmp/armmanager
@@ -33,6 +44,9 @@ do
 		;;
         --install-only)
             INSTALL_ONLY=true
+        ;;
+        -uc|--upgrade-clean)
+            UPGRADE_CLEAN=true
         ;;
         -f=*|--files=*)
 			FILES="${i#*=}"
@@ -63,19 +77,9 @@ then
     echo "==> Updating package list"
     #apt-get update
 
-    echo "Checking gcc exists ..."
-    if ! command_exists gcc;
-    then
-        echo "Installing gcc ..."
-        #options, to limit output
-        `$PACKAGEMANAGER gcc`
-    fi
+    check_and_install_package gcc gcc gcc
+    check_and_install_package make make build-essential
 
-    if ! command_exists make;
-    then
-        echo "Installing build-essential (make)"
-        `$PACKAGEMANAGER build-essential`
-    fi
 
     if [ -e "$FILES" ]
     then
@@ -126,8 +130,14 @@ then
         fi
         ##########################
 
-        echo "Cleaning eventual installation dependencies ..."
-        apt-get autoremove
+
+        if [ $UPGRADE_CLEAN ]
+        then
+            echo "Upgrading system ..."
+            apt-get upgrade
+            echo "Cleaning eventual installation dependencies ..."
+            apt-get autoremove
+        fi
 
         if [ $INSTALL_ONLY == false ]
         then
