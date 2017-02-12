@@ -33,6 +33,9 @@ INSTALL_ONLY=false
 PACKAGEMANAGER="apt-get install -qq -o=Dpkg::Use-Pty=0"
 UPGRADE_CLEAN=false
 
+echo "Updating locale ..."
+export LANGUAGE="fr:en"
+
 echo "Moving to /tmp/armmanager"
 cd /tmp/armmanager
 
@@ -100,9 +103,9 @@ then
                 chmod a+x ./$decomp_files/$EXEC_NAME.sh
                 cp ./$decomp_files/$EXEC_NAME.sh /etc/init.d/$EXEC_NAME
                 echo "Adding program to init.d services ..."
-                sudo update-rc.d $EXEC_NAME defaults > /home/pi/armmanager.log
+                update-rc.d $EXEC_NAME defaults > /home/pi/armmanager.log
                 echo "Enabling daemon ..."
-                sudo update-rc.d $EXEC_NAME enable >> /home/pi/armmanager.log
+                update-rc.d $EXEC_NAME enable >> /home/pi/armmanager.log
             else
                 echo "A problem occured when trying to compile files"
             fi
