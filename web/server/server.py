@@ -25,6 +25,10 @@ def template_debug():
     }
     return render_template('index.html', raspberries=raspberries)
 
+@app.route("/test/welcome")
+def api_test():
+    print("test")
+    return "Welcome"
 
 if __name__ == '__main__':
     app.run(debug=True)
