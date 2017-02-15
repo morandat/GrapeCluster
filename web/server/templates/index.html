@@ -8,13 +8,17 @@
 
     <div class="row">
         {% for n in raspberries %}
-            <div class="col-md-5">
-                <h2>About raspberry {{ raspberries[n]['name'] }}</h2>
-                <p>This raspberry is {{ raspberries[n]['state'] }} and its heat is {{ raspberries[n]['heat'] }}.</p>
-                <p>This raspberry is running on {{ raspberries[n]['os'] }}</p>
-                <a class="btn btn-secondary" href="#" role="button">
-                    View details ...
-                </a>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-block">
+                        <h2>About raspberry {{ raspberries[n]['name'] }}</h2>
+                        <p>This raspberry is <span class="btn btn-info {{ 'btn-success' if (raspberries[n]['state']=='On') else 'btn-danger' }}">{{ raspberries[n]['state'] }}</span> and its heat is {{ raspberries[n]['heat'] }}.</p>
+                        <p>This raspberry is running on {{ raspberries[n]['os'] }}</p>
+                        <a class="btn btn-secondary" href="details/{{ n }}" role="button">
+                            View details ...
+                        </a>
+                    </div>
+                </div>
             </div>
         {% endfor %}
     </div>
@@ -22,5 +26,7 @@
     <div>
         <p id="welcome"></p>
     </div>
+
+    <script src="/static/javascript/index.js"></script>
 
 {% endblock %}

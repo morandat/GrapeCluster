@@ -1,6 +1,20 @@
 from flask import Flask, render_template
 app = Flask(__name__)
 
+raspberriesTest = {
+    1 : {
+        'name':'Cran',
+        'heat':'70',
+        'os':'Pidora',
+        'state':'On'
+    },
+    2 : {
+        'name':'Straw',
+        'heat':'65',
+        'os':'Raspbian',
+        'state':'On'
+    }
+}
 
 @app.route("/test")
 def template_test():
@@ -9,26 +23,18 @@ def template_test():
 @app.route("/index")
 @app.route("/")
 def template_debug():
-    raspberries={
-        1:{
-            'name':'Cran',
-            'heat':'70',
-            'os':'Pidora',
-            'state':'On'
-        },
-        2:{
-            'name':'Straw',
-            'heat':'65',
-            'os':'Raspbian',
-            'state':'On'
-        }
-    }
-    return render_template('index.html', raspberries=raspberries)
+    return render_template('index.html', raspberries=raspberriesTest)
 
 @app.route("/test/welcome")
 def api_test():
     print("test")
     return "Welcome"
+
+@app.route('/details/<int:raspid>')
+def template_details(raspid):
+    raspberry = raspberriesTest[raspid]
+    raspberry[id] = raspid
+    return render_template('details.html', raspberry=raspberry)
 
 if __name__ == '__main__':
     app.run(debug=True)
