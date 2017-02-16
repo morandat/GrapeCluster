@@ -5,15 +5,27 @@ command_exists(){
     type "$1" &> /dev/null ;
 }
 
+main_action(){
+	echo -e "\e[1;33m========> $1\e[21;0m "
+}
+
+second_action(){
+	echo -e "\e[1;31m>>>\e[21;0m \e[1m$1\e[21;0m"
+}
+
+simple_action(){
+	echo "> $1"
+}
+
 launch_bash(){
-    echo "Launching bash emulator inside image"
-    echo "Just use exit command to quit bash and chroot"
+    second_action "Launching bash emulator inside image"
+    simple_action "Just use exit command to quit bash and chroot"
     cd /
     bash
 }
 
 check_and_install_package(){
-    echo -n "Checking $1 is installed ..."
+    echo -n "Checking \e[1$1\e[0m is installed ..."
     if ! command_exists $2;
     then
         echo " Not installed ! Installing ..."
@@ -23,8 +35,8 @@ check_and_install_package(){
 }
 
 #we just modify the PATH ...
-echo "======> Raspbian Preparator"
-echo "Modifying path ..."
+main_action "In-chroot script ISO conjurer"
+second_action "Modifying path ..."
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 FILES=""
 EXEC_NAME=mockdaemon
@@ -33,10 +45,10 @@ INSTALL_ONLY=false
 PACKAGEMANAGER="apt-get install -qq -o=Dpkg::Use-Pty=0"
 UPGRADE_CLEAN=false
 
-echo "Updating locale ..."
+second_action "Updating locale ..."
 export LANGUAGE="fr:en"
 
-echo "Moving to /tmp/armmanager"
+simple_action "Moving to /tmp/armmanager"
 cd /tmp/armmanager
 
 for i in "$@"
@@ -55,29 +67,29 @@ do
 			FILES="${i#*=}"
 			if [ ! -e "./$FILES" ]
 			then
-				echo "Please give an existing targz archive"
+				second_action "Please give an existing targz archive"
 				exit 1
 			fi
 		shift # past argument=value
 		;;
 		*)
-			echo "Unkown option : $i" # unknown option
+			simple_action "Unkown option : $i" # unknown option
 		;;
 	esac
 done
 
 if [ $CHROOT_ONLY == true ] && [ $INSTALL_ONLY == true ]
 then
-    echo "So you want to chroot only, but to install only ... What shall I do ?"
-    echo "It's too complicated for me."
-    echo "My answer is 42."
+    simple_action "So you want to chroot only, but to install only ... What shall I do ?"
+    simple_action "It's too complicated for me."
+    simple_action "My answer is 42."
     exit 42
 fi
 
 if [ $CHROOT_ONLY == false ]
 then
-    echo "======> Installing dependencies ..."
-    echo "==> Updating package list"
+    main_action "Installing dependencies ..."
+    second_action "Updating package list"
     #apt-get update
 
     check_and_install_package gcc gcc gcc
@@ -86,31 +98,31 @@ then
 
     if [ -e "$FILES" ]
     then
-        echo "==> Installing daemon"
-        echo "Decompressing sources ..."
+        second_action "Installing daemon"
+        simple_action "Decompressing sources ..."
         ffiles=`basename $FILES`
         decomp_files=${ffiles%.*}
         if [ -e $decomp_files ]; then rm -rf $decomp_files; fi
         tar -xzf $FILES
         if [ $? -eq 0 ]
         then
-            echo "Compiling sources ..."
+            simple_action "Compiling sources ..."
             make -C ./$decomp_files all
             if [ $? -eq 0 ]
             then
-                echo "Copying executable and launching script ..."
+                simple_action "Copying executable and launching script ..."
                 cp ./$decomp_files/$EXEC_NAME /usr/local/bin/$EXEC_NAME
                 chmod a+x ./$decomp_files/$EXEC_NAME.sh
                 cp ./$decomp_files/$EXEC_NAME.sh /etc/init.d/$EXEC_NAME
-                echo "Adding program to init.d services ..."
+                simple_action "Adding program to init.d services ..."
                 update-rc.d $EXEC_NAME defaults > /home/pi/armmanager.log
-                echo "Enabling daemon ..."
+                simple_action "Enabling daemon ..."
                 update-rc.d $EXEC_NAME enable >> /home/pi/armmanager.log
             else
-                echo "A problem occured when trying to compile files"
+                second_action "A problem occured when trying to compile files"
             fi
         else
-            echo "Impossible to extract files from targz file"
+            second_action "Impossible to extract files from targz file"
             exit 1
         fi
 
@@ -136,9 +148,9 @@ then
 
         if [ $UPGRADE_CLEAN ]
         then
-            echo "Upgrading system ..."
+            second_action "Upgrading system ..."
             apt-get upgrade
-            echo "Cleaning eventual installation dependencies ..."
+            second_action "Cleaning eventual installation dependencies ..."
             apt-get autoremove
         fi
 
@@ -148,8 +160,8 @@ then
         fi
 
     else
-        echo "No files provided, nothing to do ..."
-        echo "Exitting ..."
+        second_action "No files provided, nothing to do ..."
+        simple_action "Exitting ..."
         exit 1
     fi
 else

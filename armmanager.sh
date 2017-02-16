@@ -12,12 +12,24 @@ realpath() {
 rootasked(){
 	if [ "$EUID" -ne 0 ]
 	then
-		echo "Command $1 is going to be runned in sudo mode."
+		echo ">> Command $1 is going to be runned in sudo mode."
 	fi
 }
 
 command_exists(){
     type "$1" &> /dev/null ;
+}
+
+main_action(){
+	echo -e "\e[1;33m========> $1\e[21;0m "
+}
+
+second_action(){
+	echo -e "\e[1;31m>>>\e[21;0m \e[1m$1\e[21;0m"
+}
+
+simple_action(){
+	echo "> $1"
 }
 
 #Global Variables
@@ -33,7 +45,7 @@ POSSIBLEOPTIONS=("chroot-only" "install-only" "upgrade-clean")
 FINALOPTIONS=""
 
 mount_image(){
-	echo "======> Mounting the image"
+	main_action "Mounting the image"
 	if [[ $FILE == *.img ]] || [[ $FILE == *.iso ]]
 	then
 
@@ -43,18 +55,18 @@ mount_image(){
 			DESTINATION="./.armmanager"
 			filename=`basename $FILE`
 			WORKING_PATH="$DESTINATION/${filename%.*}"
-			echo "Setting destination folder to default $WORKING_PATH"
+			second_action "Setting destination folder to default $WORKING_PATH"
 		else
 			WORKING_PATH=$DESTINATION
-			echo "Destination folder is : $WORKING_PATH"
+			second_action "Destination folder is : $WORKING_PATH"
 		fi
 
 		df -h | grep $WORKING_PATH &> /dev/null
 		if [ $? -eq 0 ]
 		then
-			echo "The image you gave has already been mounted to $WORKING_PATH, please"
-			echo "give another destination, or use another image."
-			echo "Exitting ..."
+			simple_action "The image you gave has already been mounted to $WORKING_PATH, please"
+			simple_action "give another destination, or use another image."
+			simple_action "Exitting ..."
 			exit 1
 		fi
 
@@ -66,7 +78,7 @@ mount_image(){
 		echo -n `realpath $WORKING_PATH` > .wpath
 
 		#Seeking part to mount
-		echo "Mounting Linux partition of $FILE"
+		simple_action "Mounting Linux partition of $FILE"
 		part=`fdisk -l -o Start $FILE | cut -d' ' -f1,3 | tail -n1`
 		offset=$((512*$part))
 
@@ -74,10 +86,10 @@ mount_image(){
 		sudo mount -o offset=$offset -t ext4 $FILE $WORKING_PATH
 		if [ $? -ne 0 ]
 		then
-			echo "Something went wrong when trying to mount"
+			simple_action "Something went wrong when trying to mount"
 			exit 1
 		else
-			echo "Successfully mounted `basename $FILE` to $WORKING_PATH"
+			simple_action "Successfully mounted `basename $FILE` to $WORKING_PATH"
 		fi
 
 		#Then we copy qemu executable to make translation for chroot
@@ -86,107 +98,107 @@ mount_image(){
 			copy_qemu
 		fi
 	else
-		echo "Please give a valid file ... (img/iso)"
+		simple_action "Please give a valid file ... (img/iso)"
 		usage
 		exit 1
 	fi
 }
 
 copy_qemu(){
-	echo "======> Preparing Qemu executable"
+	main_action "Preparing Qemu executable"
 	if [ -e "/usr/bin/qemu-arm-static" ]
 	then
-		echo "Adding qemu-arm-static to /usr/bin of the image ..."
+		second_action "Adding qemu-arm-static to /usr/bin of the image ..."
 		cd $WORKING_PATH
 		rootasked "cp (in mounted filesystem)"
 		sudo cp --remove-destination /usr/bin/qemu-arm-static $WORKING_PATH/usr/bin/
 	else
-		echo "Couldn't find /usr/bin/qemu-arm-static which is required to translate from ARM to `uname -m`"
-		echo "Please install qemu, qemu-user and qemu-user-static (maybe search for qemu-extra depending on your linux distribution)"
-		echo "Use 'apt-get install qemu qemu-user qemu-user-static'"
+		second_action "Couldn't find /usr/bin/qemu-arm-static which is required to translate from ARM to `uname -m`"
+		simple_action "Please install qemu, qemu-user and qemu-user-static (maybe search for qemu-extra depending on your linux distribution)"
+		simple_action "Use 'apt-get install qemu qemu-user qemu-user-static [qemu-arm-static]'"
 		exit 1
 	fi
 }
 
 unmount_image(){
-	echo "======> Unmounting image"
+	main_action "Unmounting the image"
 	if [ -d $WORKING_PATH ]
 	then
-		echo "Unmounting `realpath $WORKING_PATH` filesystem ..."
+		second_action "Unmounting `realpath $WORKING_PATH` filesystem ..."
 		rootasked "Umount"
 		sudo umount $WORKING_PATH
 		if [ $? -ne 0 ]
 		then
-			echo "A problem occured when trying to unmount $WORKING_PATH"
+			second_action "A problem occured when trying to unmount $WORKING_PATH"
 			exit 1
 		else
-			echo "Successfully unmounted $WORKING_PATH"
-			echo "Removing temporary file ..."
+			simple_action "Successfully unmounted $WORKING_PATH"
+			simple_action "Removing temporary file ..."
 			rm .wpath
 			rm -r $WORKING_PATH
 		fi
 	else
-		echo "Unmount target must be a directory"
+		simple_action "Unmount target must be a directory"
 		usage
 		exit 1
 	fi
 }
 
 chroot_image(){
-	echo "Verifying given path ..."
+	second_action "Verifying given path for chroot ..."
 	df -h | grep $WORKING_PATH &> /dev/null
 	if [ $? -eq 0 ]
 	then
-		echo "======> Preparing and executing change of root"
+		main_action "Preparing and executing change of root"
 		if [ -e "$WORKING_PATH/usr/bin/qemu-arm-static" ]
 		then
 			if command_exists update-binfmts;
 			then
-				echo "Enabling Qemu ARM translation ..."
+				simple_action "Enabling Qemu ARM translation ..."
 				rootasked "binfmts"
 				sudo update-binfmts --enable qemu-arm
 
 				if [ $? -ne 0 ]
 				then
-					echo "There was a problem when trying to enable qemu ARM translation to your system."
-					echo "Please refer to binfmts and try to correct this issue"
+					second_action "There was a problem when trying to enable qemu ARM translation to your system."
+					simple_action "Please refer to binfmts and try to correct this issue"
 					exit 1
 				else
-					echo "Successfully enabled translation through Qemu"
+					simple_action "Successfully enabled translation through Qemu"
 					#Not activated yet for debug, really interesting ?
 					#if [ ! -e $WORKING_PATH/tmp/rasparchitect.sh ]
 					#then
-						echo "Preparing files for chroot ..."
+						simple_action "Preparing files for chroot ..."
 						mkdir -p $WORKING_PATH/tmp/armmanager
 						sudo cp --remove-destination rasparchitect.sh $WORKING_PATH/tmp/armmanager
 						#Providing daemon
 						sudo cp --remove-destination daemon.tgz $WORKING_PATH/tmp/armmanager
 						if [ $? -ne 0 ]
 						then
-							echo "Couldn't copy script for manipulation inside the image."
-							echo "Please retry or copy it manually"
+							second_action "Couldn't copy script for manipulation inside the image."
+							simple_action "Please retry or copy it manually"
 							exit 1
 						fi
 					#fi
-					echo "Going to chroot into mounted raspberry pi filesystem ..."
-					echo "Careful ! Now only works for Raspbian"
+					simple_action "Going to chroot into mounted raspberry pi filesystem ..."
+					second_action "Careful ! For now only works for Raspbian"
 					rootasked "chroot"
 					sudo chroot $WORKING_PATH /usr/bin/qemu-arm-static /bin/bash /tmp/armmanager/rasparchitect.sh -f=daemon.tgz $FINALOPTIONS
-					echo "Finished chroot actions"
+					simple_action "Finished chroot actions"
 				fi
 			else
-				echo "Please install binfmt-support in order to enable qemu ARM translation"
-				echo "Run 'apt-get install binfmt-support'"
+				simple_action "Please install binfmt-support in order to enable qemu ARM translation"
+				simple_action "Run 'apt-get install binfmt-support'"
 			fi
 		else
-			echo "Coudln't find qemu-arm-static executable in image, trying to copy it ..."
+			second_action "Coudln't find qemu-arm-static executable in image, trying to copy it ..."
 			copy_qemu
-			echo "Retrying to chroot ..."
+			simple_action "Retrying to chroot ..."
 			chroot_image
 		fi
 	else
-		echo "Given path is not a mounted filesystem, please mount a filesystem before trying to chroot in ..."
-		echo "Exitting ..."
+		second_action "Given path is not a mounted filesystem, please mount a filesystem before trying to chroot in ..."
+		simple_action "Exitting ..."
 		exit 1
 	fi
 }
@@ -207,14 +219,14 @@ verify_chroot_options(){
 			done
 			if [ $added == false ]
 			then
-				echo "Unknown chroot-in option : $element"
+				simple_action "Unknown chroot-in option : $element"
 			fi
 		done
 	fi
 
 	if [ $added == false ]
 	then
-		echo "Please verify your chroot-options"
+		second_action "Please verify your chroot-options"
 		exit 1
 	fi
 }
@@ -232,7 +244,7 @@ do
 			FILE="${i#*=}"
 			if [ ! -e "$FILE" ]
 			then
-				echo "Please give an existing file"
+				second_action "Please give an existing file"
 				usage
 				exit 1
 			fi
@@ -252,13 +264,13 @@ do
 					then
 						DIRECTORY=`cat .wpath`
 					else
-						echo "umount option needs a directory path or at least needs to be used after having mounted a filesystem"
+						second_action "umount option needs a directory path or at least needs to be used after having mounted a filesystem"
 						exit 1
 					fi
 				else 
 					if [ ! -e "$DIRECTORY" ]
 					then
-						echo "Please give an existing file"
+						second_action "Please give an existing file"
 						usage
 						exit 1
 					fi
@@ -287,13 +299,13 @@ do
 					then
 						FILE=`cat .wpath`
 					else
-						echo "chroot option needs a directory path or at least needs to be used after having mounted a filesystem"
+						second_action "chroot option needs a directory path or at least needs to be used after having mounted a filesystem"
 						exit 1
 					fi
 				else 
 					if [ ! -e "$FILE" ]
 					then
-						echo "Please give an existing directory"
+						second_action "Please give an existing directory"
 						usage
 						exit 1
 					fi
@@ -313,10 +325,10 @@ do
 		shift # past argument=value
 		;;
 		-*)
-			echo "Unkown option : $i" # unknown option
+			simple_action "Unkown option : $i" # unknown option
 		;;
 		*)
-			echo "Unkown argument : $i" # unknown argument
+			simple_action "Unkown argument : $i" # unknown argument
 		;;
 	esac
 done
@@ -337,5 +349,4 @@ then
 	unmount_image
 fi
 
-echo "All actions seemed to end correctly, thank you ...!"
 exit 0
