@@ -25,7 +25,7 @@ launch_bash(){
 }
 
 check_and_install_package(){
-    echo -n "Checking \e[1$1\e[0m is installed ..."
+    echo -ne "Checking \e[1m$1\e[0m is installed ..."
     if ! command_exists $2;
     then
         echo " Not installed ! Installing ..."
@@ -44,6 +44,7 @@ CHROOT_ONLY=false
 INSTALL_ONLY=false
 PACKAGEMANAGER="apt-get install -qq -o=Dpkg::Use-Pty=0"
 UPGRADE_CLEAN=false
+NO_UPDATE=false
 
 second_action "Updating locale ..."
 export LANGUAGE="fr:en"
@@ -63,8 +64,12 @@ do
         -uc|--upgrade-clean)
             UPGRADE_CLEAN=true
         ;;
+        -nu|--no-update)
+            NO_UPDATE=true
+        ;;
         -y|--yum)
             PACKAGEMANAGER="yum install"
+        ;;
         -f=*|--files=*)
 			FILES="${i#*=}"
 			if [ ! -e "./$FILES" ]
@@ -90,9 +95,13 @@ fi
 
 if [ $CHROOT_ONLY == false ]
 then
-    main_action "Installing dependencies ..."
-    second_action "Updating package list"
-    #apt-get update
+    main_action "Verifying and Installing dependencies ..."
+    if [ ! $NO_UPDATE ]
+    then
+        second_action "Updating package list"
+        apt-get update
+    fi
+
 
     check_and_install_package gcc gcc gcc
     check_and_install_package make make build-essential
