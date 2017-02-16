@@ -63,6 +63,8 @@ do
         -uc|--upgrade-clean)
             UPGRADE_CLEAN=true
         ;;
+        -y|--yum)
+            PACKAGEMANAGER="yum install"
         -f=*|--files=*)
 			FILES="${i#*=}"
 			if [ ! -e "./$FILES" ]
@@ -128,21 +130,21 @@ then
 
         #Not sure if python really needs to be installed
         #on slaves
-        echo "Checking python is installed ... "
-        if ! command_exists python;
-        then
-            echo -n "Installing python "
-            `$PACKAGEMANAGER python python-pip python-dev`
-        fi
-
-        echo "Checking pip is installed ... "
-        if ! command_exists pip;
-        then
-            echo -n "Installing pip ..."
-            `$PACKAGEMANAGER python-pip`
-            echo "Upgrading pip ..."
-            pip install --upgrade pip
-        fi
+        #echo "Checking python is installed ... "
+        #if ! command_exists python;
+        #then
+        #    echo -n "Installing python "
+        #    `$PACKAGEMANAGER python python-pip python-dev`
+        #fi
+        #
+        #echo "Checking pip is installed ... "
+        #if ! command_exists pip;
+        #then
+        #    echo -n "Installing pip ..."
+        #    `$PACKAGEMANAGER python-pip`
+        #    echo "Upgrading pip ..."
+        #    pip install --upgrade pip
+        #fi
         ##########################
 
 

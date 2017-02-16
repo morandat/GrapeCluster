@@ -284,6 +284,9 @@ do
 			DESTINATION="${i#*=}"
 		shift # past argument=value
 		;;
+		--pidora)
+			FINALOPTIONS="--yum $FINALOPTIONS"
+		;;
 		-h|--help)
 			usage
 			exit 0
