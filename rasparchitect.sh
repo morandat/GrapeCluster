@@ -157,7 +157,7 @@ then
         ##########################
 
 
-        if [ $UPGRADE_CLEAN ]
+        if [ $UPGRADE_CLEAN == true ]
         then
             second_action "Upgrading system ..."
             apt-get upgrade

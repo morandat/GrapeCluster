@@ -41,7 +41,7 @@ WORKING_PATH=""
 MOUNT_ONLY=false
 CHROOT=false
 CHROOTOPTIONS=""
-POSSIBLEOPTIONS=("chroot-only" "install-only" "upgrade-clean")
+POSSIBLEOPTIONS=("chroot-only" "install-only" "upgrade-clean" "no-update")
 FINALOPTIONS=""
 
 mount_image(){
