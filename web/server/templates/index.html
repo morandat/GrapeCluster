@@ -2,22 +2,38 @@
 {% block body %}
 
     <div class="jumbotron">
-        <h1>Welcome !</h1>
-        <p>Here are current raspberries :</p>
+        <h1>Grape Cluster Configuration Overview</h1>
     </div>
 
     <div class="row">
-        {% for n in raspberries %}
-            <div class="col-md-6">
+        {% for stackI in stacks %}
+            <div class="col-md-4">
                 <div class="card">
                     <div class="card-block">
-                        <h2>About raspberry {{ raspberries[n]['name'] }}</h2>
-                        <p>This raspberry is <span class="btn btn-info {{ 'btn-success' if (raspberries[n]['state']=='On') else 'btn-danger' }}">{{ raspberries[n]['state'] }}</span> and its heat is {{ raspberries[n]['heat'] }}.</p>
-                        <p>This raspberry is running on {{ raspberries[n]['os'] }}</p>
-                        <a class="btn btn-secondary" href="details/{{ n }}" role="button">
-                            View details ...
-                        </a>
+                        <h2 style="float:left;" class="card-title">Stack #{{ stackI }}</h2>
+                        <span style="float:right;" class="btn {{ 'btn-success' if (stacks[stackI]['heat']<75) else 'btn-danger' }}">{{ stacks[stackI].heat }}°C</span>
                     </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item" style="font-weight:bold;">
+                            Master Slot : 
+
+                            {% if stacks[stackI].master != -1 %}
+                                <a href="rasp/{{ rasps[stacks[stackI].master].address }}" class="card-link">{{ rasps[stacks[stackI].master].name }} ({{ rasps[stacks[stackI].master].address }})</a>
+                            {% else %}
+                                ---
+                            {% endif %}
+                        </li>
+                        {% for raspAddr in stacks[stackI].slaves %}
+                            <li class="list-group-item">
+                                Slot #{{ loop.index }} : 
+                                {% if raspAddr != -1 %}
+                                    <a href="rasp/{{ raspAddr }}" class="card-link">{{ rasps[raspAddr].name }} ({{ raspAddr }})</a>
+                                {% else %}
+                                    ---
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         {% endfor %}

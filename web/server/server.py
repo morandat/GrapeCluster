@@ -1,18 +1,57 @@
 from flask import Flask, render_template
 app = Flask(__name__)
 
-raspberriesTest = {
+stacksTest = {
     1 : {
-        'name':'Cran',
-        'heat':'70',
-        'os':'Pidora',
-        'state':'On'
+        'heat' : 80,
+        'master' : 0,
+        'slaves' : [
+            -1,
+            -1,
+            1,
+            -1,
+            -1,
+            -1
+        ]
     },
     2 : {
-        'name':'Straw',
-        'heat':'65',
-        'os':'Raspbian',
-        'state':'On'
+        'heat' : 25,
+        'master' : -1,
+        'slaves' : [
+            -1,
+            -1,
+            -1,
+            42,
+            -1,
+            -1
+        ]
+    }
+}
+
+raspsTest = {
+    0 : {
+        'name' : 'Cran',
+        'address' : 0,
+        'stack' : 0,
+        #'heat' : '70',
+        'os' : 'Pidora',
+        'state' : 'On'
+    },
+    1 : {
+        'name' : 'Straw',
+        'address' : 1,
+        'stack' : 0,
+        #'heat' : '65',
+        'os' : 'Raspbian',
+        'state' : 'Off'
+    },
+    42 : {
+        'name' : 'Blue',
+        'address' : 42,
+        'stack' : 0,
+        #'heat' : '65',
+        'os' : 'Raspbian',
+        'state' : 'On'
     }
 }
 
@@ -23,18 +62,17 @@ def template_test():
 @app.route("/index")
 @app.route("/")
 def template_debug():
-    return render_template('index.html', raspberries=raspberriesTest)
+    return render_template('index.html', stacks=stacksTest, rasps=raspsTest)
 
 @app.route("/test/welcome")
 def api_test():
     print("test")
     return "Welcome"
 
-@app.route('/details/<int:raspid>')
-def template_details(raspid):
-    raspberry = raspberriesTest[raspid]
-    raspberry[id] = raspid
-    return render_template('details.html', raspberry=raspberry)
+@app.route('/rasp/<int:raspAddr>')
+def template_details(raspAddr):
+    rasp = raspsTest[raspAddr]
+    return render_template('rasp.html', rasp=rasp)
 
 if __name__ == '__main__':
     app.run(debug=True)

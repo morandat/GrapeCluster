@@ -1,0 +1,10 @@
+{% extends "layouts/skeleton.html" %}
+{% block body %}
+
+    <div class="jumbotron">
+        <h1>About raspberry {{ rasp['name'] }}</h1>
+        <p>This raspberry is <span class="btn btn-info {{ 'btn-success' if (rasp['state']=='On') else 'btn-danger' }}">{{ rasp['state'] }}</span></p>
+        <p>This raspberry is running on {{ rasp['os'] }}</p>
+    </div>
+
+{% endblock %}
