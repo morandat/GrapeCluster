@@ -7,30 +7,49 @@
 
     <div class="row">
         {% for stackI in stacks %}
-            <div class="col-md-4">
+            <div class="col-md-6 col-lg-4">
                 <div class="card">
                     <div class="card-block">
                         <h2 style="float:left;" class="card-title">Stack #{{ stackI }}</h2>
-                        <span style="float:right;" class="btn {{ 'btn-success' if (stacks[stackI]['heat']<75) else 'btn-danger' }}">{{ stacks[stackI].heat }}°C</span>
+                        <div style="float:right;" class="btn {{ 'btn-success' if (stacks[stackI].heat<constants['stackHeatLimit']) else 'btn-danger' }}">{{ stacks[stackI].heat }}°C</div>
                     </div>
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item" style="font-weight:bold;">
-                            Master Slot : 
+                            <table style="border:0px solid; width:100%;"><tr>
+                            <td>
+                                Master Slot : 
 
-                            {% if stacks[stackI].master != -1 %}
-                                <a href="rasp/{{ rasps[stacks[stackI].master].address }}" class="card-link">{{ rasps[stacks[stackI].master].name }} ({{ rasps[stacks[stackI].master].address }})</a>
-                            {% else %}
-                                ---
-                            {% endif %}
-                        </li>
-                        {% for raspAddr in stacks[stackI].slaves %}
-                            <li class="list-group-item">
-                                Slot #{{ loop.index }} : 
-                                {% if raspAddr != -1 %}
-                                    <a href="rasp/{{ raspAddr }}" class="card-link">{{ rasps[raspAddr].name }} ({{ raspAddr }})</a>
+                                {% if stacks[stackI].master != -1 %}
+                                    <a href="rasp/{{ rasps[stacks[stackI].master].address }}" class="card-link">{{ rasps[stacks[stackI].master].name }} ({{ rasps[stacks[stackI].master].address }})</a>
                                 {% else %}
                                     ---
                                 {% endif %}
+                            </td>
+                            {% if stacks[stackI].master != -1 %}
+                            <td style="text-align:right;">
+                                <div class="btn btn-sm {{ 'btn-success' if (rasps[stacks[stackI].master].status==1) else 'btn-danger' }}">{{ constants.raspStatus[rasps[stacks[stackI].master].status] }}</div>
+                            </td>
+                            {% endif %}
+                        </tr></table>
+                        </li>
+                        {% for raspAddr in stacks[stackI].slaves %}
+                            <li class="list-group-item">
+                                <table style="border:0px solid; width:100%;"><tr>
+                                <td>
+                                    Slot #{{ loop.index }} :
+
+                                    {% if raspAddr != -1 %}
+                                        <a href="rasp/{{ raspAddr }}" class="card-link">{{ rasps[raspAddr].name }} ({{ raspAddr }})</a>
+                                    {% else %}
+                                        ---
+                                    {% endif %}
+                                </td>
+                                {% if raspAddr != -1 %}
+                                <td style="text-align:right;">
+                                    <div class="btn btn-sm {{ 'btn-success' if (rasps[raspAddr].status==1) else 'btn-danger' }}">{{ constants.raspStatus[rasps[raspAddr].status] }}</div>
+                                </td>
+                                {% endif %}
+                                </tr></table>
                             </li>
                         {% endfor %}
                     </ul>

@@ -1,6 +1,18 @@
 from flask import Flask, render_template
 app = Flask(__name__)
 
+## CONSTANTS ##
+
+constants = {
+    'stackHeatLimit' : 75,
+    'raspStatus' : [
+        'Off',
+        'On'
+    ]
+}
+
+## DATA ##
+
 stacksTest = {
     1 : {
         'heat' : 80,
@@ -35,7 +47,7 @@ raspsTest = {
         'stack' : 0,
         #'heat' : '70',
         'os' : 'Pidora',
-        'state' : 'On'
+        'status' : 1
     },
     1 : {
         'name' : 'Straw',
@@ -43,7 +55,7 @@ raspsTest = {
         'stack' : 0,
         #'heat' : '65',
         'os' : 'Raspbian',
-        'state' : 'Off'
+        'status' : 0
     },
     42 : {
         'name' : 'Blue',
@@ -51,9 +63,11 @@ raspsTest = {
         'stack' : 0,
         #'heat' : '65',
         'os' : 'Raspbian',
-        'state' : 'On'
+        'status' : 1
     }
 }
+
+## WEBSITE ##
 
 @app.route("/test")
 def template_test():
@@ -62,17 +76,20 @@ def template_test():
 @app.route("/index")
 @app.route("/")
 def template_debug():
-    return render_template('index.html', stacks=stacksTest, rasps=raspsTest)
+    return render_template('index.html', constants=constants, stacks=stacksTest, rasps=raspsTest)
+
+@app.route('/rasp/<int:raspAddr>')
+def template_details(raspAddr):
+    rasp = raspsTest[raspAddr]
+    return render_template('rasp.html', constants=constants, rasp=rasp)
+
+## REST ##
 
 @app.route("/test/welcome")
 def api_test():
     print("test")
     return "Welcome"
 
-@app.route('/rasp/<int:raspAddr>')
-def template_details(raspAddr):
-    rasp = raspsTest[raspAddr]
-    return render_template('rasp.html', rasp=rasp)
-
+## RUN ##
 if __name__ == '__main__':
     app.run(debug=True)
