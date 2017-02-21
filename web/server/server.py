@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, json
 app = Flask(__name__)
 
 ## CONSTANTS ##
@@ -67,7 +67,11 @@ raspsTest = {
     }
 }
 
-## WEBSITE ##
+#######################################################################################
+#                                                                                     #
+#                                    VIEWS                                            #
+#                                                                                     #
+#######################################################################################
 
 @app.route("/test")
 def template_test():
@@ -83,13 +87,56 @@ def template_details(raspAddr):
     rasp = raspsTest[raspAddr]
     return render_template('rasp.html', constants=constants, rasp=rasp)
 
-## REST ##
+#######################################################################################
+#                                                                                     #
+#                                   REST ROUTES                                       #
+#                                                                                     #
+#######################################################################################
 
 @app.route("/test/welcome")
 def api_test():
     print("test")
     return "Welcome"
 
-## RUN ##
+########SLAVES#########
+
+@app.route("/slave/", defaults={'id':None}, methods=['GET'])
+@app.route("/slave/<int:id>")
+def slave_details(id):
+    if id is not None:
+        return app.response_class(
+            response=json.dumps(raspsTest[id]),
+            status=200,
+            mimetype='application/json')
+    else:
+        return app.response_class(
+            response=json.dumps(raspsTest),
+            status=200,
+            mimetype='application/json')
+
+@app.route("/conf/", defaults={'id': None}, methods=['GET'])
+@app.route("/conf/<int:id>")
+def slave_conf(id):
+    if id is not None:
+        return app.response_class(
+            response=json.dumps(get_conf(id)),
+            status=200,
+            mimetype='application/json')
+    else:
+        return app.response_class(
+            response=json.dumps(get_conf()),
+            status=200,
+            mimetype='application/json')
+
+conf=[{"ip":"192.168.0.1"}, {"ip":"192.168.0.2"}, {"ip":"192.168.0.3"}]
+
+def get_conf(id=None):
+    if id is not None:
+        return conf[id]
+    else:
+        return conf
+
+#########CLUSTERS#########
+
 if __name__ == '__main__':
     app.run(debug=True)
