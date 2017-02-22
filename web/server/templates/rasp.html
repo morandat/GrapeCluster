@@ -2,9 +2,40 @@
 {% block body %}
 
     <div class="jumbotron">
-        <h1>About raspberry {{ rasp['name'] }}</h1>
-        <p>This raspberry is <span class="btn btn-info {{ 'btn-success' if (rasp['state']=='On') else 'btn-danger' }}">{{ rasp['state'] }}</span></p>
-        <p>This raspberry is running on {{ rasp['os'] }}</p>
+        <h1>Raspberry Configuration</h1>
     </div>
+
+    <div class="row">
+    	<div class="col-md-12">
+    		<div class="card">
+    			<ul class="list-group list-group-flush">
+    				<li class="list-group-item">
+   						Name : <span id="raspName"></span>
+   					</li>
+   					<li class="list-group-item">
+				    	Status : <span id="raspStatus" class="btn"></span>
+   					</li>
+				    <li class="list-group-item">
+				    	Operating System : <span id="raspOS"></span>
+   					</li>
+				    <li class="list-group-item">
+				    	I2C Address : <span id="raspI2C"></span>
+   					</li>
+				    <li class="list-group-item">
+				   		IP Address : <span id="raspIP"></span>
+   					</li>
+   				</ul>
+            </div>
+        </div>
+    </div>
+    
+
+    <script>
+    CONSTANTS = {{ constants|tojson|safe }};
+    RASPID = {{ rasp.address }};
+    </script>
+
+    <script src="/static/javascript/common.js"></script>
+    <script src="/static/javascript/rasp.js"></script>
 
 {% endblock %}

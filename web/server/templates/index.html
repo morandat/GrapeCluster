@@ -6,49 +6,32 @@
     </div>
 
     <div class="row">
-        {% for stackI in stacks %}
-            <div class="col-md-6 col-lg-4">
-                <div class="card">
+        {% for stackI in range(constants.maxStacks) %}
+            <div class="col-md-6 col-lg-4" style="display:none;" id="stack{{ stackI }}">
+                <div class="card" style="margin-bottom:30px;">
                     <div class="card-block">
-                        <h2 style="float:left;" class="card-title">Stack #{{ stackI }}</h2>
-                        <div style="float:right;" class="btn {{ 'btn-success' if (stacks[stackI].heat<constants['stackHeatLimit']) else 'btn-danger' }}">{{ stacks[stackI].heat }}°C</div>
+                        <h2 style="float:left;" class="card-title">Stack #<span id="stackId{{ stackI }}"></span></h2>
+                        <div style="float:right;" class="btn" id="stackTemp{{ stackI }}"></div>
                     </div>
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item" style="font-weight:bold;">
-                            <table style="border:0px solid; width:100%;"><tr>
-                            <td>
-                                Master Slot : 
-
-                                {% if stacks[stackI].master != -1 %}
-                                    <a href="rasp/{{ rasps[stacks[stackI].master].address }}" class="card-link">{{ rasps[stacks[stackI].master].name }} ({{ rasps[stacks[stackI].master].address }})</a>
-                                {% else %}
-                                    ---
-                                {% endif %}
-                            </td>
-                            {% if stacks[stackI].master != -1 %}
-                            <td style="text-align:right;">
-                                <div class="btn btn-sm {{ 'btn-success' if (rasps[stacks[stackI].master].status==1) else 'btn-danger' }}">{{ constants.raspStatus[rasps[stacks[stackI].master].status] }}</div>
-                            </td>
+                        
+                        {% for raspI in range(constants.nSlavesByStack+1) %}
+                            {% set isMaster = (raspI == 0) %}
+                            {% set raspPos = stackI|string + '_' + ('master' if isMaster else (raspI - 1)|string) %}
+                            {%if isMaster %}
+                                <li class="list-group-item" style="font-weight:bold;">
+                            {% else %}
+                                <li class="list-group-item">
                             {% endif %}
-                        </tr></table>
-                        </li>
-                        {% for raspAddr in stacks[stackI].slaves %}
-                            <li class="list-group-item">
                                 <table style="border:0px solid; width:100%;"><tr>
                                 <td>
-                                    Slot #{{ loop.index }} :
+                                    {{ 'Master Slot' if isMaster else 'Slot #' + raspI|string }} :
 
-                                    {% if raspAddr != -1 %}
-                                        <a href="rasp/{{ raspAddr }}" class="card-link">{{ rasps[raspAddr].name }} ({{ raspAddr }})</a>
-                                    {% else %}
-                                        ---
-                                    {% endif %}
+                                    <span id="raspName{{ raspPos }}"></span>
                                 </td>
-                                {% if raspAddr != -1 %}
                                 <td style="text-align:right;">
-                                    <div class="btn btn-sm {{ 'btn-success' if (rasps[raspAddr].status==1) else 'btn-danger' }}">{{ constants.raspStatus[rasps[raspAddr].status] }}</div>
+                                    <div class="btn btn-sm" id="raspStatus{{ raspPos }}" style="display:none;"></div>
                                 </td>
-                                {% endif %}
                                 </tr></table>
                             </li>
                         {% endfor %}
@@ -58,10 +41,11 @@
         {% endfor %}
     </div>
 
-    <div>
-        <p id="welcome"></p>
-    </div>
+    <script>
+    CONSTANTS = {{ constants|tojson|safe }};
+    </script>
 
+    <script src="/static/javascript/common.js"></script>
     <script src="/static/javascript/index.js"></script>
 
 {% endblock %}

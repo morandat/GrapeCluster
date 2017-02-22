@@ -1,9 +1,12 @@
-from flask import Flask, render_template, json
+from flask import Flask, render_template, json, redirect
+import copy, collections
 app = Flask(__name__)
 
 ## CONSTANTS ##
 
 constants = {
+    'maxStacks' : 16,
+    'nSlavesByStack' : 6,
     'stackHeatLimit' : 75,
     'raspStatus' : [
         'Off',
@@ -16,56 +19,97 @@ constants = {
 stacksTest = {
     1 : {
         'heat' : 80,
-        'master' : 0,
-        'slaves' : [
-            -1,
-            -1,
-            1,
-            -1,
-            -1,
-            -1
-        ]
+        'rasps' : {
+            'master' : 1,
+            2 : 2
+        }
     },
     2 : {
         'heat' : 25,
-        'master' : -1,
-        'slaves' : [
-            -1,
-            -1,
-            -1,
-            42,
-            -1,
-            -1
-        ]
+        'rasps' : {
+            3 : 42
+        }
     }
 }
 
 raspsTest = {
-    0 : {
+    1 : {
         'name' : 'Cran',
-        'address' : 0,
-        'stack' : 0,
+        'address' : 1,
+        #'stack' : 0,
         #'heat' : '70',
         'os' : 'Pidora',
-        'status' : 1
+        'status' : 1,
+        'ip' : "192.168.0.1"
     },
-    1 : {
+    2 : {
         'name' : 'Straw',
-        'address' : 1,
-        'stack' : 0,
+        'address' : 2,
+        #'stack' : 0,
         #'heat' : '65',
         'os' : 'Raspbian',
-        'status' : 0
+        'status' : 0,
+        'ip' : "192.168.0.2"
     },
     42 : {
         'name' : 'Blue',
         'address' : 42,
-        'stack' : 0,
+        #'stack' : 0,
         #'heat' : '65',
         'os' : 'Raspbian',
-        'status' : 1
+        'status' : 1,
+        'ip' : "192.168.0.42"
     }
 }
+
+
+
+def getStack(id=None):
+    if id is not None:
+        if stacksTest.get(id) is not None:
+            return copy.deepcopy(stacksTest[id])
+        else:
+            return None
+    else:
+        return copy.deepcopy(stacksTest)
+
+def getRasp(id=None):
+    if id is not None:
+        if raspsTest.get(id) is not None:
+            return copy.deepcopy(raspsTest[id])
+        else:
+            return None
+    else:
+        return copy.deepcopy(raspsTest)
+
+
+
+def computeStack(stack):
+    raspsIn = stack['rasps']
+    raspsOut = collections.OrderedDict()
+
+    raspsOut['master'] = raspsIn['master'] if raspsIn.get('master') is not None else -1
+
+    for i in range(constants['nSlavesByStack']):
+        if raspsIn.get(i) is not None:
+            raspsOut[i] = raspsIn[i]
+        else:
+            raspsOut[i] = -1
+
+    stack['rasps'] = raspsOut
+
+    return stack
+
+def computeStacks(stacks):
+    output = collections.OrderedDict(sorted(stacks.items(), key=lambda t: t[0]))
+
+    for elt in output:
+        output[elt] = computeStack(output[elt])
+
+    return output
+
+    
+
 
 #######################################################################################
 #                                                                                     #
@@ -73,19 +117,29 @@ raspsTest = {
 #                                                                                     #
 #######################################################################################
 
-@app.route("/test")
-def template_test():
-    return render_template('template.html', my_string="Wheeeee!", my_list=[0,1,2,3,4,5])
-
 @app.route("/index")
 @app.route("/")
-def template_debug():
-    return render_template('index.html', constants=constants, stacks=stacksTest, rasps=raspsTest)
+@app.route("/view/rasp")
+def routeDefault():
+    return redirect("/view", code=302)
 
-@app.route('/rasp/<int:raspAddr>')
-def template_details(raspAddr):
-    rasp = raspsTest[raspAddr]
-    return render_template('rasp.html', constants=constants, rasp=rasp)
+
+@app.route("/view/test")
+def viewTest():
+    print("test")
+    return render_template('test.html', my_string="Wheeeee!", my_list=[0,1,2,3,4,5])
+
+@app.route("/view")
+def viewDefault():
+    return render_template('index.html', constants=constants, stacks=computeStacks(getStack()), rasps=getRasp())
+
+@app.route('/view/rasp/<int:id>')
+def viewRasp(id):
+    rasp = getRasp(id)
+    if rasp is not None:
+        return render_template('rasp.html', constants=constants, rasp=rasp)
+    else:
+        return routeDefault()
 
 #######################################################################################
 #                                                                                     #
@@ -93,50 +147,40 @@ def template_details(raspAddr):
 #                                                                                     #
 #######################################################################################
 
-@app.route("/test/welcome")
-def api_test():
-    print("test")
-    return "Welcome"
+@app.route("/stack/", defaults={'id':None}, methods=['GET'])
+@app.route("/stack/<int:id>")
+def routeStack(id):
+    def nestRaspsInStack(stack):
+        for rasp in stack['rasps']:
+            stack['rasps'][rasp] = getRasp(stack['rasps'][rasp])
 
-########SLAVES#########
-
-@app.route("/slave/", defaults={'id':None}, methods=['GET'])
-@app.route("/slave/<int:id>")
-def slave_details(id):
-    if id is not None:
-        return app.response_class(
-            response=json.dumps(raspsTest[id]),
-            status=200,
-            mimetype='application/json')
+    stack = getStack(id)
+    if stack is None:
+        stack = {}
     else:
-        return app.response_class(
-            response=json.dumps(raspsTest),
-            status=200,
-            mimetype='application/json')
+        if id is None:
+            for stackId in stack:
+                nestRaspsInStack(stack[stackId])
+        else:
+            nestRaspsInStack(stack)
 
-@app.route("/conf/", defaults={'id': None}, methods=['GET'])
-@app.route("/conf/<int:id>")
-def slave_conf(id):
-    if id is not None:
-        return app.response_class(
-            response=json.dumps(get_conf(id)),
-            status=200,
-            mimetype='application/json')
-    else:
-        return app.response_class(
-            response=json.dumps(get_conf()),
-            status=200,
-            mimetype='application/json')
+    return app.response_class(
+        response=json.dumps(stack),
+        status=200,
+        mimetype='application/json')
 
-conf=[{"ip":"192.168.0.1"}, {"ip":"192.168.0.2"}, {"ip":"192.168.0.3"}]
+@app.route("/rasp/", defaults={'id':None}, methods=['GET'])
+@app.route("/rasp/<int:id>")
+def routeRasp(id):
+    rasp = getRasp(id)
+    if rasp is None:
+        rasp = {}
+    return app.response_class(
+        response=json.dumps(rasp),
+        status=200,
+        mimetype='application/json')
 
-def get_conf(id=None):
-    if id is not None:
-        return conf[id]
-    else:
-        return conf
 
-#########CLUSTERS#########
 
 if __name__ == '__main__':
     app.run(debug=True)

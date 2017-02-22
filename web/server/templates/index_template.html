@@ -1,0 +1,60 @@
+{% extends "layouts/skeleton.html" %}
+{% block body %}
+
+    <div class="jumbotron">
+        <h1>Grape Cluster Configuration Overview</h1>
+    </div>
+
+    <div class="row">
+        {% for stackI in stacks %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card">
+                    <div class="card-block">
+                        <h2 style="float:left;" class="card-title">Stack #{{ stackI }}</h2>
+                        <div style="float:right;" class="btn {{ 'btn-success' if (stacks[stackI].heat<constants['stackHeatLimit']) else 'btn-danger' }}"><span id="tempSonde{{ stackI }}">{{ stacks[stackI].heat }}</span>°C</div>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        
+                        {% for raspSlot in stacks[stackI].rasps %}
+                            {% set isMaster = (loop.index == 1) %}
+                            {%if isMaster %}
+                                <li class="list-group-item" style="font-weight:bold;">
+                            {% else %}
+                                <li class="list-group-item">
+                            {% endif %}
+                                <table style="border:0px solid; width:100%;"><tr>
+                                <td>
+                                    {{ 'Master Slot' if isMaster else 'Slot #' + (loop.index - 1)|string }} :
+
+                                    <span id="raspName{{ stackI }}_{{ 'master' if isMaster else loop.index - 2 }}">
+
+                                    {% if stacks[stackI].rasps[raspSlot] != -1 %}
+                                        <a href="view/rasp/{{ stacks[stackI].rasps[raspSlot] }}" class="card-link">{{ rasps[stacks[stackI].rasps[raspSlot]].name }} ({{ stacks[stackI].rasps[raspSlot] }})</a>
+                                    {% else %}
+                                        ---
+                                    {% endif %}
+
+
+                                    </span>
+                                </td>
+                                {% if stacks[stackI].rasps[raspSlot] != -1 %}
+                                <td style="text-align:right;">
+                                    <div class="btn btn-sm {{ 'btn-success' if (rasps[stacks[stackI].rasps[raspSlot]].status==1) else 'btn-danger' }}">{{ constants.raspStatus[rasps[stacks[stackI].rasps[raspSlot]].status] }}</div>
+                                </td>
+                                {% endif %}
+                                </tr></table>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+    CONSTANTS = {{ constants|tojson|safe }};
+    </script>
+
+    <script src="/static/javascript/index.js"></script>
+
+{% endblock %}
