@@ -15,7 +15,8 @@ $(document).ready(function(){
 		 			var stack = data[stackId];
 
 		 			$('#stackId'+stackCount)
-		 				.text(stackId);
+		 				.attr('href', 'stack/'+stackId)
+		 				.text('Stack #'+stackId);
 		 			$('#stackTemp'+stackCount)
 		 				.btnColor(stack.heat<CONSTANTS.stackHeatLimit)
 		 				.text(stack.heat+'°C');
@@ -40,9 +41,7 @@ $(document).ready(function(){
 		 				}
 		 			}
 
-		 			raspAction('master', stack.rasps.master);
-
-		 			for(var i=0; i<CONSTANTS.nSlavesByStack; ++i)
+		 			for(var i=0; i<CONSTANTS.nSlavesByStack+1; ++i)
 		 				raspAction(i, stack.rasps[i]);
 
 		 			$('#stack'+stackCount).show();

@@ -6,7 +6,10 @@ $(document).ready(function(){
 		 	dataType : 'json',
 		 	type : 'GET',
 		 	success : function(data) {
+		 		$('#bcStackId').attr('href', '/stack/'+data.stack).text('Stack #'+data.stack);
+
 		 		$('#raspName').text(data.name);
+		 		$('#raspStack').text('#'+data.stack);
 		 		$('#raspStatus')
 		 			.btnColor(data.status)
 		 			.text(CONSTANTS.raspStatus[data.status]);

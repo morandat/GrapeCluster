@@ -20,7 +20,7 @@ stacksTest = {
     1 : {
         'heat' : 80,
         'rasps' : {
-            'master' : 1,
+            0 : 1,
             2 : 2
         }
     },
@@ -36,7 +36,7 @@ raspsTest = {
     1 : {
         'name' : 'Cran',
         'address' : 1,
-        #'stack' : 0,
+        'stack' : 1,
         #'heat' : '70',
         'os' : 'Pidora',
         'status' : 1,
@@ -45,7 +45,7 @@ raspsTest = {
     2 : {
         'name' : 'Straw',
         'address' : 2,
-        #'stack' : 0,
+        'stack' : 1,
         #'heat' : '65',
         'os' : 'Raspbian',
         'status' : 0,
@@ -54,7 +54,7 @@ raspsTest = {
     42 : {
         'name' : 'Blue',
         'address' : 42,
-        #'stack' : 0,
+        'stack' : 2,
         #'heat' : '65',
         'os' : 'Raspbian',
         'status' : 1,
