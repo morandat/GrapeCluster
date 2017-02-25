@@ -1,6 +1,8 @@
 from flask import Flask, render_template, json, redirect
-import copy, collections
+import copy
+
 app = Flask(__name__)
+
 
 ## CONSTANTS ##
 
@@ -13,6 +15,7 @@ constants = {
         'On'
     ]
 }
+
 
 ## DATA ##
 
@@ -63,6 +66,7 @@ raspsTest = {
 }
 
 
+## GETTERS ##
 
 def getStack(id=None):
     if id is not None:
@@ -83,34 +87,6 @@ def getRasp(id=None):
         return copy.deepcopy(raspsTest)
 
 
-
-def computeStack(stack):
-    raspsIn = stack['rasps']
-    raspsOut = collections.OrderedDict()
-
-    raspsOut['master'] = raspsIn['master'] if raspsIn.get('master') is not None else -1
-
-    for i in range(constants['nSlavesByStack']):
-        if raspsIn.get(i) is not None:
-            raspsOut[i] = raspsIn[i]
-        else:
-            raspsOut[i] = -1
-
-    stack['rasps'] = raspsOut
-
-    return stack
-
-def computeStacks(stacks):
-    output = collections.OrderedDict(sorted(stacks.items(), key=lambda t: t[0]))
-
-    for elt in output:
-        output[elt] = computeStack(output[elt])
-
-    return output
-
-    
-
-
 #######################################################################################
 #                                                                                     #
 #                                    VIEWS                                            #
@@ -123,7 +99,7 @@ def computeStacks(stacks):
 def routeDefault():
     return redirect("/view", code=302)
 
-
+# TEST
 @app.route("/view/test")
 def viewTest():
     print("test")
@@ -131,15 +107,22 @@ def viewTest():
 
 @app.route("/view")
 def viewDefault():
-    return render_template('index.html', constants=constants, stacks=computeStacks(getStack()), rasps=getRasp())
+    return render_template('index.html', constants=constants)
+
+@app.route('/view/stack/<int:id>')
+def viewStack(id):
+    if getStack(id) is not None:
+        return render_template('stack.html', constants=constants, stackId=id)
+    else:
+        return routeDefault()
 
 @app.route('/view/rasp/<int:id>')
 def viewRasp(id):
-    rasp = getRasp(id)
-    if rasp is not None:
-        return render_template('rasp.html', constants=constants, rasp=rasp)
+    if getRasp(id) is not None:
+        return render_template('rasp.html', constants=constants, raspId=id)
     else:
         return routeDefault()
+
 
 #######################################################################################
 #                                                                                     #
@@ -181,6 +164,7 @@ def routeRasp(id):
         mimetype='application/json')
 
 
+## RUN ##
 
 if __name__ == '__main__':
     app.run(debug=True)

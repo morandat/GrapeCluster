@@ -1,0 +1,58 @@
+{% extends "layouts/skeleton.html" %}
+{% block body %}
+
+    <div class="jumbotron">
+        <h1>Stack #{{ stackId }} Configuration</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <nav class="breadcrumb">
+          <a class="breadcrumb-item" href="/">Home</a>
+          <span class="breadcrumb-item active">Stack #{{ stackId }}</span>
+        </nav>
+        </div>
+        <div class="col-md-12">
+            <div class="card" style="margin-bottom:30px;">
+                <div class="card-block">
+                    <h2 style="float:left;" class="card-title">Stack #{{ stackId }}</h2>
+                    <div style="float:right;" class="btn" id="stackTemp"></div>
+                </div>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Slot</th>
+                      <th>Name</th>
+                      <th>I2C Address</th>
+                      <th>Operating System</th>
+                      <th>IP Address</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for raspI in range(constants.nSlavesByStack+1) %}
+                        {% set isMaster = (raspI == 0) %}
+                            <tr>
+                              <th scope="row">{{ 'Master' if isMaster else raspI }}</th>
+                              <td id="raspName{{ raspI }}"></td>
+                              <td id="raspI2C{{ raspI }}"></td>
+                              <td id="raspOS{{ raspI }}"></td>
+                              <td id="raspIP{{ raspI }}"></td>
+                              <td><div class="btn btn-sm" id="raspStatus{{ raspI }}" style="display:none;"></div></td>
+                            </tr>
+                        {% endfor %}
+                  </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    CONSTANTS = {{ constants|tojson|safe }};
+    STACKID = {{ stackId }};
+    </script>
+
+    <script src="/static/javascript/common.js"></script>
+    <script src="/static/javascript/stack.js"></script>
+
+{% endblock %}
