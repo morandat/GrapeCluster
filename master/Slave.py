@@ -1,4 +1,6 @@
-class Slave:
-    def __init__(self):
-        self._ip_address = "127.0.0.1"
-        self._port = 42333
+from PiDevice import PiDevice
+
+
+class Slave(PiDevice):
+    def __init__(self, stack_nb, mac_add, ip_address, i2c_add, pos):
+        super(Slave, self).__init__(stack_nb, mac_add, ip_address, i2c_add, pos)
