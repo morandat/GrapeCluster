@@ -21,7 +21,7 @@ display = None
 
 
 def _reverse_bits_of_byte(b):
-    return (((b * 0x0802L & 0x22110L) |(b * 0x8020L & 0x88440L)) * 0x10101L >> 16) & 0xff
+    return (((b * 0x0802 & 0x22110) |(b * 0x8020 & 0x88440)) * 0x10101 >> 16) & 0xff
 
 def big2little_endian(w):
     return ((w & 0xff) << 8) | ((w & 0xff00) >> 8)

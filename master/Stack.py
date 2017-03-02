@@ -13,7 +13,7 @@ class Stack(IStack):
         for dev in STACK_DEVICES:
             if dev.probe(bus, prefix):
                 self.__devices[dev] = dev(bus, prefix)
-        for dev in self.__devices.itervalues():
+        for dev in self.__devices.items():
             try:
                 dev.setup()
             except Exception as e:
@@ -28,9 +28,14 @@ class Stack(IStack):
             self.__pi_devices.append(pi_device)
             pi_device.set_pos(len(self.__pi_devices)-1)
         else:
-            raise StandardError("Trying to add more than 7 Pi devices to the same stack")
+            raise IndexError("Trying to add more than 7 Pi devices to the same stack")
 
+    def get_ip_addresses(self):
+        ip_addresses = []
+        for pi_device in self.__pi_devices:
+            if not pi_device.is_master():
+                ip_addresses.append(pi_device.get_ip_address())
+        return ip_addresses
 
-
-        def __getitem__(self, kind):
-            return self.devices[kind]
+    def __getitem__(self, kind):
+        return self.__devices[kind]
