@@ -8,20 +8,19 @@ class CommunicatorUDP(Communicator):  # Communicator for UDP
         self.__address = address
 
     def open_communication(self):
-        self.__in_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.__out_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.__sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        #self.__out_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-        self.__in_sock.bind((self.__address, self.__port))
+        self.__sock.bind((self.__address, self.__port))
 
     def send(self, message, address):
-        self.__out_sock.sendto(message.encode(), (address, self.__port))
+        self.__sock.sendto(message.encode(), (address, self.__port))
 
     def receive(self, size):
-        return self.__in_sock.recvfrom(size)
+        return self.__sock.recvfrom(size)
 
     def close_communication(self):
-        self.__in_sock.close()
-        self.__out_sock.close()
+        self.__sock.close()
         pass
 
 # Actions/Demandes sur les stacks

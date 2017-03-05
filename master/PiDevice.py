@@ -29,10 +29,10 @@ class PiDevice(I2CDevice):
         self._pos = pos
 
     def get_cpu_usage(self):
-        return psutil.cpu_freq()
+        return psutil.cpu_freq()  # To-do
 
     def get_ram_usage(self):
-        return psutil.virtual_memory().percent
+        return psutil.virtual_memory().percent  # To-do
 
     def is_master(self):
         return False

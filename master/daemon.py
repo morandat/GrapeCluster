@@ -14,6 +14,7 @@ slave = Slave(0, "AA:AA:AA:AA:AA:AA", "127.0.0.2", "0", 0)
 
 stack.add_pi_device(master)
 stack.add_pi_device(slave)
+stack.add_pi_device(Slave(0, "AA:AA:AA:AA:AA:AA", "127.0.0.3", "0", 0))
 
 master.add_stack(stack)
 
@@ -26,6 +27,6 @@ comm.open_communication()
 comm.broadcast(sys.argv[1], master.get_cluster_ip_addresses())
 
 while True:
-    data, addr = comm.receive(10)
-    print("received message: {} from {}".format(data, addr))
+    data, addr = comm.receive(1024)
+    print("received message: {}".format(data))
 

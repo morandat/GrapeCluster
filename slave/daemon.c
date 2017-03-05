@@ -92,6 +92,7 @@ int main(int argc, char *argv[]) {
      */
 
     struct sockaddr_in slave_info, master_info;
+
     /*
     master_info.sin_family = AF_INET;
     master_info.sin_port = htons(PORT);
@@ -113,13 +114,12 @@ int main(int argc, char *argv[]) {
     slave_info.sin_port = htons(PORT);
     slave_info.sin_addr.s_addr = inet_addr(argv[1]);
 
-
     CHKERR(bind(sock, (struct sockaddr*)&slave_info, sizeof(slave_info) ));
 
     while (curr_status != STOPPED) {
         switch (curr_status) {
             case ACTIVE:
-                printf("waiting for data\n");
+                printf("waiting for data...\n");
 
                 CHKERR((recv_len = recvfrom(sock, buffer, BUFFER_LEN, 0,
                                             (struct sockaddr *) &master_info, &master_info_len)));
@@ -133,9 +133,8 @@ int main(int argc, char *argv[]) {
                     } else {
                         int order_code = atoi(&buffer[0]);
                         exec_order(order_code);//, buffer, recv_len+1);
-                        printf("order returned :\n%s", exec_buff);
-
-                        CHKERR(sendto(sock, exec_buff, sizeof(exec_buff), 0, (struct sockaddr *) &master_info, master_info_len));
+                        printf("order returned :\n%s\nSending to master...", exec_buff);
+                        CHKERR(sendto(sock, exec_buff, exec_len, 0, (struct sockaddr *) &master_info, master_info_len));
                     }
                 }
                 break;
