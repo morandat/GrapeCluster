@@ -5,9 +5,7 @@ instruction =  {0 : echo,
 }
  
 class slave(i2c_device):
-	def __init__(self, address, smbus):
-		i2c_dev.__init__(self, address, smbus)
-		self.init(self)
+
 
 
 	def init(self):
