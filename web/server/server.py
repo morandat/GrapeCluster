@@ -1,4 +1,5 @@
 from flask import Flask, render_template, json, redirect
+from master.Daemon import Daemon
 import copy
 
 app = Flask(__name__)
@@ -157,9 +158,16 @@ def routeStack(id):
 def routeRasp(id):
     rasp = getRasp(id)
     if rasp is None:
-        rasp = {}
+        rasp = {}   
     return app.response_class(
         response=json.dumps(rasp),
+        status=200,
+        mimetype='application/json')
+
+@app.route("/test/")
+def test():
+    return app.response_class(
+        response=json.dumps(daemon.get_master().get_ip_address()),
         status=200,
         mimetype='application/json')
 
@@ -167,4 +175,6 @@ def routeRasp(id):
 ## RUN ##
 
 if __name__ == '__main__':
+    daemon = Daemon()
+    daemon.start()
     app.run(debug=True)
