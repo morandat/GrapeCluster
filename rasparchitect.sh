@@ -47,7 +47,8 @@ UPGRADE_CLEAN=false
 NO_UPDATE=false
 
 second_action "Updating locale ..."
-export LANGUAGE="fr:en"
+export LANGUAGE="en"
+export LANG=en_US.utf8
 
 simple_action "Moving to /tmp/armmanager"
 cd /tmp/armmanager
@@ -105,37 +106,74 @@ then
 
     check_and_install_package gcc gcc gcc
     check_and_install_package make make build-essential
+    check_and_install_package git git git
+    check_and_install_package bc bc bc
 
 
-    if [ -e "$FILES" ]
-    then
+    #if [ -e "$FILES" ]
+    #then
         second_action "Installing daemon"
-        simple_action "Decompressing sources ..."
-        ffiles=`basename $FILES`
-        decomp_files=${ffiles%.*}
-        if [ -e $decomp_files ]; then rm -rf $decomp_files; fi
-        tar -xzf $FILES
-        if [ $? -eq 0 ]
+        simple_action "Cloning from https://github.com/raspberrypi/linux ..."
+        git clone --depth=1 https://github.com/raspberrypi/linux        
+        
+        if [ -e "./linux" ]
         then
-            simple_action "Compiling sources ..."
-            make -C ./$decomp_files all
-            if [ $? -eq 0 ]
-            then
-                simple_action "Copying executable and launching script ..."
-                cp ./$decomp_files/$EXEC_NAME /usr/local/bin/$EXEC_NAME
-                chmod a+x ./$decomp_files/$EXEC_NAME.sh
-                cp ./$decomp_files/$EXEC_NAME.sh /etc/init.d/$EXEC_NAME
-                simple_action "Adding program to init.d services ..."
-                update-rc.d $EXEC_NAME defaults > /home/pi/armmanager.log
-                simple_action "Enabling daemon ..."
-                update-rc.d $EXEC_NAME enable >> /home/pi/armmanager.log
-            else
-                second_action "A problem occured when trying to compile files"
-            fi
+            cd linux
+            KERNEL=kernel7
+            simple_action "Making bcm2709_defconfig ..."
+            make bcm2709_defconfig
+
+            simple_action "Making zImage modules and dtbs ..."
+            make -j4 zImage modules dtbs
+            simple_action "Making modules_install ..."
+            sudo make modules_install
+            simple_action "Copying new files to /boot ..."
+            sudo cp arch/arm/boot/dts/*.dtb /boot/
+            sudo cp arch/arm/boot/dts/overlays/*.dtb* /boot/overlays/
+            sudo cp arch/arm/boot/dts/overlays/README /boot/overlays/
+            sudo scripts/mkknlimg arch/arm/boot/zImage /boot/$KERNEL.img
+
+            simple_action "Device tree compiler ..."
+            dtc -@ -I dts -O dtb i2cslave-bcm2708-overlay.dts -o i2cslave-bcm2708.dtbo
+            simple_action "Copying to overlays ..."
+            sudo cp i2cslave-bcm2708.dtbo /boot/overlays/
+
+            cd ../
+            simple_action "Cloning raspberry_slave_i2c"
+            git clone https://github.com/marilafo/raspberry_slave_i2c.git
+            cd raspberry_slave_i2c
+            simple_action "Building daemon ..."
+            gcc -o daemon i2ccat.c
         else
-            second_action "Impossible to extract files from targz file"
-            exit 1
+            second_action "Something went wrong when trying to clone repository ..."
         fi
+
+        #simple_action "Decompressing sources ..."
+        #ffiles=`basename $FILES`
+        #decomp_files=${ffiles%.*}
+        #if [ -e $decomp_files ]; then rm -rf $decomp_files; fi
+        #tar -xzf $FILES
+        #if [ $? -eq 0 ]
+        #then
+        #    simple_action "Compiling sources ..."
+        #    make -C ./$decomp_files all
+        #    if [ $? -eq 0 ]
+        #    then
+        #        simple_action "Copying executable and launching script ..."
+        #        cp ./$decomp_files/$EXEC_NAME /usr/local/bin/$EXEC_NAME
+        #        chmod a+x ./$decomp_files/$EXEC_NAME.sh
+        #        cp ./$decomp_files/$EXEC_NAME.sh /etc/init.d/$EXEC_NAME
+        #        simple_action "Adding program to init.d services ..."
+        #        update-rc.d $EXEC_NAME defaults > /home/pi/armmanager.log
+        #        simple_action "Enabling daemon ..."
+        #        update-rc.d $EXEC_NAME enable >> /home/pi/armmanager.log
+        #    else
+        #        second_action "A problem occured when trying to compile files"
+        #    fi
+        #else
+        #    second_action "Impossible to extract files from targz file"
+        #    exit 1
+        #fi
 
         #Not sure if python really needs to be installed
         #on slaves
@@ -170,11 +208,11 @@ then
             launch_bash
         fi
 
-    else
-        second_action "No files provided, nothing to do ..."
-        simple_action "Exitting ..."
-        exit 1
-    fi
+    #else
+    #    second_action "No files provided, nothing to do ..."
+    #    simple_action "Exitting ..."
+    #    exit 1
+    #fi
 else
     launch_bash
 fi

@@ -43,6 +43,49 @@ CHROOT=false
 CHROOTOPTIONS=""
 POSSIBLEOPTIONS=("chroot-only" "install-only" "upgrade-clean" "no-update")
 FINALOPTIONS=""
+RESIZE_VALUE=-1
+
+resize_image(){
+	main_action "Resizing the image"
+
+	if [[ $FILE == *.img ]] || [[ $FILE == *.iso ]]
+	then
+
+		df -h | grep $FILE &> /dev/null
+		if [ $? -eq 0 ]
+		then
+			simple_action "The image is already mounted, unmounting it ..."
+			rootasked "Umount"
+			sudo umount $FILE
+		fi
+
+		mkdir -p ./.armmanager
+		TEMP_IMG="./.armmanager/tmp_img"
+		str="G"
+		SEEK="$RESIZE_VALUE$str"
+
+		simple_action "Creating blank image"
+		dd if=/dev/zero of=$TEMP_IMG bs=1 count=1 seek=$SEEK
+
+		simple_action "Appending blank image to original one"
+		cat $TEMP_IMG >> $FILE
+
+		simple_action "Getting the partition's offset, and resizing it ..."
+		part=`fdisk -l -o Start $FILE | cut -d' ' -f1,3 | tail -n1`
+		offset=$((512*$part))
+
+		rootasked "Losetup, e2fsck and resize2fs"
+		sudo losetup --offset $offset /dev/loop0 $FILE
+		sudo e2fsck -f /dev/loop0
+		sudo resize2fs -f /dev/loop0
+
+		sudo losetup -d /dev/loop0
+	else
+		simple_action "Please give a valid file ... (img/iso)"
+		usage
+		exit 1
+	fi
+}
 
 mount_image(){
 	main_action "Mounting the image"
@@ -327,6 +370,16 @@ do
 			fi
 		shift # past argument=value
 		;;
+		-r|-r=*|--resize-image|--resize-image=*)
+			VALUE="${i#*=}"
+			if [ "$VALUE" == "$i" ]
+			then
+				RESIZE_VALUE=1
+			else
+				RESIZE_VALUE=$VALUE
+			fi
+		shift
+		;;
 		-*)
 			simple_action "Unkown option : $i" # unknown option
 		;;
@@ -335,6 +388,17 @@ do
 		;;
 	esac
 done
+
+#resize the image
+if [ $RESIZE_VALUE -ne -1 ]
+then
+	if [ $MOUNTOPT -eq 1 ]
+	then
+		resize_image
+	else
+		second_action "Please give a file to mount with -m=/path/to/file in order to resize it before mounting"
+	fi
+fi
 
 #Mount the filesystem
 if [ $MOUNTOPT -eq 1 ]
