@@ -158,7 +158,7 @@ def routeStack(id):
 def routeRasp(id):
     rasp = getRasp(id)
     if rasp is None:
-        rasp = {}   
+        rasp = {}
     return app.response_class(
         response=json.dumps(rasp),
         status=200,
