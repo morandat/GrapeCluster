@@ -21,13 +21,12 @@ class Daemon(Thread):
         self.__udp_comm.open_communication()
 
     def run(self):
-        #self.__udp_comm.broadcast("0", self.__master.get_cluster_ip_addresses())
-
         while True:
+            self.__udp_comm.broadcast("1;", self.__master.get_cluster_ip_addresses())
             data, addr = self.__udp_comm.receive(1024)
             if data == b"configure":#To-Do: check why data is bstr
                 stack = self.__master.get_stack(0)
-                #To-do : ip_address conflict, some kind of simple DHCP. May look for DHCP Py libs
+                #To-do : check for ip_address conflict, implement some kind of simple DHCP. May look for DHCP Py libs
                 new_slave = Slave(0, "AA:AA:AA:AA:AA:AA", addr[0], "0", len(stack.get_pi_devices()))
                 self.__master.get_stack(0).add_pi_device(new_slave)
                 print("0;" + addr[0] + ";")

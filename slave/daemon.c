@@ -19,7 +19,6 @@ enum status curr_status = ACTIVE;
 int count_args(char* msg, ssize_t msg_len) {
     int arg_num = 0;
     for (int i = 0; i < msg_len; ++i) {
-        printf("%c\n", msg[i]);
         if (msg[i] == ';')
             arg_num++;
     }
@@ -39,7 +38,7 @@ char** slice_args(char* msg, ssize_t msg_len, int arg_num) {
             args[j] = malloc(length * sizeof(char));
             strncpy(args[j], msg + start, (size_t) length);
             start = i + 1;
-            printf("Sliced : args[%i] = %s\n", j, args[j]);
+            //sprintf("Sliced : args[%i] = %s\n", j, args[j]);
             j++;
         }
     }
@@ -77,6 +76,25 @@ void exec_order(int order_code, struct daemon* daemon) {//, char** args, int arg
     pclose(pipe);
 }
 
+long double get_cpu_usage() {
+    long double a[4], b[4], loadavg;
+    FILE *fp;
+    char dump[50];
+    fp = fopen("/proc/stat","r");
+    fscanf(fp,"%*s %Lf %Lf %Lf %Lf",&a[0],&a[1],&a[2],&a[3]);
+    fclose(fp);
+    sleep(1);
+
+    fp = fopen("/proc/stat","r");
+    fscanf(fp,"%*s %Lf %Lf %Lf %Lf",&b[0],&b[1],&b[2],&b[3]);
+    fclose(fp);
+
+    loadavg = ((b[0]+b[1]+b[2]) - (a[0]+a[1]+a[2])) / ((b[0]+b[1]+b[2]+b[3]) - (a[0]+a[1]+a[2]+a[3]));
+    printf("Current CPU utilization is : %Lf\n",loadavg);
+
+    return loadavg;
+}
+
 int main(int argc, char *argv[]) {
     /* need to read the doc about this
     jsmn_parser parser;
@@ -96,17 +114,13 @@ int main(int argc, char *argv[]) {
 
     struct sockaddr_in slave_info, master_info;
 
-
     memset((char *) &master_info, 0, sizeof(master_info));
 
     master_info.sin_family = AF_INET;
     master_info.sin_port = htons(PORT);
     master_info.sin_addr.s_addr = inet_addr("127.0.0.2");
 
-
-
     socklen_t master_info_len = sizeof(master_info);
-
 
     int sock;
     CHKERR(sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP));
@@ -143,15 +157,22 @@ int main(int argc, char *argv[]) {
                         close(sock);
                     }
                     else if(strcmp(args[0], "0") == 0) {
+                        printf("Received master configuration\n");
                         slave_info.sin_addr.s_addr = inet_addr(args[1]);
-                        free_args(args, arg_num);
+
+                    }
+                    else if(strcmp(args[0], "1") == 0) {
+                        get_cpu_usage();
+                        printf("Sending cpu usage to master\n");
                     }
                     else {
+                        printf("Order code : %s", args[0]);
                         int order_code = atoi(args[0]);
                         exec_order(order_code-1, &daemon);//, buffer, recv_len+1);
                         printf("order returned :\n%s\nSending to master...", daemon.exec_buff);
                         CHKERR(sendto(sock, daemon.exec_buff, daemon.exec_len, 0, (struct sockaddr *) &master_info, master_info_len));
                     }
+                    free_args(args, arg_num);
                 }
                 else {
                     printf("received empty message\n");
