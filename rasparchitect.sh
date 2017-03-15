@@ -39,7 +39,7 @@ main_action "In-chroot script ISO conjurer"
 second_action "Modifying path ..."
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 FILES=""
-EXEC_NAME=mockdaemon
+EXEC_NAME=daemon
 CHROOT_ONLY=false
 INSTALL_ONLY=false
 PACKAGEMANAGER="apt-get install -qq -o=Dpkg::Use-Pty=0"
@@ -143,9 +143,27 @@ then
             git clone https://github.com/marilafo/raspberry_slave_i2c.git
             cd raspberry_slave_i2c
             simple_action "Building daemon ..."
-            gcc -o daemon i2ccat.c
+            gcc -o $EXEC_NAME i2ccat.c
         else
             second_action "Something went wrong when trying to clone repository ..."
+        fi
+
+        if [ -e $EXEC_NAME ]
+        then
+            simple_action "Copying executable and launching script ..."
+            cp ./$EXEC_NAME /usr/local/bin/$EXEC_NAME
+            chmod a+x ./$EXEC_NAME.sh
+            cp ./$EXEC_NAME.sh /etc/init.d/$EXEC_NAME
+            simple_action "Adding program to init.d services ..."
+            update-rc.d $EXEC_NAME defaults > /home/pi/armmanager.log
+            simple_action "Enabling daemon ..."
+            update-rc.d $EXEC_NAME enable >> /home/pi/armmanager.log
+
+            if [ $? -eq 0 ]
+            then
+                
+        else
+            second_action "Impossible to proceed service creator, executable does not exist."
         fi
 
         #simple_action "Decompressing sources ..."
