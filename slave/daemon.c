@@ -11,51 +11,52 @@
 #include <unistd.h>
 #include <string.h>
 
-#define BUFFER_LEN 1024
-#define PORT 42666
-
-#define CHKERR(X) \
-    if ((X) < 0) \
-    { \
-        perror(#X); \
-        exit(errno); \
-    }
-
-
-enum status {
-    ACTIVE,
-    STOPPED
-};
+#include "daemon.h"
+#include "utils.h"
 
 enum status curr_status = ACTIVE;
 
-char *orders[2] = {"ps", "shutdown"};
+int count_args(char* msg, ssize_t msg_len) {
+    int arg_num = 0;
+    for (int i = 0; i < msg_len; ++i) {
+        printf("%c\n", msg[i]);
+        if (msg[i] == ';')
+            arg_num++;
+    }
 
-char exec_buff[BUFFER_LEN];
-size_t exec_len;
+    return arg_num;
+}
 
-void exec_order(int order_code) {//, char *buffer, ssize_t len) {
-    char* order = orders[order_code];
-    printf("executing order %i : %s\n", order_code, order);
+char** slice_args(char* msg, ssize_t msg_len, int arg_num) {
+    char** args = malloc(sizeof(char*) * arg_num);
 
-    char *args[2];//len+1];
+    int start = 0;
+    int j = 0;
 
-    args[0] = order;
-    //args[len-1] = "> toto.txt";
-    args[1] = NULL;
-    /*int start = 1;
-    int j = 1;
-    //slice arguments
-    for (int i = 1; i < len-1; ++i) {
-        if (buffer[i] == ';') {
+    for (int i = 0; i < msg_len; ++i) {//msg contains first order char, so start at 1
+        if (msg[i] == ';') {
             int length = i - start;
             args[j] = malloc(length * sizeof(char));
-            strncpy(args[j], buffer + start, (size_t) length);
+            strncpy(args[j], msg + start, (size_t) length);
             start = i + 1;
-            printf("args[%i] = %s\n", j, args[j]);
+            printf("Sliced : args[%i] = %s\n", j, args[j]);
             j++;
         }
-    }*/
+    }
+
+    return args;
+}
+
+void free_args(char** args, int arg_num) {
+    for (arg_num; arg_num > 0; arg_num--) {
+        free(args[arg_num-1]);
+    }
+    free(args);
+}
+
+void exec_order(int order_code, struct daemon* daemon) {//, char** args, int arg_num) {
+    char* order = orders[order_code];
+    printf("executing order %i : %s\n", order_code, order);
 
     fflush(stdin);
     fflush(stdout);
@@ -66,7 +67,7 @@ void exec_order(int order_code) {//, char *buffer, ssize_t len) {
     }
 
 
-    exec_len = fread(exec_buff, sizeof(char), sizeof(exec_buff), pipe);
+    daemon->exec_len = fread(daemon->exec_buff, sizeof(char), BUFF_LEN - 1, pipe);
     int err = ferror(pipe);
     if (err != 0) {
         perror("fread");
@@ -91,20 +92,23 @@ int main(int argc, char *argv[]) {
     }
      */
 
+    struct daemon daemon;
+
     struct sockaddr_in slave_info, master_info;
 
-    /*
+
+    memset((char *) &master_info, 0, sizeof(master_info));
+
     master_info.sin_family = AF_INET;
     master_info.sin_port = htons(PORT);
-    master_info.sin_addr.s_addr = inet_addr("127.0.0.1");
-    */
+    master_info.sin_addr.s_addr = inet_addr("127.0.0.2");
+
+
+
+    socklen_t master_info_len = sizeof(master_info);
+
 
     int sock;
-    socklen_t master_info_len = sizeof(master_info);
-    ssize_t recv_len;
-    char buffer[BUFFER_LEN];
-
-
     CHKERR(sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP));
 
     // zero out the structure
@@ -115,27 +119,42 @@ int main(int argc, char *argv[]) {
     slave_info.sin_addr.s_addr = inet_addr(argv[1]);
 
     CHKERR(bind(sock, (struct sockaddr*)&slave_info, sizeof(slave_info) ));
+    printf("Sending configure message to master \n");
+    CHKERR(sendto(sock, "configure", strlen("configure"), 0, (struct sockaddr *) &master_info, master_info_len));
 
+    ssize_t recv_len;
+    char buffer[BUFF_LEN];
     while (curr_status != STOPPED) {
         switch (curr_status) {
             case ACTIVE:
                 printf("waiting for data...\n");
 
-                CHKERR((recv_len = recvfrom(sock, buffer, BUFFER_LEN, 0,
+                CHKERR((recv_len = recvfrom(sock, buffer, BUFF_LEN, 0,
                                             (struct sockaddr *) &master_info, &master_info_len)));
                 buffer[recv_len] = '\0';
 
                 printf("received data : '%s'\n", buffer);
                 if (recv_len > 0) {
-                    if (strcmp(&buffer[0], "9") == 0) {
+                    int arg_num = count_args(buffer, recv_len);
+                    char** args = slice_args(buffer, recv_len, arg_num);
+
+                    if (strcmp(args[0], "9") == 0) {
                         curr_status = STOPPED;
                         close(sock);
-                    } else {
-                        int order_code = atoi(&buffer[0]);
-                        exec_order(order_code);//, buffer, recv_len+1);
-                        printf("order returned :\n%s\nSending to master...", exec_buff);
-                        CHKERR(sendto(sock, exec_buff, exec_len, 0, (struct sockaddr *) &master_info, master_info_len));
                     }
+                    else if(strcmp(args[0], "0") == 0) {
+                        slave_info.sin_addr.s_addr = inet_addr(args[1]);
+                        free_args(args, arg_num);
+                    }
+                    else {
+                        int order_code = atoi(args[0]);
+                        exec_order(order_code-1, &daemon);//, buffer, recv_len+1);
+                        printf("order returned :\n%s\nSending to master...", daemon.exec_buff);
+                        CHKERR(sendto(sock, daemon.exec_buff, daemon.exec_len, 0, (struct sockaddr *) &master_info, master_info_len));
+                    }
+                }
+                else {
+                    printf("received empty message\n");
                 }
                 break;
             default:
