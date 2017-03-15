@@ -1,0 +1,56 @@
+{% extends "layouts/skeleton.html" %}
+{% block body %}
+
+    <div class="jumbotron">
+        <h1>Grape Cluster Configuration Overview</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <nav class="breadcrumb">
+              <span class="breadcrumb-item active">Home</span>
+            </nav>
+        </div>
+        {% for stackI in range(constants.maxStacks) %}
+            <div class="col-md-6 col-lg-4" style="display:none;" id="stack{{ stackI }}">
+                <div class="card" style="margin-bottom:30px;">
+                    <div class="card-block">
+                        <h2 style="float:left;" class="card-title"><a href="#" id="stackId{{ stackI }}">Stack</a></h2>
+                        <div style="float:right;" class="btn" id="stackTemp{{ stackI }}"></div>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        
+                        {% for raspI in range(constants.nSlavesByStack+1) %}
+                            {% set isMaster = (raspI == 0) %}
+                            {% set raspPos = stackI|string + '_' + raspI|string %}
+                            {%if isMaster %}
+                                <li class="list-group-item" style="font-weight:bold;">
+                            {% else %}
+                                <li class="list-group-item">
+                            {% endif %}
+                                <table style="border:0px solid; width:100%;"><tr>
+                                <td>
+                                    {{ 'Master Slot' if isMaster else 'Slot #' + raspI|string }} :
+
+                                    <span id="raspName{{ raspPos }}"></span>
+                                </td>
+                                <td style="text-align:right;">
+                                    <div class="btn btn-sm" id="raspStatus{{ raspPos }}" style="display:none;"></div>
+                                </td>
+                                </tr></table>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+    CONSTANTS = {{ constants|tojson|safe }};
+    </script>
+
+    <script src="/static/javascript/common.js"></script>
+    <script src="/static/javascript/index.js"></script>
+
+{% endblock %}
