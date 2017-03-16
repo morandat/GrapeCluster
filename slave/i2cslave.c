@@ -27,21 +27,25 @@ void action(enum sys_call call, char* option, int size){
 			printf("Echo\n");
 			sprintf(cmd, "echo toto");
 			system(cmd);
+			printf("\n");
 			break;
 		case LS:
 			printf("ls\n");
 			sprintf(cmd, "ls");
 			system(cmd);
+			printf("\n");
 			break;
 		case PS:
 			printf("ps\n");
 			sprintf(cmd, "ps");
 			system(cmd);
+			printf("\n");
 			break;
 		case SHUTDOWN:
 			printf("shutdown");
 			sprintf(cmd, "shutdown -h now");
 			system(cmd);
+			printf("\n");
 			break;
 	}
 }
