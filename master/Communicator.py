@@ -1,5 +1,40 @@
 from Stack import Stack
 
+"""
+Actions nécessaires pour l'instant : (temp)
+
+Les actions possibles sur une stack sont, avec les routes correspondantes :
+— Obtenir sa consommation d’électricité en volts :GET stack/power/<id>
+— Obtenir sa température en degrés Celsius : GET stack/temp/<id>
+— Allumer ou éteindre toutes les Raspberries de la stack : POST stack/shutdown/<id>
+— Obtenir les actions disponibles : OPTIONS stack
+
+Les actions possibles sur un slave sont :
+— connaitre le slave à qui l’on parle : GET slave/index
+— obtenir son identité (quintuplet de configuration + adresse IP) :GET slave/config/<id>
+— obtenir son taux d’utilisation CPU :GET slave/cpu/<id>
+— allumer, éteindre ou redémarrer le slave: respectivementPOST slave/start, stop, restart/<id>
+— obtenir les actions disponibles :OPTIONS slave
+
+"""
+
+func_stack = {
+  'get_power': Communicator.ask_stack_power,
+  'get_temp': Communicator.ask_stack_temp,
+  'shutdown': Communicator.send_stack_shutdown,
+  'options': Communicator.ask_stack_options,
+}
+
+func_slave = {
+  'get_slave': Communicator.ask_slave_slaves,
+  'get_config': Communicator. ask_slave_config,
+  'get_usage': Communicator.ask_slave_cpu,
+  'start': Communicator.ask_slave_start,
+  'stop': Communicator.ask_slave_stop,
+  'restart': Communicator.ask_slave_restart,
+  'options': Communicator.ask_slave_options,
+}
+          
 class Communicator():  # Interface Communicator to abstract communication (UDP or I2C)
 
 # Actions générales
@@ -16,6 +51,7 @@ class Communicator():  # Interface Communicator to abstract communication (UDP o
 
     def close_communication(self):
         raise NotImplementedError("Not implemented in interface")
+        
 # Actions/Demandes sur les stacks
 
     # Obtenir la consommation d'éléctricité (en volts)
