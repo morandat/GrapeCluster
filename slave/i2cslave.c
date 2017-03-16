@@ -20,9 +20,9 @@ enum sys_call {
 
 struct commande{
 	enum sys_call call;
-	char *option[];
-	int size;
-}
+	char **option;
+	int nb_element;
+};
 
 void action(struct commande com){
 	
@@ -63,14 +63,15 @@ int main(int argc, char **argv)
 	uint8_t data;
 	int length;
 	int i;
-
 	
+		
 
 	int opt;
 	int mode = 0;
 
-	int nb_opt = 0; 
-	struct commande;
+	int nb_opt = -1; 
+	int is_commande = 0;
+	struct commande com;	
 
 	FILE *usage_file = stderr;
 	const char *input = DEFAULT_DEVICE;
@@ -111,15 +112,57 @@ int main(int argc, char **argv)
 				switch (mode) {
 				case 1:
 					printf("1: Data received : %c\n", tx_buffer[i]);
-					action(tx_buffer[i], NULL, 0);
+					if(nb_opt = -1){
+						printf("Nb option\n");
+						nb_opt = tx_buffer[i];
+						com.nb_element = nb_opt - 1;
+						com.option = malloc(sizeof(char *) * com.nb_element);
+						is_commande = 1;											
+					}
+					else if (is_commande == 1){		
+						printf("Commande\n");
+						com.call = tx_buffer[i];
+						nb_opt --;
+						is_commande = 0;
+						if (nb_opt == 0)
+							action(com);							
+					}				
 					break;
 				case 2:
 					printf("2 :Data received : %02x\n ", tx_buffer[i]);
-					action(tx_buffer[i], NULL, 0);
+					if(nb_opt = -1){
+						printf("Nn option\n");
+                                                nb_opt = tx_buffer[i];
+                                                com.nb_element = nb_opt;
+                                                com.option = malloc(sizeof(char *) * com.nb_element);
+                                                is_commande = 1;                  
+                                        }
+                                        else if (is_commande == 1){             
+                                        	printf("Commande\n"); 
+					       	com.call = tx_buffer[i];
+                                                nb_opt --;
+                                                is_commande = 0;
+						if(nb_opt == 0)
+							action(com);
+                                        }
 					break;
 				default:
 					printf("3 :Data received : %d \n", tx_buffer[i]);
-					action(tx_buffer[i], NULL, 0);
+					if(nb_opt = -1){
+                                         	printf("Nb option\n");
+						nb_opt = tx_buffer[i];
+                                                com.nb_element = nb_opt;
+                                                com.option = malloc(sizeof(char *) * com.nb_element);
+                                                is_commande = 1;                  
+                                        }
+                                        else if (is_commande == 1){             
+                                                printf("Commande\n");
+						com.call = tx_buffer[i];
+                                                nb_opt --;
+                                                is_commande = 0;
+                                        	if(nb_opt == 0)
+							action(com);
+					}
 					break;
 				}
 			}
