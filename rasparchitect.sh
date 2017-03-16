@@ -124,7 +124,7 @@ then
     check_and_install_package make make build-essential
     check_and_install_package git git git
     check_and_install_package bc bc bc
-    check_and_install libncurses-dev
+    check_and_install libncurses5-dev
     check_and_install sysstat
     check_and_install python
     check_and_install python-pip
@@ -137,6 +137,7 @@ then
         simple_action "Cloning from https://github.com/raspberrypi/linux ..."
         #git clone --depth=1 https://github.com/raspberrypi/linux        
         
+        #Really ?
         #if [ -e "./linux" ]
         #then
         #    cd linux
