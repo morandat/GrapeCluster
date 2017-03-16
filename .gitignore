@@ -2,3 +2,4 @@
 .wpath
 .idea
 cmake-build-debug
+*.out
