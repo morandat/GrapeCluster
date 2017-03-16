@@ -1,9 +1,22 @@
 from PiDevice import PiDevice
+from queue import Queue, Full
+
+# instruction = {0: Slave.stop,
+#                1: Slave.echo,
+#                2: Slave.ls,
+#                3: Slave.ps,
+#                4: Slave.shutdown,
+#                5: Slave.read,
+#                6: Slave.error
+#                }
 
 class Slave(PiDevice):
     CLASS_ADDRESS = 0x42  # 42 for slaves
-    def __init__(self, stack_nb, mac_add, ip_address, i2c_add, pos):
+    def __init__(self, stack_nb, mac_add, ip_address, i2c_add, pos, instruction, param=None):
         super(Slave, self).__init__(stack_nb, mac_add, ip_address, i2c_add, pos)
+        self.__instr=instruction
+        self.__param=param
+        self.__data = Queue(256)
         self.init(self)
 
     def verif_key(self, key):
@@ -15,69 +28,91 @@ class Slave(PiDevice):
             return -1
 
     def init(self):
-        self.__instr = 0
         # Régler la clé en fonction du slave a qui l'on parle
         self.__key = 0x01  # valeur par défaut
-        if self.verif_key(self.__key) == -1:
-            print("Wrong key")
+
         if self.verif_key(self.__key) == -1:
             print("La clé n'est pas bonne")
             return
         elif self.verif_key(self.__key) == -2 :
             print("Problème initialisation du slave")
             return
-        tmp=instruction[self.__instr]()
-        if (tmp == -1):
-            print("Problème instruction")
+        self.send_instruction()
+        #if (tmp == -1):
+        #    print("Problème instruction")
+        #    return
+        #print("C'est fini")
+
+    #write a byte and wait for ack
+    def write_ack(self, to_write):
+        self.write_byte(self.__key, to_write)
+        if self.read_byte(self.__key) == 1:
+            self.getLastError()
+
+    # write a byte and wait for ack
+    def read_ack(self):
+        try:
+            self.__data.put_nowait(self.read_byte(self.__key))
+        except Full:
+            self.write_byte(self.__key, 1)
             return
+        self.write_byte(self.__key, 0)
 
-       # length = self.read_byte(0x00)
-        #instruction[self.__instr](length)
+    #send an instruction and its arguments bytes by bytes
+    def send_instruction(self):
+        #send integer corresponding to a command
+        self.write_ack(self.__instr)
 
-        print("C'est fini")
+        #send a boolean corresponding to the existence of arguments
+        if self.__param is not None :
+            self.write_ack(1)
+            for i in range (0, len(self.__param)):
+                self.write_ack(self.__param[i])
+        else:
+            self.write_ack(0)
 
+        self.receiveData()
+        self.stop()
 
-   #  def send_instruction(self,instr):
-   #     instruction[self.]
-   #     self.write_byte(0x00, instr)
-
-
-    def echo(self):
-        print("is an echo")
-        self.write_byte(0x00, 0) #numéro de l'instruction
-        if self.read_byte(0x00) == 1:
-            self.getLastError()
-        self.write_byte(0x00, 1) #booléen indiquant si des paramètres arrivent
-        if self.read_byte(0x00) == 1:
-            self.getLastError()
-        self.write_byte(0x00, 1)  #nombre de paquets arrivant avec les paramètres
-        if self.read_byte(0x00) == 1:
-            self.getLastError()
-        self.write_byte(0x00, "Hello")  #paramètre
-        if self.read_byte(0x00) == 1:
-            self.getLastError()
-
-        self.receiveData();
-
-    def receiveData(self):
-        print("receive from  slave")
-    def ls(self):
-        print("is an ls")
-    def ps(self):
-        print("is an ls")
-    def shutdown(self):
-        print("is an ls")
     def stop(self):
         print("stop communication")
+
+
     def getLastError(self):
-        self.write_byte(0x00, 6)
+        self.write_byte(self.__key, 6)
+        self.read_byte(self.__key)
+
+    def receiveData(self):
+        size_to_receive = self.read_ack()
+        for i in range (0, size_to_receive):
+            self.read_ack()
 
 
-instruction = {0: Slave.stop,
-               1: Slave.echo,
-               2: Slave.ls,
-               3: Slave.ps,
-               4: Slave.shutdown,
-               5: Slave.read,
-               6: Slave.error
-               }
+
+    # def echo(self):
+    #     print("is an echo")
+    #     self.write_byte(0x00, 0) #numéro de l'instruction
+    #     if self.read_byte(0x00) == 1:
+    #         self.getLastError()
+    #     self.write_byte(0x00, 1) #booléen indiquant si des paramètres arrivent
+    #     if self.read_byte(0x00) == 1:
+    #         self.getLastError()
+    #     self.write_byte(0x00, 1)  #nombre de paquets arrivant avec les paramètres
+    #     if self.read_byte(0x00) == 1:
+    #         self.getLastError()
+    #     self.write_byte(0x00, "Hello")  #paramètre
+    #     if self.read_byte(0x00) == 1:
+    #         self.getLastError()
+    #
+    #     self.receiveData();
+
+
+    #def ls(self):
+    #    print("is an ls")
+    #def ps(self):
+    #   print("is an ls")
+    #def shutdown(self):
+    #    print("is an ls")
+
+
+
