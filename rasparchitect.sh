@@ -28,8 +28,19 @@ check_and_install_package(){
     echo -ne "Checking \e[1m$1\e[0m is installed ..."
     if ! command_exists $2;
     then
-        echo " Not installed ! Installing ..."
+        echo -ne " Not installed ! Installing ..."
         `$PACKAGEMANAGER $3`
+    fi
+    echo ""
+}
+
+check_and_install(){
+    echo -ne "Checking package \e[1m$1\e[0m is installed ..."
+    dpkg -s $1 &> /dev/null
+    if [ $? == 1 ]
+    then
+        echo -ne " Not installed ! Installing ..."
+        `$PACKAGEMANAGER $1`
     fi
     echo ""
 }
@@ -45,10 +56,12 @@ INSTALL_ONLY=false
 PACKAGEMANAGER="apt-get install -qq -o=Dpkg::Use-Pty=0"
 UPGRADE_CLEAN=false
 NO_UPDATE=false
+DAEMON=true
 
 second_action "Updating locale ..."
-export LANGUAGE="en"
-export LANG=en_US.utf8
+export LANGUAGE=en_GB.utf8
+export LANG=en_GB.utf8
+export LC_ALL=en_GB.utf8
 
 simple_action "Moving to /tmp/armmanager"
 cd /tmp/armmanager
@@ -70,6 +83,9 @@ do
         ;;
         -y|--yum)
             PACKAGEMANAGER="yum install"
+        ;;
+        -d|--no-daemon)
+            DAEMON=false
         ;;
         -f=*|--files=*)
 			FILES="${i#*=}"
@@ -108,45 +124,51 @@ then
     check_and_install_package make make build-essential
     check_and_install_package git git git
     check_and_install_package bc bc bc
+    check_and_install libncurses-dev
+    check_and_install sysstat
+    check_and_install python
+    check_and_install python-pip
+    check_and_install python-dev
 
 
-    #if [ -e "$FILES" ]
-    #then
+    if [ $DAEMON == true ]
+    then
         second_action "Installing daemon"
         simple_action "Cloning from https://github.com/raspberrypi/linux ..."
-        git clone --depth=1 https://github.com/raspberrypi/linux        
+        #git clone --depth=1 https://github.com/raspberrypi/linux        
         
-        if [ -e "./linux" ]
-        then
-            cd linux
-            KERNEL=kernel7
-            simple_action "Making bcm2709_defconfig ..."
-            make bcm2709_defconfig
+        #if [ -e "./linux" ]
+        #then
+        #    cd linux
+        #    KERNEL=kernel7
+        #    simple_action "Making bcm2709_defconfig ..."
+        #    make bcm2709_defconfig
+        #
+        #    simple_action "Making zImage modules and dtbs ..."
+        #    make -j4 zImage modules dtbs
+        #    simple_action "Making modules_install ..."
+        #    sudo make modules_install
+        #    simple_action "Copying new files to /boot ..."
+        #    sudo cp arch/arm/boot/dts/*.dtb /boot/
+        #    sudo cp arch/arm/boot/dts/overlays/*.dtb* /boot/overlays/
+        ##    sudo cp arch/arm/boot/dts/overlays/README /boot/overlays/
+        ##    sudo scripts/mkknlimg arch/arm/boot/zImage /boot/$KERNEL.img
+        #
+        #    simple_action "Device tree compiler ..."
+        #    dtc -@ -I dts -O dtb i2cslave-bcm2708-overlay.dts -o i2cslave-bcm2708.dtbo
+        #    simple_action "Copying to overlays ..."
+        #    sudo cp i2cslave-bcm2708.dtbo /boot/overlays/
+        #
+        #   cd ../
+        #else
+        #    second_action "Something went wrong when trying to clone repository ..."
+        #fi
 
-            simple_action "Making zImage modules and dtbs ..."
-            make -j4 zImage modules dtbs
-            simple_action "Making modules_install ..."
-            sudo make modules_install
-            simple_action "Copying new files to /boot ..."
-            sudo cp arch/arm/boot/dts/*.dtb /boot/
-            sudo cp arch/arm/boot/dts/overlays/*.dtb* /boot/overlays/
-            sudo cp arch/arm/boot/dts/overlays/README /boot/overlays/
-            sudo scripts/mkknlimg arch/arm/boot/zImage /boot/$KERNEL.img
-
-            simple_action "Device tree compiler ..."
-            dtc -@ -I dts -O dtb i2cslave-bcm2708-overlay.dts -o i2cslave-bcm2708.dtbo
-            simple_action "Copying to overlays ..."
-            sudo cp i2cslave-bcm2708.dtbo /boot/overlays/
-
-            cd ../
-            simple_action "Cloning raspberry_slave_i2c"
-            git clone https://github.com/marilafo/raspberry_slave_i2c.git
-            cd raspberry_slave_i2c
-            simple_action "Building daemon ..."
-            gcc -o $EXEC_NAME i2ccat.c
-        else
-            second_action "Something went wrong when trying to clone repository ..."
-        fi
+        simple_action "Cloning raspberry_slave_i2c"
+        git clone https://github.com/marilafo/raspberry_slave_i2c.git
+        cd raspberry_slave_i2c
+        simple_action "Building daemon ..."
+        gcc -o $EXEC_NAME i2ccat.c -lncurses
 
         if [ -e $EXEC_NAME ]
         then
@@ -158,14 +180,11 @@ then
             update-rc.d $EXEC_NAME defaults > /home/pi/armmanager.log
             simple_action "Enabling daemon ..."
             update-rc.d $EXEC_NAME enable >> /home/pi/armmanager.log
-
-            if [ $? -eq 0 ]
-            then
                 
         else
             second_action "Impossible to proceed service creator, executable does not exist."
         fi
-
+    fi
         #simple_action "Decompressing sources ..."
         #ffiles=`basename $FILES`
         #decomp_files=${ffiles%.*}

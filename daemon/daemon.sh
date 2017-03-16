@@ -10,22 +10,22 @@
 # Description:       Start/stop an example script
 ### END INIT INFO
 
-DESC="Mock Daemon script"
-NAME=mockdaemon
-DAEMON=/usr/local/bin/mockdaemon
+DESC="Daemon script"
+NAME=daemon
+DAEMON=/usr/local/bin/daemon
 
 do_start()
 {
-   initlog -c "echo [ Info ] Starting mockdaemon ..."
+   initlog -c "echo [ Info ] Starting daemon ..."
    $DAEMON &
-   initlog -c "echo [ Info ] Mock daemon started !"
+   initlog -c "echo [ Info ] daemon started !"
 }
 
 do_stop()
 {
-   initlog -c "echo [ Info ] Stopping mockdaemon"
+   initlog -c "echo [ Info ] Stopping daemon"
    pkill $DAEMON
-   initlog -c "echo [ Info ] Mock daemon stopped !"
+   initlog -c "echo [ Info ] daemon stopped !"
 }
 
 

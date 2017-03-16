@@ -41,7 +41,7 @@ WORKING_PATH=""
 MOUNT_ONLY=false
 CHROOT=false
 CHROOTOPTIONS=""
-POSSIBLEOPTIONS=("chroot-only" "install-only" "upgrade-clean" "no-update")
+POSSIBLEOPTIONS=("chroot-only" "install-only" "upgrade-clean" "no-update" "no-daemon")
 FINALOPTIONS=""
 RESIZE_VALUE=-1
 
@@ -167,7 +167,6 @@ copy_qemu(){
 	if [ -e "/usr/bin/qemu-arm-static" ]
 	then
 		second_action "Adding qemu-arm-static to /usr/bin of the image ..."
-		cd $WORKING_PATH
 		rootasked "cp (in mounted filesystem)"
 		sudo cp --remove-destination /usr/bin/qemu-arm-static $WORKING_PATH/usr/bin/
 	else
@@ -230,14 +229,14 @@ chroot_image(){
 						simple_action "Preparing files for chroot ..."
 						mkdir -p $WORKING_PATH/tmp/armmanager
 						sudo cp --remove-destination rasparchitect.sh $WORKING_PATH/tmp/armmanager
-						#Providing daemon
-						sudo cp --remove-destination daemon.tgz $WORKING_PATH/tmp/armmanager
-						if [ $? -ne 0 ]
-						then
-							second_action "Couldn't copy script for manipulation inside the image."
-							simple_action "Please retry or copy it manually"
-							exit 1
-						fi
+						#Providing daemon (not anymore needed -> we get it from git)
+						#sudo cp --remove-destination daemon.tgz $WORKING_PATH/tmp/armmanager
+						#if [ $? -ne 0 ]
+						#then
+						#	second_action "Couldn't copy script for manipulation inside the image."
+						#	simple_action "Please retry or copy it manually"
+						#	exit 1
+						#fi
 					#fi
 					simple_action "Going to chroot into mounted raspberry pi filesystem ..."
 					second_action "Careful ! For now only works for Raspbian"
