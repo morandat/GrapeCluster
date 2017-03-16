@@ -11,6 +11,41 @@
 
 #define DEFAULT_DEVICE "/dev/i2c_slave"
 
+enum sys_call {
+	ECHO, 
+	LS,
+	PS,
+	SHUTDOWN
+};
+
+void action(enum sys_call call, char* option, int size){
+	
+	char cmd[64];
+
+	switch(call){
+		case ECHO:
+			printf("Echo\n");
+			sprintf(cmd, "echo toto");
+			system(cmd);
+			break;
+		case LS:
+			printf("ls\n");
+			sprintf(cmd, "ls");
+			system(cmd);
+			break;
+		case PS:
+			printf("ps\n");
+			sprintf(cmd, "ps");
+			system(cmd);
+			break;
+		case SHUTDOWN:
+			printf("shutdown");
+			sprintf(cmd, "shutdown -h now");
+			system(cmd);
+			break;
+	}
+}
+
 int main(int argc, char **argv)
 {
 	char tx_buffer[TX_BUF_SIZE];
@@ -60,12 +95,15 @@ int main(int argc, char **argv)
 				switch (mode) {
 				case 1:
 					printf("Data received : %c\n", tx_buffer[i]);
+					action(tx_buffer[i], NULL, 0);
 					break;
 				case 2:
 					printf("Data received : %02x\n ", tx_buffer[i]);
+					action(tx_buffer[i], NULL, 0);
 					break;
 				default:
 					printf("Data received : %d \n", tx_buffer[i]);
+					action(tx_buffer[i], NULL, 0);
 					break;
 				}
 			}
