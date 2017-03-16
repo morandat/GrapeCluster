@@ -18,11 +18,17 @@ enum sys_call {
 	SHUTDOWN
 };
 
-void action(enum sys_call call, char* option, int size){
+struct commande{
+	enum sys_call call;
+	char *option[];
+	int size;
+}
+
+void action(struct commande com){
 	
 	char cmd[64];
 
-	switch(call){
+	switch(com.call){
 		case ECHO:
 			printf("Echo\n");
 			sprintf(cmd, "echo toto");
@@ -58,8 +64,14 @@ int main(int argc, char **argv)
 	int length;
 	int i;
 
+	
+
 	int opt;
 	int mode = 0;
+
+	int nb_opt = 0; 
+	struct commande;
+
 	FILE *usage_file = stderr;
 	const char *input = DEFAULT_DEVICE;
 
@@ -98,15 +110,15 @@ int main(int argc, char **argv)
 			{
 				switch (mode) {
 				case 1:
-					printf("Data received : %c\n", tx_buffer[i]);
+					printf("1: Data received : %c\n", tx_buffer[i]);
 					action(tx_buffer[i], NULL, 0);
 					break;
 				case 2:
-					printf("Data received : %02x\n ", tx_buffer[i]);
+					printf("2 :Data received : %02x\n ", tx_buffer[i]);
 					action(tx_buffer[i], NULL, 0);
 					break;
 				default:
-					printf("Data received : %d \n", tx_buffer[i]);
+					printf("3 :Data received : %d \n", tx_buffer[i]);
 					action(tx_buffer[i], NULL, 0);
 					break;
 				}
