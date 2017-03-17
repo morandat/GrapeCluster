@@ -7,107 +7,69 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#define TX_BUF_SIZE   4000
+#define TX_BUF_SIZE   4
 
 #define DEFAULT_DEVICE "/dev/i2c_slave"
 
 enum sys_call {
-	ECHO, 
-	LS,
-	PS,
-	SHUTDOWN
+	TEST,
+	CPU, 
+	SHUTDOWN,
+	RESTART,
+	GET_IP, 
+	GET_I2C, 
+	IS_NETWORK
 };
 
-struct commande{
-	enum sys_call call;
-	char **option;
-	int nb_element;
-};
-
-void action(struct commande *com){
-	
+int test_communication(){
 	char cmd[64];
-	int i = 0; 
-
-	switch(com->call){
-		case ECHO:
-			printf("Echo\n");
-			sprintf(cmd, "echo");
-			for (i =  0 ; i < com->nb_element ; i++){
-				sprintf(cmd, "%s %s", cmd, com->option[i]);
-			}
-			system(cmd);
-			printf("\n");
-			break;
-		case LS:
-			printf("ls\n");
-			sprintf(cmd, "ls");
-			for (i =  0 ; i < com->nb_element ; i++){
-				sprintf(cmd, "%s %s", cmd, com->option[i]);
-			}
-			system(cmd);
-			printf("\n");
-			break;
-		case PS:
-			printf("ps\n");
-			sprintf(cmd, "ps");
-			for (i =  0 ; i < com->nb_element ; i++){
-				sprintf(cmd, "%s %s", cmd, com->option[i]);
-			}
-			system(cmd);
-			printf("\n");
-			break;
-		case SHUTDOWN:
-			printf("shutdown");
-			sprintf(cmd, "shutdown -h now");
-			system(cmd);
-			printf("\n");
-			break;
-	}
+	sprintf(cmd, "echo toto");
+	system(cmd);
 }
 
-//15 2 -la -lb 
-//Attendre de voir comment sont traité les chaines
-void decode_data(struct commande *com, int *is_com, int *nb_opt, char *c){
-	/**nb_opt = c[0];
-	com->nb_element = nb_opt -1;
-	com->option = malloc(sizeof(char *) * com->nb_element);
+int shutdown_slave(){
+	char cmd[64];
+	//printf("shutdown");
+	sprintf(cmd, "shutdown -h now");
+	system(cmd);
+	//printf("\n");
+}
 
-	com->call = c[1];
-	*nb_opt --; 
+int restart_slave(){
+	char cmd[64];
+	sprintf(cmd, "shutdown -r");
+	system(cmd);
+}
+
+
+void action(enum sys_call call){
 	
-	if(*nb_opt == 0)
-		action(com);
+	
+	int i = 0; 
 
-	else{
-
-	}*/
-
-	if(*nb_opt = -1){
-		printf("Nb option\n");
-		*nb_opt = c[0];
-		com->nb_element = *nb_opt - 1;
-		com->option = malloc(sizeof(char *) * com->nb_element);
-		*is_com = 1;											
+	switch(call){
+		case TEST:
+			test_communication();
+			break;
+		case CPU:
+			//get_cpu();
+			break;
+		case SHUTDOWN:
+			shutdown_slave();
+			break;
+		case RESTART:
+			restart_slave();
+			break;
+		case GET_IP:
+			//get_ip();
+			break;
+		case GET_I2C:
+			//get_i2c();
+			break;
+		case IS_NETWORK:
+			//is_network();
+			break;
 	}
-	else if (*is_com == 1){		
-		printf("Commande\n");
-		com->call = c[0];
-		*nb_opt -= 1;
-		*is_com = 0;
-		if (*nb_opt == 0){
-			action(com);
-			*nb_opt = -1;
-		}							
-	}
-	else{
-		printf("Option :\n");
-		com->option[*nb_opt] = c;
-		if (*nb_opt == 0){
-			action(com);
-			*nb_opt = -1;
-		}
-	}			
 }
 
 int main(int argc, char **argv)
@@ -121,11 +83,9 @@ int main(int argc, char **argv)
 		
 
 	int opt;
-	int mode = 0;
-
-	int is_commande = 0; 
-	int nb_opt = -1; 
-	struct commande *com = malloc(sizeof(struct commande));	
+	int mode = 0; 
+	
+	enum sys_call commande;
 
 	FILE *usage_file = stderr;
 	const char *input = DEFAULT_DEVICE;
@@ -160,7 +120,7 @@ int main(int argc, char **argv)
 	}
 
 	while (1) {	
-			length = read(fd, tx_buffer, TX_BUF_SIZE);
+			length = read(fd, tx_buffer, 4);
 			for(i = 0; i < length; i++)
 			{
 				switch (mode) {
@@ -175,9 +135,11 @@ int main(int argc, char **argv)
 					break;
 				}
 			}
-			//decode_data(com, &is_commande, &nb_opt, tx_buffer);					
-
-			write(fd, tx_buffer, length);
+			tx_buffer[0] = 0; 
+			tx_buffer[1] = 1;
+			tx_buffer[2] = 2; 
+			tx_buffer[3] = 4;
+			write(fd, tx_buffer, 4);
 	}
 
 	close(fd);
