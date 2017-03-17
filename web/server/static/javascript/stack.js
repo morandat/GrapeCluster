@@ -28,7 +28,7 @@ addAjaxHandler("/stack/"+STACKID, function(stack) {
 		}
 	}
 
-	for(var i=0; i<CONSTANTS.nSlavesByStack+1; ++i)
+	for(var i=0; i < CONSTANTS.nSlavesByStack+1; ++i)
 		raspAction(i, stack.rasps[i]);
 	
 }, true);

@@ -143,14 +143,15 @@ def viewTemperature(id):
         return render_template('temperature.html', constants=constants, stackId=id)
     else:
         return routeDefault()
-
+"""
+#Post function have a view ? 
 @app.route('/view/stack/shutdown/<int::id>')
 def viewShutdown(id):
     if getStack(id) is not None:
         return render_template('shutdown.html', constants=constants, stackId=id)
     else:
         return routeDefault()
-        
+"""     
 #ROUTE RASP
        
 @app.route('/view/rasp/config/<int:id>')
@@ -166,6 +167,8 @@ def viewCPU(id):
         return render_template('cpu.html', constants=constants, raspId=id)
     else:
         return routeDefault() 
+"""
+#Post function have a view ? 
 
 @app.route('/view/rasp/start/<int:id>')
 def viewStart(id):
@@ -187,6 +190,7 @@ def viewRestart(id):
         return render_template('restart.html', constants=constants, raspId=id)
     else:
         return routeDefault() 
+"""
         
 #######################################################################################
 #                                                                                     #
