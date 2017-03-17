@@ -44,7 +44,8 @@ raspsTest = {
         #'heat' : '70',
         'os' : 'Pidora',
         'status' : 1,
-        'ip' : "192.168.0.1"
+        'ip' : "192.168.0.1",
+        'cpu' : 42
     },
     2 : {
         'name' : 'Straw',
@@ -53,7 +54,8 @@ raspsTest = {
         #'heat' : '65',
         'os' : 'Raspbian',
         'status' : 0,
-        'ip' : "192.168.0.2"
+        'ip' : "192.168.0.2",
+        "cpu" : 32
     },
     42 : {
         'name' : 'Blue',
@@ -62,7 +64,8 @@ raspsTest = {
         #'heat' : '65',
         'os' : 'Raspbian',
         'status' : 1,
-        'ip' : "192.168.0.42"
+        'ip' : "192.168.0.42",
+        'cpu' : 74
     }
 }
 
@@ -130,14 +133,14 @@ def viewRasp(id):
 
 #ROUTE STACK
 
-@app.route('/view/stack/power/<int::id>')
+@app.route('/view/stack/power/<int:id>')
 def viewPower(id):
     if getStack(id) is not None:
         return render_template('power.html', constants=constants, stackId=id)
     else:
         return routeDefault()
 	
-@app.route('/view/stack/temp/<int::id>')
+@app.route('/view/stack/temp/<int:id>')
 def viewTemperature(id):
     if getStack(id) is not None:
         return render_template('temperature.html', constants=constants, stackId=id)
@@ -145,7 +148,7 @@ def viewTemperature(id):
         return routeDefault()
 """
 #Post function have a view ? 
-@app.route('/view/stack/shutdown/<int::id>')
+@app.route('/view/stack/shutdown/<int:id>')
 def viewShutdown(id):
     if getStack(id) is not None:
         return render_template('shutdown.html', constants=constants, stackId=id)
@@ -163,8 +166,9 @@ def viewConfig(id):
         
 @app.route('/view/rasp/cpu/<int:id>')
 def viewCPU(id):
-    if getRasp(id) is not None:
-        return render_template('cpu.html', constants=constants, raspId=id)
+    rasp = getRasp(id)
+    if rasp is not None:
+        return render_template('cpu.html', raspId=id, rasp=rasp, constants=constants)
     else:
         return routeDefault() 
 """
@@ -254,7 +258,7 @@ def test():
 #ROUTE STACK
 
 @app.route("/stack/power", defaults={'id':None}, methods=['GET'])
-@app.route('/stack/power/<int::id>')
+@app.route('/stack/power/<int:id>')
 def routePower(id):
     def nestRaspsInStack(stack):
         for rasp in stack['rasps']:
@@ -276,7 +280,7 @@ def routePower(id):
         mimetype='application/json')
 	
 @app.route("/stack/temp", defaults={'id':None}, methods=['GET'])
-@app.route('/stack/temp/<int::id>')
+@app.route('/stack/temp/<int:id>')
 def routeTemperature(id):
     def nestRaspsInStack(stack):
         for rasp in stack['rasps']:
@@ -298,7 +302,7 @@ def routeTemperature(id):
         mimetype='application/json')
 
 @app.route("/stack/shutdown", defaults={'id':None}, methods=['POST'])
-@app.route('/stack/shutdown/<int::id>')
+@app.route('/stack/shutdown/<int:id>')
 def routeShutdown(id):
     def nestRaspsInStack(stack):
         for rasp in stack['rasps']:

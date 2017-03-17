@@ -15,9 +15,8 @@ class PiDevice(I2CDevice):
         self.__last_cpu_usage = "-1"
         self.__last_ram_usage = "-1"
 
-
-    def get_identity(self):
-        return json.dump(self)
+    def get_config(self):
+        return (self._mac, self._ip_address, self._i2c_add, self._pos)
 
     def get_ip_address(self):
         return self._ip_address
