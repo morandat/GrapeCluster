@@ -24,26 +24,36 @@ struct commande{
 	int nb_element;
 };
 
-void action(struct commande com){
+void action(struct commande *com){
 	
 	char cmd[64];
+	int i = 0; 
 
-	switch(com.call){
+	switch(com->call){
 		case ECHO:
 			printf("Echo\n");
-			sprintf(cmd, "echo toto");
+			sprintf(cmd, "echo");
+			for (i =  0 ; i < com->nb_element ; i++){
+				sprintf(cmd, "%s %s", cmd, com->option[i]);
+			}
 			system(cmd);
 			printf("\n");
 			break;
 		case LS:
 			printf("ls\n");
 			sprintf(cmd, "ls");
+			for (i =  0 ; i < com->nb_element ; i++){
+				sprintf(cmd, "%s %s", cmd, com->option[i]);
+			}
 			system(cmd);
 			printf("\n");
 			break;
 		case PS:
 			printf("ps\n");
 			sprintf(cmd, "ps");
+			for (i =  0 ; i < com->nb_element ; i++){
+				sprintf(cmd, "%s %s", cmd, com->option[i]);
+			}
 			system(cmd);
 			printf("\n");
 			break;
@@ -54,6 +64,50 @@ void action(struct commande com){
 			printf("\n");
 			break;
 	}
+}
+
+//15 2 -la -lb 
+//Attendre de voir comment sont traité les chaines
+void decode_data(struct commande *com, int *is_com, int *nb_opt, char *c){
+	/**nb_opt = c[0];
+	com->nb_element = nb_opt -1;
+	com->option = malloc(sizeof(char *) * com->nb_element);
+
+	com->call = c[1];
+	*nb_opt --; 
+	
+	if(*nb_opt == 0)
+		action(com);
+
+	else{
+
+	}*/
+
+	if(*nb_opt = -1){
+		printf("Nb option\n");
+		*nb_opt = c[0];
+		com->nb_element = *nb_opt - 1;
+		com->option = malloc(sizeof(char *) * com->nb_element);
+		*is_com = 1;											
+	}
+	else if (*is_com == 1){		
+		printf("Commande\n");
+		com->call = c[0];
+		*nb_opt -= 1;
+		*is_com = 0;
+		if (*nb_opt == 0){
+			action(com);
+			*nb_opt = -1;
+		}							
+	}
+	else{
+		printf("Option :\n");
+		com->option[*nb_opt] = c;
+		if (*nb_opt == 0){
+			action(com);
+			*nb_opt = -1;
+		}
+	}			
 }
 
 int main(int argc, char **argv)
@@ -69,9 +123,9 @@ int main(int argc, char **argv)
 	int opt;
 	int mode = 0;
 
+	int is_commande = 0; 
 	int nb_opt = -1; 
-	int is_commande = 0;
-	struct commande com;	
+	struct commande *com = malloc(sizeof(struct commande));	
 
 	FILE *usage_file = stderr;
 	const char *input = DEFAULT_DEVICE;
@@ -112,60 +166,17 @@ int main(int argc, char **argv)
 				switch (mode) {
 				case 1:
 					printf("1: Data received : %c\n", tx_buffer[i]);
-					if(nb_opt = -1){
-						printf("Nb option\n");
-						nb_opt = tx_buffer[i];
-						com.nb_element = nb_opt - 1;
-						com.option = malloc(sizeof(char *) * com.nb_element);
-						is_commande = 1;											
-					}
-					else if (is_commande == 1){		
-						printf("Commande\n");
-						com.call = tx_buffer[i];
-						nb_opt --;
-						is_commande = 0;
-						if (nb_opt == 0)
-							action(com);							
-					}				
 					break;
 				case 2:
 					printf("2 :Data received : %02x\n ", tx_buffer[i]);
-					if(nb_opt = -1){
-						printf("Nn option\n");
-                                                nb_opt = tx_buffer[i];
-                                                com.nb_element = nb_opt;
-                                                com.option = malloc(sizeof(char *) * com.nb_element);
-                                                is_commande = 1;                  
-                                        }
-                                        else if (is_commande == 1){             
-                                        	printf("Commande\n"); 
-					       	com.call = tx_buffer[i];
-                                                nb_opt --;
-                                                is_commande = 0;
-						if(nb_opt == 0)
-							action(com);
-                                        }
 					break;
 				default:
 					printf("3 :Data received : %d \n", tx_buffer[i]);
-					if(nb_opt = -1){
-                                         	printf("Nb option\n");
-						nb_opt = tx_buffer[i];
-                                                com.nb_element = nb_opt;
-                                                com.option = malloc(sizeof(char *) * com.nb_element);
-                                                is_commande = 1;                  
-                                        }
-                                        else if (is_commande == 1){             
-                                                printf("Commande\n");
-						com.call = tx_buffer[i];
-                                                nb_opt --;
-                                                is_commande = 0;
-                                        	if(nb_opt == 0)
-							action(com);
-					}
 					break;
 				}
 			}
+			decode_data(com, &is_commande, &nb_opt, tx_buffer);					
+
 			write(fd, tx_buffer, length);
 	}
 
