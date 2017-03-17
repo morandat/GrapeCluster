@@ -1,6 +1,7 @@
 from PiDevice import PiDevice
 from queue import Queue, Full
 
+#key = bytearray([0x13, 0x00, 0x00, 0x00, 0x08, 0x00])
 
 # instruction = {0: Slave.stop,
 #                1: Slave.echo,
@@ -17,7 +18,7 @@ class Slave(PiDevice):
         super(Slave, self).__init__(stack_nb, mac_add, ip_address, i2c_add, pos)
         self.__instr=instruction
         self.__param=param
-        self.__data = Queue(256)
+        self.__data = Queue(4)
         self.init(self)
 
     def verif_key(self, key):
@@ -28,14 +29,19 @@ class Slave(PiDevice):
         else :
             return -1
 
+    def simple_test(self):
+        self.write_byte(0x42, 0x01)
+        for i in range(0, 4):
+            self.__data.put_nowait(self.read_byte(self._i2c))
+        print(self.__data)
+        
     def init(self):
         # Régler la clé en fonction du slave a qui l'on parle
-        self.__key = 0x01  # valeur par défaut
 
-        if self.verif_key(self.__key) == -1:
+        if self.verif_key(self._i2c) == -1:
             print("La clé n'est pas bonne")
             return
-        elif self.verif_key(self.__key) == -2 :
+        elif self.verif_key(self._i2c) == -2 :
             print("Problème initialisation du slave")
             return
         self.send_instruction()
@@ -46,18 +52,18 @@ class Slave(PiDevice):
 
     #write a byte and wait for ack
     def write_ack(self, to_write):
-        self.write_byte(self.__key, to_write)
-        if self.read_byte(self.__key) == 1:
+        self.write_byte(self._i2c, to_write)
+        if self.read_byte(self._i2c) == 1:
             self.getLastError()
 
     # write a byte and wait for ack
     def read_ack(self):
         try:
-            self.__data.put_nowait(self.read_byte(self.__key))
+            self.__data.put_nowait(self.read_byte(self._i2c))
         except Full:
-            self.write_byte(self.__key, 1)
+            self.write_byte(self._i2c, 1)
             return
-        self.write_byte(self.__key, 0)
+        self.write_byte(self._i2c, 0)
 
     #send an instruction and its arguments bytes by bytes
     def send_instruction(self):
@@ -65,23 +71,23 @@ class Slave(PiDevice):
         self.write_ack(self.__instr)
 
         #send a boolean corresponding to the existence of arguments
-        if self.__param is not None :
+        if self.__param is not None:
             self.write_ack(1)
-            for i in range (0, len(self.__param)):
+            for i in range(0, len(self.__param)):
                 self.write_ack(self.__param[i])
         else:
-            self.write_ack(0)
+            self.write_ack(0x00)
 
         self.receiveData()
         self.stop()
 
-    def stop(self):
-        print("stop communication")
-
+    # def stop(self):
+    #     print("stop communication")
+    #
 
     def getLastError(self):
-        self.write_byte(self.__key, 6)
-        self.read_byte(self.__key)
+        self.write_byte(self._i2c, 6)
+        self.read_byte(self._i2c)
 
     def receiveData(self):
         size_to_receive = self.read_ack()

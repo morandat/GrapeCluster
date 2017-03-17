@@ -1,4 +1,4 @@
-import smbus
+#import smbus
 #from RPi import GPIO
 from time import sleep
 import logging
