@@ -1,6 +1,7 @@
 from PiDevice import PiDevice
 from queue import Queue, Full
 
+
 # instruction = {0: Slave.stop,
 #                1: Slave.echo,
 #                2: Slave.ls,
@@ -86,6 +87,9 @@ class Slave(PiDevice):
         size_to_receive = self.read_ack()
         for i in range (0, size_to_receive):
             self.read_ack()
+
+
+
 
 
 
