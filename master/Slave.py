@@ -14,12 +14,13 @@ from queue import Queue, Full
 
 class Slave(PiDevice):
     CLASS_ADDRESS = 0x42  # 42 for slaves
-    def __init__(self, stack_nb, mac_add, ip_address, i2c_add, pos, instruction, param=None):
+    def __init__(self, stack_nb=None, mac_add=None, ip_address=None, i2c_add=0x42, pos=None, instruction=0x00, param=None):
         super(Slave, self).__init__(stack_nb, mac_add, ip_address, i2c_add, pos)
         self.__instr=instruction
         self.__param=param
         self.__data = Queue(4)
-        self.init(self)
+
+        #self.init(self)
 
     def verif_key(self, key):
         self.write_byte(0x00, key)
@@ -29,6 +30,12 @@ class Slave(PiDevice):
         else :
             return -1
 
+    def simple_test(self):
+        data = Queue(4)
+        self.write_byte(0x42, 0x01)
+        for i in range(0, 4):
+            data.put_nowait(self.read_byte(self._i2c))
+        print(self.__data)
 
     def init(self):
         # Régler la clé en fonction du slave a qui l'on parle
