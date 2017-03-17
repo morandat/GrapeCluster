@@ -162,7 +162,9 @@ int main(int argc, char *argv[]) {
 
                     }
                     else if(strcmp(args[0], "1") == 0) {
-                        get_cpu_usage();
+                        char cpu_usage[20];
+                        sprintf(cpu_usage, "cpu:%Lf", get_cpu_usage());
+                        sendto(sock, cpu_usage, strlen(cpu_usage), 0, (struct sockaddr *) &master_info, master_info_len);
                         printf("Sending cpu usage to master\n");
                     }
                     else {

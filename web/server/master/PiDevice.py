@@ -12,6 +12,9 @@ class PiDevice(I2CDevice):
         self._pos = pos
         self._ip_address = ip_address
 
+        self.__last_cpu_usage = "-1"
+        self.__last_ram_usage = "-1"
+
 
     def get_identity(self):
         return json.dump(self)
@@ -28,11 +31,14 @@ class PiDevice(I2CDevice):
     def set_pos(self, pos):
         self._pos = pos
 
-    def get_cpu_usage(self):
-        return psutil.cpu_freq()
+    def set_last_cpu_usage(self, last_cpu_usage):
+        self.__last_cpu_usage = last_cpu_usage
+
+    def get_last_cpu_usage(self):
+        return self.__last_cpu_usage
 
     def get_ram_usage(self):
-        return psutil.virtual_memory().percent
+        return self.__last_ram_usage
 
     def is_master(self):
         return False

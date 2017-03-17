@@ -10,6 +10,12 @@ class Master(PiDevice):
             pass
             # To-Do: initialisation
 
+    def get_slave(self, ip_address):
+        for stack in self.__stacks:
+            for pi_device in stack.get_pi_devices():
+                if pi_device.get_ip_address() == ip_address:
+                    return pi_device
+
     def get_stack(self, number):
         return self.__stacks[number]
 

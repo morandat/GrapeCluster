@@ -166,8 +166,15 @@ def routeRasp(id):
 
 @app.route("/test/")
 def test():
+    master = daemon.get_master()
+    cpu_values = []
+    for stack in master.get_stacks():
+        for pi_device in stack.get_pi_devices():
+            cpu_values.append(pi_device.get_last_cpu_usage())
+    for value in cpu_values:
+        print("TA GROSSE MERE" + value)
     return app.response_class(
-        response=json.dumps(daemon.get_master().get_ip_address()),
+        response=json.dumps(cpu_values),
         status=200,
         mimetype='application/json')
 
