@@ -126,12 +126,15 @@ int main(int argc, char **argv)
 				switch (mode) {
 				case 1:
 					printf("1: Data received : %c\n", tx_buffer[i]);
+					action(tx_buffer[i]);
 					break;
 				case 2:
 					printf("2 :Data received : %02x\n ", tx_buffer[i]);
+					action(tx_buffer[i]);
 					break;
 				default:
 					printf("3 :Data received : %d \n", tx_buffer[i]);
+					action(tx_buffer[i]);
 					break;
 				}
 			}
