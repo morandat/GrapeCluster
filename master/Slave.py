@@ -29,12 +29,7 @@ class Slave(PiDevice):
         else :
             return -1
 
-    def simple_test(self):
-        self.write_byte(0x42, 0x01)
-        for i in range(0, 4):
-            self.__data.put_nowait(self.read_byte(self._i2c))
-        print(self.__data)
-        
+
     def init(self):
         # Régler la clé en fonction du slave a qui l'on parle
 
