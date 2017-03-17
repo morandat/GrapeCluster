@@ -13,7 +13,7 @@ Les actions possibles sur un slave sont :
 — connaitre le slave à qui l’on parle : GET slave/index
 — obtenir son identité (quintuplet de configuration + adresse IP) :GET slave/config/<id>
 — obtenir son taux d’utilisation CPU :GET slave/cpu/<id>
-— allumer, éteindre ou redémarrer le slave: respectivementPOST slave/start, stop, restart/<id>
+— allumer, éteindre ou redémarrer le slave: respectivement POST slave/start, stop, restart/<id>
 — obtenir les actions disponibles :OPTIONS slave
 
 """
