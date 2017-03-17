@@ -175,7 +175,7 @@ int main(int argc, char **argv)
 					break;
 				}
 			}
-			decode_data(com, &is_commande, &nb_opt, tx_buffer);					
+			//decode_data(com, &is_commande, &nb_opt, tx_buffer);					
 
 			write(fd, tx_buffer, length);
 	}
