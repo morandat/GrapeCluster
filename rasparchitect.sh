@@ -135,41 +135,43 @@ then
     then
         second_action "Installing daemon"
         simple_action "Cloning from https://github.com/raspberrypi/linux ..."
-        #git clone --depth=1 https://github.com/raspberrypi/linux        
+
+        if [ -e "./linux" ]
+        then
+            cd linux
+            git pull
+        else
+            git clone --depth=1 https://github.com/raspberrypi/linux  
+            cd linux  
+        fi    
         
-        #Really ?
-        #if [ -e "./linux" ]
-        #then
-        #    cd linux
-        #    KERNEL=kernel7
-        #    simple_action "Making bcm2709_defconfig ..."
-        #    make bcm2709_defconfig
-        #
-        #    simple_action "Making zImage modules and dtbs ..."
-        #    make -j4 zImage modules dtbs
-        #    simple_action "Making modules_install ..."
-        #    sudo make modules_install
-        #    simple_action "Copying new files to /boot ..."
-        #    sudo cp arch/arm/boot/dts/*.dtb /boot/
-        #    sudo cp arch/arm/boot/dts/overlays/*.dtb* /boot/overlays/
-        ##    sudo cp arch/arm/boot/dts/overlays/README /boot/overlays/
-        ##    sudo scripts/mkknlimg arch/arm/boot/zImage /boot/$KERNEL.img
-        #
-        #    simple_action "Device tree compiler ..."
-        #    dtc -@ -I dts -O dtb i2cslave-bcm2708-overlay.dts -o i2cslave-bcm2708.dtbo
-        #    simple_action "Copying to overlays ..."
-        #    sudo cp i2cslave-bcm2708.dtbo /boot/overlays/
-        #
-        #   cd ../
-        #else
-        #    second_action "Something went wrong when trying to clone repository ..."
-        #fi
+        KERNEL=kernel7
+        simple_action "Making bcm2709_defconfig ..."
+        #make bcm2709_defconfig
+    
+        simple_action "Making zImage modules and dtbs ..."
+        #make -j4 zImage modules dtbs
+        simple_action "Making modules_install ..."
+        sudo make modules_install
+        simple_action "Copying new files to /boot ..."
+        sudo cp arch/arm/boot/dts/*.dtb /boot/
+        sudo cp arch/arm/boot/dts/overlays/*.dtb* /boot/overlays/
+        sudo cp arch/arm/boot/dts/overlays/README /boot/overlays/
+        sudo scripts/mkknlimg arch/arm/boot/zImage /boot/$KERNEL.img
+    
+        simple_action "Device tree compiler ..."
+        dtc -@ -I dts -O dtb i2cslave-bcm2708-overlay.dts -o i2cslave-bcm2708.dtbo
+        simple_action "Copying to overlays ..."
+        sudo cp i2cslave-bcm2708.dtbo /boot/overlays/
+    
+        cd ../
 
         simple_action "Cloning raspberry_slave_i2c"
         git clone https://github.com/marilafo/raspberry_slave_i2c.git
         cd raspberry_slave_i2c
         simple_action "Building daemon ..."
         gcc -o $EXEC_NAME i2ccat.c -lncurses
+
 
         if [ -e $EXEC_NAME ]
         then

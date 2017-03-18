@@ -241,7 +241,7 @@ chroot_image(){
 					simple_action "Going to chroot into mounted raspberry pi filesystem ..."
 					second_action "Careful ! For now only works for Raspbian"
 					rootasked "chroot"
-					sudo chroot $WORKING_PATH /usr/bin/qemu-arm-static /bin/bash /tmp/armmanager/rasparchitect.sh -f=daemon.tgz $FINALOPTIONS
+					sudo chroot $WORKING_PATH /usr/bin/qemu-arm-static /bin/bash /tmp/armmanager/rasparchitect.sh $FINALOPTIONS
 					simple_action "Finished chroot actions"
 				fi
 			else
