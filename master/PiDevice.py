@@ -1,11 +1,11 @@
 import json
-
+import smbus
 #import psutil
 from grape import I2CDevice
 
 class PiDevice(I2CDevice):
     def __init__(self, stack_nb, mac_add, ip_address, i2c_add, pos):
-        super(PiDevice, self).__init__(0, 0)#To-Do : bus, prefix
+        super(PiDevice, self).__init__(smbus.SMBus(0), 0)#To-Do : bus, prefix
         self._stack_nb = stack_nb
         self._mac = mac_add
         self._i2c = i2c_add
