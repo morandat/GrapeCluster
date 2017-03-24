@@ -18,6 +18,7 @@ Les actions possibles sur un slave sont :
 
 """
 
+"""
 func_stack = {
   'get_power': Communicator.ask_stack_power,
   'get_temp': Communicator.ask_stack_temp,
@@ -34,6 +35,7 @@ func_slave = {
   'restart': Communicator.ask_slave_restart,
   'options': Communicator.ask_slave_options,
 }
+"""
           
 class Communicator():  # Interface Communicator to abstract communication (UDP or I2C)
 

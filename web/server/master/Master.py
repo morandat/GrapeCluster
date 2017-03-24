@@ -10,10 +10,16 @@ class Master(PiDevice):
             pass
             # To-Do: initialisation
 
-    def get_slave(self, ip_address):
+    def get_slave_by_ip(self, ip_address):
         for stack in self.__stacks:
             for pi_device in stack.get_pi_devices():
                 if pi_device.get_ip_address() == ip_address:
+                    return pi_device
+
+    def get_slave_by_id(self, id):
+        for stack in self.__stacks:
+            for pi_device in stack.get_pi_devices():
+                if pi_device.get_id() == id:
                     return pi_device
 
     def get_stack(self, number):
@@ -25,7 +31,7 @@ class Master(PiDevice):
     def get_cluster_ip_addresses(self):
         ip_addresses = []
         for stack in self.__stacks:
-            ip_addresses.extend(    stack.get_ip_addresses())
+            ip_addresses.extend(stack.get_ip_addresses())
         return ip_addresses
 
     def add_stack(self, stack):

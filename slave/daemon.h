@@ -13,7 +13,9 @@ enum status {
     STOPPED
 };
 
-char *orders[2] = {"ps", "shutdown"};
+//master 172.20.1.165
+//slave 136
+char ** orders;
 
 struct daemon {
     char exec_buff[BUFF_LEN];
