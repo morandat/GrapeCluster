@@ -139,7 +139,10 @@ def getRasp(id=None):
         }
 
     if id is not None:
-        rasp = master.get_slave_by_id(id)
+        rasp = master.get_slave_by_i2c(id)
+        print id
+        print type(id)
+        print rasp
         if rasp is not None:
             return renderRasp(rasp)
         else:
@@ -250,7 +253,7 @@ def routeShutdown(id):
 @app.route("/rasp/start", defaults={'id':None}, methods=['POST'])
 @app.route('/rasp/start/<int:id>')
 def routeStart(id):
-    rasp = daemon.get_master().get_slave_by_id(id)
+    rasp = daemon.get_master().get_slave_by_i2c(id)
 
     if rasp is None:
         response = 0
@@ -265,7 +268,7 @@ def routeStart(id):
 @app.route("/rasp/stop", defaults={'id':None}, methods=['POST'])        
 @app.route('/rasp/stop/<int:id>')
 def routeStop(id):
-    rasp = daemon.get_master().get_slave_by_id(id)
+    rasp = daemon.get_master().get_slave_by_i2c(id)
 
     if rasp is None:
         response = 0
@@ -280,7 +283,7 @@ def routeStop(id):
 @app.route("/rasp/restart", defaults={'id':None}, methods=['POST'])        
 @app.route('/rasp/restart/<int:id>')
 def routeRestart(id):
-    rasp = daemon.get_master().get_slave_by_id(id)
+    rasp = daemon.get_master().get_slave_by_i2c(id)
 
     if rasp is None:
         response = 0
