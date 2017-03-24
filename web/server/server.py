@@ -103,12 +103,6 @@ def getRasp(id=None):
 def routeDefault():
     return redirect("/view", code=302)
 
-# TEST
-@app.route("/view/test")
-def viewTest():
-    print("test")
-    return render_template('test.html', my_string="Wheeeee!", my_list=[0,1,2,3,4,5])
-
 @app.route("/view")
 def viewDefault():
     return render_template('index.html', constants=constants)
@@ -127,74 +121,7 @@ def viewRasp(id):
     else:
         return routeDefault()
         
-##########################
-# ADDED
-##########################
 
-#ROUTE STACK
-
-@app.route('/view/stack/power/<int:id>')
-def viewPower(id):
-    if getStack(id) is not None:
-        return render_template('power.html', constants=constants, stackId=id)
-    else:
-        return routeDefault()
-	
-@app.route('/view/stack/temp/<int:id>')
-def viewTemperature(id):
-    if getStack(id) is not None:
-        return render_template('temperature.html', constants=constants, stackId=id)
-    else:
-        return routeDefault()
-"""
-#Post function have a view ? 
-@app.route('/view/stack/shutdown/<int:id>')
-def viewShutdown(id):
-    if getStack(id) is not None:
-        return render_template('shutdown.html', constants=constants, stackId=id)
-    else:
-        return routeDefault()
-"""     
-#ROUTE RASP
-       
-@app.route('/view/rasp/config/<int:id>')
-def viewConfig(id):
-    if getRasp(id) is not None:
-        return render_template('config.html', constants=constants, raspId=id)
-    else:
-        return routeDefault() 
-        
-@app.route('/view/rasp/cpu/<int:id>')
-def viewCPU(id):
-    rasp = getRasp(id)
-    if rasp is not None:
-        return render_template('cpu.html', raspId=id, rasp=rasp, constants=constants)
-    else:
-        return routeDefault() 
-"""
-#Post function have a view ? 
-
-@app.route('/view/rasp/start/<int:id>')
-def viewStart(id):
-    if getRasp(id) is not None:
-        return render_template('start.html', constants=constants, raspId=id)
-    else:
-        return routeDefault() 
-        
-@app.route('/view/rasp/stop/<int:id>')
-def viewStop(id):
-    if getRasp(id) is not None:
-        return render_template('stop.html', constants=constants, raspId=id)
-    else:
-        return routeDefault() 
-        
-@app.route('/view/rasp/restart/<int:id>')
-def viewRestart(id):
-    if getRasp(id) is not None:
-        return render_template('restart.html', constants=constants, raspId=id)
-    else:
-        return routeDefault() 
-"""
         
 #######################################################################################
 #                                                                                     #
