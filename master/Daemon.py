@@ -10,10 +10,10 @@ from CommunicatorUDP import CommunicatorUDP
 from logging import getLogger
 
 class Daemon(Thread):
-    def __init__(self):
+    def __init__(self, ip_address):
         super(Daemon, self).__init__()
 
-        self.__master = Master(0, "00:00:00:00:00:00", "127.0.0.2", "0", 0)
+        self.__master = Master(0, "00:00:00:00:00:00", ip_address, "0", 0)
 
         self.__master.add_stack(Stack(0,0))
 
