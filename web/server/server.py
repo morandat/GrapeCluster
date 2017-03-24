@@ -241,7 +241,7 @@ def test():
     cpu_values = []
     for stack in master.get_stacks():
         for pi_device in stack.get_pi_devices():
-            cpu_values.append(pi_device.get_last_cpu_usage())
+            cpu_values.append(pi_device.get_cpu_usage())
     for value in cpu_values:
         print("TA GROSSE MERE" + value)
     return app.response_class(

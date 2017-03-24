@@ -35,7 +35,9 @@ class Daemon(Thread):
                 print("Configured new slave of ip_addr {}".format(addr[0]))
 
             elif data[:4] == b"cpu:":
-                self.__master.get_slave(addr[0]).set_last_cpu_usage(data[4:].decode("utf-8"))
+                slave = self.__master.get_slave(addr[0])
+                slave.set_cpu_usage(data[4:])
+
                 print("Received cpu_usage from slave {}, updating value".format(addr[0]))
 
     def get_master(self):
