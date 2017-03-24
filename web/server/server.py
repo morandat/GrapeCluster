@@ -233,22 +233,15 @@ def routeRasp(id):
 @app.route("/stack/shutdown", defaults={'id':None}, methods=['POST'])
 @app.route('/stack/shutdown/<int:id>')
 def routeShutdown(id):
-    def nestRaspsInStack(stack):
-        for rasp in stack['rasps']:
-            stack['rasps'][rasp] = getRasp(stack['rasps'][rasp])
+    stack = daemon.get_master().get_stack(id)
 
-    stack = getStack(id)
     if stack is None:
-        stack = {}
-    else:
-        if id is None:
-            for stackId in stack:
-                nestRaspsInStack(stack[stackId])
-        else:
-            nestRaspsInStack(stack)
-
+        response = 0
+    else
+        response = 1
+    
     return app.response_class(
-        response=json.dumps(stack.shutdown()),
+        response=json.dumps({'response': response}),
         status=200,
         mimetype='application/json')
         
@@ -257,33 +250,45 @@ def routeShutdown(id):
 @app.route("/rasp/start", defaults={'id':None}, methods=['POST'])
 @app.route('/rasp/start/<int:id>')
 def routeStart(id):
-    rasp = getRasp(id)
+    rasp = daemon.get_master().get_slave_by_id(id)
+
     if rasp is None:
-        rasp = {}
+        response = 0
+    else
+        response = 1
+
     return app.response_class(
-        response=json.dumps(rasp.start()),
+        response=json.dumps({'response': response}),
         status=200,
         mimetype='application/json')
 
 @app.route("/rasp/stop", defaults={'id':None}, methods=['POST'])        
 @app.route('/rasp/stop/<int:id>')
 def routeStop(id):
-    rasp = getRasp(id)
+    rasp = daemon.get_master().get_slave_by_id(id)
+
     if rasp is None:
-        rasp = {}
+        response = 0
+    else
+        response = 1
+    
     return app.response_class(
-        response=json.dumps(rasp.stop()),
+        response=json.dumps({'response': response}),
         status=200,
         mimetype='application/json')
 
 @app.route("/rasp/restart", defaults={'id':None}, methods=['POST'])        
 @app.route('/rasp/restart/<int:id>')
 def routeRestart(id):
-    rasp = getRasp(id)
+    rasp = daemon.get_master().get_slave_by_id(id)
+
     if rasp is None:
-        rasp = {}
+        response = 0
+    else
+        response = 1
+    
     return app.response_class(
-        response=json.dumps(rasp.restart()),
+        response=json.dumps({'response': response}),
         status=200,
         mimetype='application/json')
         
