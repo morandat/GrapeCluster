@@ -16,6 +16,8 @@
 
 enum status curr_status = ACTIVE;
 
+int orders_num;
+
 int count_args(char* msg, ssize_t msg_len) {
     int arg_num = 0;
     for (int i = 0; i < msg_len; ++i) {
@@ -37,6 +39,7 @@ char** slice_args(char* msg, ssize_t msg_len, int arg_num) {
             int length = i - start;
             args[j] = malloc(length * sizeof(char));
             strncpy(args[j], msg + start, (size_t) length);
+            args[j][length] = 0;
             start = i + 1;
             //sprintf("Sliced : args[%i] = %s\n", j, args[j]);
             j++;
@@ -76,6 +79,13 @@ void exec_order(int order_code, struct daemon* daemon) {//, char** args, int arg
     pclose(pipe);
 }
 
+int order_str_to_code(char* str) {
+    for (int i = 0; i < orders_num; i++) {
+        if(strcmp(orders[i], str) == 0)
+            return i;
+    }
+}
+
 long double get_cpu_usage() {
     long double a[4], b[4], loadavg;
     FILE *fp;
@@ -96,19 +106,21 @@ long double get_cpu_usage() {
 }
 
 int main(int argc, char *argv[]) {
-    /* need to read the doc about this
-    jsmn_parser parser;
+    FILE* orders_file = fopen("../orders.txt", "r");
+    fseek(orders_file, 0, SEEK_END);
+    long fsize = ftell(orders_file);
+    fseek(orders_file, 0, SEEK_SET);
 
-    jsmn_init(&parser);
-    jsmntok_t tokens[256];
-    const char *js = "orders.json";
-    int r;
+    char* orders_file_str = malloc(fsize+1);
+    fread(orders_file_str, fsize, 1, orders_file);
+    fclose(orders_file);
+    orders_file_str[fsize] = 0;
 
-    r = jsmn_parse(&parser, js, strlen(js), tokens, 256);
-    if (r < 0) {
-        printf("error parsing json %i\n", r);
-    }
-     */
+    int oflen = strlen(orders_file_str);
+
+    orders_num = count_args(orders_file_str, oflen);
+
+    orders = slice_args(orders_file_str, oflen, orders_num);
 
     struct daemon daemon;
 
@@ -132,7 +144,9 @@ int main(int argc, char *argv[]) {
     slave_info.sin_port = htons(PORT);
     slave_info.sin_addr.s_addr = inet_addr(argv[1]);
 
+    CHKERR(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int)));
     CHKERR(bind(sock, (struct sockaddr*)&slave_info, sizeof(slave_info) ));
+    
     printf("Sending configure message to master \n");
     CHKERR(sendto(sock, "configure", strlen("configure"), 0, (struct sockaddr *) &master_info, master_info_len));
 
@@ -151,7 +165,8 @@ int main(int argc, char *argv[]) {
                 if (recv_len > 0) {
                     int arg_num = count_args(buffer, recv_len);
                     char** args = slice_args(buffer, recv_len, arg_num);
-
+                    printf("%s\n", args[0]);
+                    printf("%d\n", strcmp(args[0], "0"));
                     if (strcmp(args[0], "9") == 0) {
                         curr_status = STOPPED;
                         close(sock);
@@ -170,7 +185,7 @@ int main(int argc, char *argv[]) {
                     else {
                         printf("Order code : %s", args[0]);
                         int order_code = atoi(args[0]);
-                        exec_order(order_code-1, &daemon);//, buffer, recv_len+1);
+                        exec_order(order_code-1, &daemon);
                         printf("order returned :\n%s\nSending to master...", daemon.exec_buff);
                         CHKERR(sendto(sock, daemon.exec_buff, daemon.exec_len, 0, (struct sockaddr *) &master_info, master_info_len));
                     }

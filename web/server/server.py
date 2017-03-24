@@ -95,7 +95,7 @@ def getRasp(id=None):
 #                                                                                     #
 #                                    VIEWS                                            #
 #                                                                                     #
-#######################################################################################
+#################################(    stack.get_ip_addresses())######################################################
 
 @app.route("/index")
 @app.route("/")
@@ -243,7 +243,7 @@ def test():
         for pi_device in stack.get_pi_devices():
             cpu_values.append(pi_device.get_cpu_usage())
     for value in cpu_values:
-        print("TA GROSSE MERE" + value)
+        print(value)
     return app.response_class(
         response=json.dumps(cpu_values),
         status=200,

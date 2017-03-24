@@ -31,7 +31,7 @@ class Master(PiDevice):
     def get_cluster_ip_addresses(self):
         ip_addresses = []
         for stack in self.__stacks:
-            ip_addresses.extend(    stack.get_ip_addresses())
+            ip_addresses.extend(stack.get_ip_addresses())
         return ip_addresses
 
     def add_stack(self, stack):

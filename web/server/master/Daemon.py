@@ -33,7 +33,6 @@ class Daemon(Thread):
                 print("0;" + addr[0] + ";")
                 self.__udp_comm.send("0;" + addr[0] + ";", new_slave.get_ip_address())
                 print("Configured new slave of ip_addr {}".format(addr[0]))
-
             elif data[:4] == b"cpu:":
                 slave = self.__master.get_slave(addr[0])
                 slave.set_cpu_usage(data[4:])
