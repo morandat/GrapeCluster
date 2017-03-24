@@ -1,3 +1,4 @@
+# coding: utf-8
 import smbus
 #from RPi import GPIO
 from time import sleep

@@ -1,3 +1,4 @@
+# coding: utf-8
 from PiDevice import PiDevice
 from grape import STACK_DEVICES
 
