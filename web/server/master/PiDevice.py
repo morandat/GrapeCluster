@@ -62,7 +62,7 @@ class PiDevice(I2CDevice):
         return self.__os
 
     def get_i2c_address(self):
-        return self.__i2c_address
+        return self.__i2c
 
     def is_master(self):
         return False
