@@ -1,7 +1,5 @@
 # coding: utf-8
 import json
-
-import psutil
 from grape import I2CDevice
 
 class PiDevice(I2CDevice):
