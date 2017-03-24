@@ -19,6 +19,25 @@ Les actions possibles sur un slave sont :
 
 """
 
+"""func_stack = {
+  'get_power': Communicator.ask_stack_power,
+  'get_temp': Communicator.ask_stack_temp,
+  'shutdown': Communicator.send_stack_shutdown,
+  'options': Communicator.ask_stack_options,
+}
+
+func_slave = {
+  'get_slave': Communicator.ask_slave_slaves,
+  'get_config': Communicator. ask_slave_config,
+  'get_usage': Communicator.ask_slave_cpu,
+  'start': Communicator.ask_slave_start,
+  'stop': Communicator.ask_slave_stop,
+  'restart': Communicator.ask_slave_restart,
+  'options': Communicator.ask_slave_options,
+}
+"""
+
+
 class Communicator():  # Interface Communicator to abstract communication (UDP or I2C)
 
 # Actions générales
@@ -81,21 +100,3 @@ class Communicator():  # Interface Communicator to abstract communication (UDP o
     # Obtenir les actions disponibles
     def ask_slave_options(self, slave):
         raise NotImplementedError("Not implemented in interface")
-
-
-func_stack = {
-  'get_power': Communicator.ask_stack_power,
-  'get_temp': Communicator.ask_stack_temp,
-  'shutdown': Communicator.send_stack_shutdown,
-  'options': Communicator.ask_stack_options,
-}
-
-func_slave = {
-  'get_slave': Communicator.ask_slave_slaves,
-  'get_config': Communicator. ask_slave_config,
-  'get_usage': Communicator.ask_slave_cpu,
-  'start': Communicator.ask_slave_start,
-  'stop': Communicator.ask_slave_stop,
-  'restart': Communicator.ask_slave_restart,
-  'options': Communicator.ask_slave_options,
-}

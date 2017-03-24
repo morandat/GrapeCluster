@@ -228,7 +228,6 @@ def routeRasp(id):
         status=200,
         mimetype='application/json')
 
-
 # STACK ACTIONS
 
 @app.route("/stack/shutdown", defaults={'id':None}, methods=['POST'])

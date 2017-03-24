@@ -52,6 +52,9 @@ class PiDevice(I2CDevice):
         self.__cpu_usage = cpu_usage
         self.__cpu_usage_timestamp = datetime.datetime.now()
 
+    def get_cpu_usage_timestamp(self):
+        return self.__cpu_usage_timestamp
+
     def get_ram_usage(self):
         return self.__last_ram_usage
 
