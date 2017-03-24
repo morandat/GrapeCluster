@@ -237,7 +237,7 @@ def routeShutdown(id):
 
     if stack is None:
         response = 0
-    else
+    else:
         response = 1
     
     return app.response_class(
@@ -254,7 +254,7 @@ def routeStart(id):
 
     if rasp is None:
         response = 0
-    else
+    else:
         response = 1
 
     return app.response_class(
@@ -269,7 +269,7 @@ def routeStop(id):
 
     if rasp is None:
         response = 0
-    else
+    else:
         response = 1
     
     return app.response_class(
@@ -284,7 +284,7 @@ def routeRestart(id):
 
     if rasp is None:
         response = 0
-    else
+    else:
         response = 1
     
     return app.response_class(
