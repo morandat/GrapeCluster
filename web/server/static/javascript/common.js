@@ -4,20 +4,25 @@ $.fn.btnColor = function(condition){
     		.removeClass('btn-success btn-danger')
     		.addClass(condition ? 'btn-success' : 'btn-danger');
     });
-    
+
     return this;
 };
 
-addAjaxHandler = function(url, handler, interval) {
+addAjaxHandler = function(url, handler, interval, method) {
 	if(interval === true)
 		interval = 20000;
+  if(method === undefined)
+    method = 'GET'
 
 	var upd = function() {
 		$.ajax({
 			url : url,
 			dataType : 'json',
-			type : 'GET',
-			success : handler
+			type : method,
+			success : handler,
+      error: function() {
+        alert("AJAX Error.");
+      }
 		});
 
 		if(interval)

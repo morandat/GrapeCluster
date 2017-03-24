@@ -10,9 +10,12 @@ addAjaxHandler("/stack/"+STACKID, function(stack) {
 			$('#raspI2C'+raspSlot).text(raspData.address);
 			$('#raspOS'+raspSlot).text(raspData.os);
 			$('#raspIP'+raspSlot).text(raspData.ip);
+			$('#raspCPU'+raspSlot).text(raspData.cpu);
+			$('#raspRAM'+raspSlot).text(raspData.ram);
 			$('#raspStatus'+raspSlot)
 				.btnColor(raspData.status)
 				.text(CONSTANTS.raspStatus[raspData.status])
+				.attr('raspId', raspData.address)
 				.show();
 
 			//console.log(raspSlot+' : '+JSON.stringify(raspData))
@@ -22,6 +25,8 @@ addAjaxHandler("/stack/"+STACKID, function(stack) {
 			$('#raspI2C'+raspSlot).text('');
 			$('#raspOS'+raspSlot).text('');
 			$('#raspIP'+raspSlot).text('');
+			$('#raspCPU'+raspSlot).text('');
+			$('#raspRAM'+raspSlot).text('');
 			$('#raspStatus'+raspSlot).hide();
 
 			//console.log(raspSlot+' : Empty')
@@ -30,5 +35,22 @@ addAjaxHandler("/stack/"+STACKID, function(stack) {
 
 	for(var i=0; i < CONSTANTS.nSlavesByStack+1; ++i)
 		raspAction(i, stack.rasps[i]);
-	
+
 }, true);
+
+$('.statusBtn').click(function() {
+	if($(this).text() == CONSTANTS.raspStatus[0]) {
+		if(confirm("Allumer la Rasp ?")) {
+			addAjaxHandler('/rasp/start/'+$(this).attr('raspId'), function() {
+				$(this).text(CONSTANTS.raspStatus[1]).btnColor(1);
+			}, false, 'POST');
+		}
+	}
+	if($(this).text() == CONSTANTS.raspStatus[1]) {
+		if(confirm("Eteindre la Rasp ?")) {
+			addAjaxHandler('/rasp/start/'+$(this).attr('raspId'), function() {
+				$(this).text(CONSTANTS.raspStatus[0]).btnColor(0);
+			}, false, 'POST');
+		}
+	}
+});

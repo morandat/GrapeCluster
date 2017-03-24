@@ -26,7 +26,7 @@
               Stack : <a class="stackLink" href="#">Stack #<span class="raspStack"></span></a>
             </li>
    					<li class="list-group-item">
-				    	Status : <span id="raspStatus" class="btn"></span>
+				    	Status : <span id="raspStatus" class="btn statusBtn"></span>
    					</li>
 				    <li class="list-group-item">
 				    	Operating System : <span id="raspOS"></span>
@@ -34,11 +34,17 @@
 				    <li class="list-group-item">
 				   		IP Address : <span id="raspIP"></span>
    					</li>
+            <li class="list-group-item">
+				   		CPU Usage : <span id="raspCPU"></span>
+   					</li>
+            <li class="list-group-item">
+				   		RAM Usage : <span id="raspRAM"></span>
+   					</li>
    				</ul>
             </div>
         </div>
     </div>
-    
+
 
     <script>
     CONSTANTS = {{ constants|tojson|safe }};
