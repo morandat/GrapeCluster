@@ -20,6 +20,7 @@ class Daemon(Thread):
         self.__udp_comm = CommunicatorUDP(42666, self.__master.get_ip_address())
 
         self.__udp_comm.open_communication()
+        print("Master listening on {}:{}".format(ip_address, 42666))
 
     def run(self):
         while True:
