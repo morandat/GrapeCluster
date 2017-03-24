@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from Stack import Stack
 
 """
@@ -34,7 +35,7 @@ func_slave = {
   'restart': Communicator.ask_slave_restart,
   'options': Communicator.ask_slave_options,
 }
-          
+
 class Communicator():  # Interface Communicator to abstract communication (UDP or I2C)
 
 # Actions générales
@@ -51,7 +52,7 @@ class Communicator():  # Interface Communicator to abstract communication (UDP o
 
     def close_communication(self):
         raise NotImplementedError("Not implemented in interface")
-        
+
 # Actions/Demandes sur les stacks
 
     # Obtenir la consommation d'éléctricité (en volts)
@@ -97,4 +98,3 @@ class Communicator():  # Interface Communicator to abstract communication (UDP o
     # Obtenir les actions disponibles
     def ask_slave_options(self, slave):
         raise NotImplementedError("Not implemented in interface")
-
