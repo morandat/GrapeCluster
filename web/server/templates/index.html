@@ -19,7 +19,7 @@
                         <div style="float:right;" class="btn" id="stackTemp{{ stackI }}"></div>
                     </div>
                     <ul class="list-group list-group-flush">
-                        
+
                         {% for raspI in range(constants.nSlavesByStack+1) %}
                             {% set isMaster = (raspI == 0) %}
                             {% set raspPos = stackI|string + '_' + raspI|string %}
@@ -35,7 +35,7 @@
                                     <span id="raspName{{ raspPos }}"></span>
                                 </td>
                                 <td style="text-align:right;">
-                                    <div class="btn btn-sm" id="raspStatus{{ raspPos }}" style="display:none;"></div>
+                                    <div class="btn btn-sm statusBtn" id="raspStatus{{ raspPos }}" style="display:none;"></div>
                                 </td>
                                 </tr></table>
                             </li>
