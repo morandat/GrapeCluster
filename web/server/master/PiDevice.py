@@ -42,6 +42,9 @@ class PiDevice(I2CDevice):
     def set_pos(self, pos):
         self._pos = pos
 
+    def get_pos(self):
+        return self._pos
+
     def get_cpu_usage(self):
         return self.__cpu_usage
 

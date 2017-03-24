@@ -15,12 +15,14 @@ class Master(PiDevice):
             for pi_device in stack.get_pi_devices():
                 if pi_device.get_ip_address() == ip_address:
                     return pi_device
+        return None
 
     def get_slave_by_id(self, id):
         for stack in self.__stacks:
             for pi_device in stack.get_pi_devices():
                 if pi_device.get_id() == id:
                     return pi_device
+        return None
 
     def get_stack(self, number):
         return self.__stacks[number]
