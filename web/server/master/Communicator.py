@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from Stack import Stack
 
 class Communicator():  # Interface Communicator to abstract communication (UDP or I2C)
@@ -61,4 +62,3 @@ class Communicator():  # Interface Communicator to abstract communication (UDP o
     # Obtenir les actions disponibles
     def ask_slave_options(self, slave):
         raise NotImplementedError("Not implemented in interface")
-
