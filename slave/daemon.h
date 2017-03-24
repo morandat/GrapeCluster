@@ -6,6 +6,8 @@
 #define SLAVE_DAEMON_H
 
 #define BUFF_LEN 1024
+
+#define MASTER_IP_ADDRESS "172.20.1.136"
 #define PORT 42666
 
 enum status {

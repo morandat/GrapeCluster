@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
 
     master_info.sin_family = AF_INET;
     master_info.sin_port = htons(PORT);
-    master_info.sin_addr.s_addr = inet_addr("127.0.0.2");
+    master_info.sin_addr.s_addr = inet_addr(MASTER_IP_ADDRESS);
 
     socklen_t master_info_len = sizeof(master_info);
 
