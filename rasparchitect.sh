@@ -147,10 +147,10 @@ then
         
         KERNEL=kernel7
         simple_action "Making bcm2709_defconfig ..."
-        #make bcm2709_defconfig
+        make bcm2709_defconfig
     
         simple_action "Making zImage modules and dtbs ..."
-        #make -j4 zImage modules dtbs
+        make -j4 zImage modules dtbs
         simple_action "Making modules_install ..."
         sudo make modules_install
         simple_action "Copying new files to /boot ..."
@@ -158,17 +158,24 @@ then
         sudo cp arch/arm/boot/dts/overlays/*.dtb* /boot/overlays/
         sudo cp arch/arm/boot/dts/overlays/README /boot/overlays/
         sudo scripts/mkknlimg arch/arm/boot/zImage /boot/$KERNEL.img
-    
-        simple_action "Device tree compiler ..."
-        dtc -@ -I dts -O dtb i2cslave-bcm2708-overlay.dts -o i2cslave-bcm2708.dtbo
-        simple_action "Copying to overlays ..."
-        sudo cp i2cslave-bcm2708.dtbo /boot/overlays/
-    
+
         cd ../
 
         simple_action "Cloning raspberry_slave_i2c"
         git clone https://github.com/marilafo/raspberry_slave_i2c.git
         cd raspberry_slave_i2c
+
+        simple_action "Modprobing ..."
+        make
+        sudo rmmod i2c_dev 
+        sudo rmmod i2c_bcm2835
+        sudo insmod bcm2835_slave_mod.ko
+        sudo modprobe -a bcm2835_slave_mod
+
+        simple_action "Device tree compiler ..."
+        dtc -@ -I dts -O dtb i2cslave-bcm2708-overlay.dts -o i2cslave-bcm2708.dtbo
+        simple_action "Copying to overlays ..."
+        sudo cp i2cslave-bcm2708.dtbo /boot/overlays/
         simple_action "Building daemon ..."
         gcc -o $EXEC_NAME i2ccat.c -lncurses
 

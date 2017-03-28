@@ -61,11 +61,9 @@ resize_image(){
 
 		mkdir -p ./.armmanager
 		TEMP_IMG="./.armmanager/tmp_img"
-		str="G"
-		SEEK="$RESIZE_VALUE$str"
 
 		simple_action "Creating blank image"
-		dd if=/dev/zero of=$TEMP_IMG bs=1 count=1 seek=$SEEK
+		dd if=/dev/zero of=$TEMP_IMG bs=$RESIZE_VALUE count=1
 
 		simple_action "Appending blank image to original one"
 		cat $TEMP_IMG >> $FILE
@@ -405,7 +403,7 @@ do
 done
 
 #resize the image
-if [ $RESIZE_VALUE -ne -1 ]
+if [ "$RESIZE_VALUE" != "-1" ]
 then
 	if [ $MOUNTOPT -eq 1 ]
 	then
