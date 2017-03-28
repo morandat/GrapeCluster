@@ -154,20 +154,28 @@ then
         simple_action "Making modules_install ..."
         make modules_install
         simple_action "Copying new files to /boot ..."
+
         cp arch/arm/boot/dts/*.dtb /boot/
         cp arch/arm/boot/dts/overlays/*.dtb* /boot/overlays/
         cp arch/arm/boot/dts/overlays/README /boot/overlays/
         scripts/mkknlimg arch/arm/boot/zImage /boot/$KERNEL.img
-    
         cd ../
 
         simple_action "Cloning raspberry_slave_i2c"
         git clone https://github.com/marilafo/raspberry_slave_i2c.git
         cd raspberry_slave_i2c
+
+        simple_action "Modprobing ..."
+        make
+        sudo rmmod i2c_dev 
+        sudo rmmod i2c_bcm2835
+        sudo insmod bcm2835_slave_mod.ko
+        sudo modprobe -a bcm2835_slave_mod
+
         simple_action "Device tree compiler ..."
         dtc -@ -I dts -O dtb i2cslave-bcm2708-overlay.dts -o i2cslave-bcm2708.dtbo
         simple_action "Copying to overlays ..."
-        cp i2cslave-bcm2708.dtbo /boot/overlays/
+        sudo cp i2cslave-bcm2708.dtbo /boot/overlays/
         simple_action "Building daemon ..."
         gcc -o $EXEC_NAME i2ccat.c -lncurses
 

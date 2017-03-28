@@ -63,7 +63,7 @@ resize_image(){
 		TEMP_IMG="./.armmanager/tmp_img"
 
 		simple_action "Creating blank image"
-		dd if=/dev/zero of=$TEMP_IMG bs=1 count=0 seek=$RESIZE_VALUE
+		dd if=/dev/zero of=$TEMP_IMG bs=$RESIZE_VALUE count=1
 
 		simple_action "Appending blank image to original one"
 		cat $TEMP_IMG >> $FILE
