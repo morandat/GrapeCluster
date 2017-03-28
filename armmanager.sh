@@ -61,11 +61,9 @@ resize_image(){
 
 		mkdir -p ./.armmanager
 		TEMP_IMG="./.armmanager/tmp_img"
-		str="G"
-		SEEK="$RESIZE_VALUE$str"
 
 		simple_action "Creating blank image"
-		dd if=/dev/zero of=$TEMP_IMG bs=1 count=1 seek=$SEEK
+		dd if=/dev/zero of=$TEMP_IMG bs=1 count=0 seek=$RESIZE_VALUE
 
 		simple_action "Appending blank image to original one"
 		cat $TEMP_IMG >> $FILE
@@ -125,13 +123,23 @@ mount_image(){
 
 		#Seeking part to mount
 		simple_action "Mounting Linux partition of $FILE"
-		part_root=`fdisk -l -o Start $FILE | cut -d' ' -f1,3 | tail -n1`
+		#part_root=`fdisk -l -o Start $FILE | cut -d' ' -f1,3 | tail -n1`
 		#part_boot=`fdisk -l -o Start $FILE | cut -d' ' -f1,3 | tail -n2 | head -n1`
-		offset_root=$((512*$part_root))
+		#offset_root=$((512*$part_root))
 		#offset_boot=$((512*$part_boot))
+		rootasked "Losetup"
+		FREE_LOOP=`sudo losetup -f`
+		if [ $? -ne 0 ]
+		then
+			second_action "No free loop device could be found, cannot set loopback device."
+			exit 1
+		fi
+
+		sudo losetup -P $FREE_LOOP $FILE
 
 		rootasked "Mount"
-		sudo mount -o offset=$offset_root -t ext4 $FILE $WORKING_PATH
+		#sudo mount -o offset=$offset_root -t ext4 $FILE $WORKING_PATH
+		sudo mount "$FREE_LOOP"p2 $WORKING_PATH
 
 		if [ $? -ne 0 ]
 		then
@@ -140,14 +148,15 @@ mount_image(){
 		else
 			#sudo mkdir -p $WORKING_PATH/boot
 			#sudo mount -o offset=$offset_boot -t vfat $FILE $WORKING_PATH/boot
+			sudo mount "$FREE_LOOP"p1 $WORKING_PATH/boot
 
-			#if [ $? -ne 0 ]
-			#then
-			#	simple_action "Something went wrong when trying to mount boot"
-			#	exit 1
-			#else
+			if [ $? -ne 0 ]
+			then
+				simple_action "Something went wrong when trying to mount boot"
+				exit 1
+			else
 				simple_action "Successfully mounted `basename $FILE` to $WORKING_PATH"
-			#fi
+			fi
 		fi
 
 		#Then we copy qemu executable to make translation for chroot
@@ -183,17 +192,26 @@ unmount_image(){
 	then
 		second_action "Unmounting `realpath $WORKING_PATH` filesystem ..."
 		rootasked "Umount"
-		#sudo umount $WORKING_PATH/boot
+		sudo umount $WORKING_PATH/boot
 		sudo umount $WORKING_PATH
 		if [ $? -ne 0 ]
 		then
 			second_action "A problem occured when trying to unmount $WORKING_PATH"
 			exit 1
 		else
-			simple_action "Successfully unmounted $WORKING_PATH"
-			simple_action "Removing temporary file ..."
-			rm .wpath
-			rm -r $WORKING_PATH
+
+			sudo losetup -d /dev/loop0
+
+			if [ $? -ne 0 ]
+			then
+				second_action "A problem occured when unload loopback device"
+				exit 1
+			else
+				simple_action "Successfully unmounted $WORKING_PATH"
+				simple_action "Removing temporary file ..."
+				rm .wpath
+				rm -r $WORKING_PATH
+			fi
 		fi
 	else
 		simple_action "Unmount target must be a directory"
@@ -389,7 +407,7 @@ do
 			VALUE="${i#*=}"
 			if [ "$VALUE" == "$i" ]
 			then
-				RESIZE_VALUE=1
+				RESIZE_VALUE=1G
 			else
 				RESIZE_VALUE=$VALUE
 			fi
@@ -405,7 +423,7 @@ do
 done
 
 #resize the image
-if [ $RESIZE_VALUE -ne -1 ]
+if [ "$RESIZE_VALUE" != "-1" ]
 then
 	if [ $MOUNTOPT -eq 1 ]
 	then
