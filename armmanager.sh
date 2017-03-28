@@ -59,28 +59,34 @@ resize_image(){
 			sudo umount $FILE
 		fi
 
-		mkdir -p ./.armmanager
-		TEMP_IMG="./.armmanager/tmp_img"
-
-		simple_action "Creating blank image"
-		dd if=/dev/zero of=$TEMP_IMG bs=$RESIZE_VALUE count=1
-
-		simple_action "Appending blank image to original one"
-		cat $TEMP_IMG >> $FILE
-
 		simple_action "Getting the partition's offset, and resizing it ..."
 		part=`fdisk -l -o Start $FILE | cut -d' ' -f1,3 | tail -n1`
 		offset=$((512*$part))
 
-		rootasked "Losetup, e2fsck and resize2fs"
-		sudo losetup --offset $offset /dev/loop0 $FILE
-		sudo e2fsck -f /dev/loop0
-		sudo resize2fs -f /dev/loop0
+		truncate -s +1G $FILE
+		rootasked "Losetup"
+		sudo losetup /dev/loop0 $FILE
 
+		if [ $? -ne 0 ]
+		then
+			second_action "loopback device 0 is required to resize and mount on loop raspbian system"
+			exit 1
+		fi
+
+		simple_action "Re-creating partition in order to resize it ..."
+		rootasked "fdisk"
+		echo -e "d\n2\nn\np\n2\n$part\n\nw" | sudo fdisk /dev/loop0
 		sudo losetup -d /dev/loop0
 
-		simple_action "Cleaning ..."
-		rm $TEMP_IMG
+		sudo losetup -o $offset /dev/loop0 $FILE
+		simple_action "Verifying filesystem with e2fsck ..."
+		sudo e2fsck -f -y /dev/loop0
+		simple_action  "Resizing filesystem with resize2fs ..."
+		sudo resize2fs /dev/loop0
+
+		sudo losetup -d /dev/loop0
+		simple_action "Done !"
+
 	else
 		simple_action "Please give a valid file ... (img/iso)"
 		usage
@@ -316,7 +322,7 @@ fi
 for i in "$@"
 do
 	case $i in
-		-m=*|--mountfile=*)
+		-m|--mountfile)
 			FILE="${i#*=}"
 			if [ ! -e "$FILE" ]
 			then
@@ -417,7 +423,18 @@ do
 			simple_action "Unkown option : $i" # unknown option
 		;;
 		*)
-			simple_action "Unkown argument : $i" # unknown argument
+			if [ "$FILE" == "" ]
+			then
+				FILE="${i}"
+				if [ ! -e "$FILE" ]
+				then
+					second_action "Please give an existing file"
+					usage
+					exit 1
+				fi
+			else
+				simple_action "Unkown argument : $i" # unknown argument
+			fi
 		;;
 	esac
 done
@@ -425,12 +442,7 @@ done
 #resize the image
 if [ "$RESIZE_VALUE" != "-1" ]
 then
-	if [ $MOUNTOPT -eq 1 ]
-	then
-		resize_image
-	else
-		second_action "Please give a file to mount with -m=/path/to/file in order to resize it before mounting"
-	fi
+	resize_image
 fi
 
 #Mount the filesystem
