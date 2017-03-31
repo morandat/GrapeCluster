@@ -25,7 +25,4 @@ struct daemon {
     size_t exec_len;
 };
 
-
-void exec_order(int order_code, struct daemon* daemon);
-
 #endif //SLAVE_DAEMON_H

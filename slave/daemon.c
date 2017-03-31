@@ -11,7 +11,9 @@
 #include <unistd.h>
 #include <string.h>
 
+
 #include "daemon.h"
+#include "i2cslave.h"
 #include "utils.h"
 
 enum status curr_status = ACTIVE;
@@ -105,25 +107,7 @@ long double get_cpu_usage() {
     return loadavg;
 }
 
-int main(int argc, char *argv[]) {
-    FILE* orders_file = fopen("../orders.txt", "r");
-    fseek(orders_file, 0, SEEK_END);
-    long fsize = ftell(orders_file);
-    fseek(orders_file, 0, SEEK_SET);
-
-    char* orders_file_str = malloc(fsize+1);
-    fread(orders_file_str, fsize, 1, orders_file);
-    fclose(orders_file);
-    orders_file_str[fsize] = 0;
-
-    int oflen = strlen(orders_file_str);
-
-    orders_num = count_args(orders_file_str, oflen);
-
-    orders = slice_args(orders_file_str, oflen, orders_num);
-
-    struct daemon daemon;
-
+int init_network() {
     struct sockaddr_in slave_info, master_info;
 
     memset((char *) &master_info, 0, sizeof(master_info));
@@ -145,8 +129,109 @@ int main(int argc, char *argv[]) {
     slave_info.sin_addr.s_addr = inet_addr(argv[1]);
 
     CHKERR(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int)));
-    CHKERR(bind(sock, (struct sockaddr*)&slave_info, sizeof(slave_info) ));
-    
+    CHKERR(bind(sock, (struct sockaddr*)&slave_info, sizeof(slave_info)));
+
+    return sock;
+}
+
+char** load_orders() {
+    FILE* orders_file = fopen("../orders.txt", "r");
+    fseek(orders_file, 0, SEEK_END);
+    long fsize = ftell(orders_file);
+    fseek(orders_file, 0, SEEK_SET);
+
+    char* orders_file_str = malloc(fsize+1);
+    fread(orders_file_str, fsize, 1, orders_file);
+    fclose(orders_file);
+    orders_file_str[fsize] = 0;
+
+    int oflen = strlen(orders_file_str);
+
+    orders_num = count_args(orders_file_str, oflen);
+
+    return slice_args(orders_file_str, oflen, orders_num);
+}
+
+int main(int argc, char *argv[]) {
+    char tx_buffer[TX_BUF_SIZE];
+    int fd;
+    uint8_t data;
+    int length;
+    int i;
+
+    int opt;
+    int mode = 0;
+
+    int is_commande = 0;
+    int nb_opt = -1;
+    struct commande *com = malloc(sizeof(struct commande));
+
+    FILE *usage_file = stderr;
+    const char *input = DEFAULT_DEVICE;
+
+    while ((opt = getopt(argc, argv, "hxc")) != -1) {
+        switch (opt) {
+            case 'd':
+                mode = 0; // TODO defines
+                break;
+            case 'c':
+                mode = 1; // TODO defines
+                break;
+            case 'x':
+                mode = 2; // TODO defines
+                break;
+            case 'h':
+                usage_file = stdout;
+            default: /* '?' */
+                fprintf(usage_file, "Usage: %s [-a addr] [-x|-c|-d] [device]\n", argv[0]);
+                fprintf(usage_file, "defaults device: %s addr: %x\n", DEFAULT_DEVICE, 0x42);
+                exit(usage_file == stdout ? EXIT_SUCCESS : EXIT_FAILURE);
+        }
+    }
+
+    if (optind < argc) {
+        input = argv[optind];
+    }
+
+    if ((fd = open(input, O_RDWR)) == -1) {
+        perror("open i2c device");
+        exit(EXIT_FAILURE);
+    }
+
+    while (1) {
+        length = read(fd, tx_buffer, TX_BUF_SIZE);
+        for(i = 0; i < length; i++)
+        {
+            switch (mode) {
+                case 1:
+                    printf("1: Data received : %c\n", tx_buffer[i]);
+                    break;
+                case 2:
+                    printf("2 :Data received : %02x\n ", tx_buffer[i]);
+                    break;
+                default:
+                    printf("3 :Data received : %d \n", tx_buffer[i]);
+                    break;
+            }
+        }
+        //decode_data(com, &is_commande, &nb_opt, tx_buffer);
+
+        write(fd, tx_buffer, length);
+    }
+
+    orders = load_orders();
+
+    struct daemon daemon;
+
+    if ((fd = open(input, O_RDWR)) == -1) {
+        perror("open i2c device");
+        exit(EXIT_FAILURE);
+    }
+
+    int sock;
+
+    CHKERR(sock = init_network());
+
     printf("Sending configure message to master \n");
     CHKERR(sendto(sock, "configure", strlen("configure"), 0, (struct sockaddr *) &master_info, master_info_len));
 
@@ -201,4 +286,6 @@ int main(int argc, char *argv[]) {
         }
         //sleep(1);
     }
+
+    free(orders);
 }
