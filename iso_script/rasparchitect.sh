@@ -138,10 +138,14 @@ if [ $CHROOT_ONLY == false ]; then
 			make bcm2709_defconfig
 
 			simple_action "Making zImage modules and dtbs ..."
-			make -j4 zImage modules dtbs
+			#make -j4 zImage modules dtbs
 
 			simple_action "Making modules_install ..."
-			make modules_install
+			#make modules_install
+
+			#Testing with only overlays
+			make dtbs
+			make arch/arm/boot/dts
 
 			simple_action "Copying new files to /boot ..."
 			cp arch/arm/boot/dts/*.dtb /boot/
