@@ -41,7 +41,7 @@ WORKING_PATH=""
 MOUNT_ONLY=false
 CHROOT=false
 CHROOTOPTIONS=""
-POSSIBLEOPTIONS=("chroot-only" "install-only" "upgrade-clean" "no-update" "no-daemon")
+POSSIBLEOPTIONS=("chroot-only" "install-only" "upgrade-clean" "no-update" "no-daemon" "no-kernel-recompile")
 FINALOPTIONS=""
 RESIZE_VALUE=-1
 
@@ -247,21 +247,10 @@ chroot_image(){
 					exit 1
 				else
 					simple_action "Successfully enabled translation through Qemu"
-					#Not activated yet for debug, really interesting ?
-					#if [ ! -e $WORKING_PATH/tmp/rasparchitect.sh ]
-					#then
-						simple_action "Preparing files for chroot ..."
-						mkdir -p $WORKING_PATH/tmp/armmanager
-						sudo cp --remove-destination rasparchitect.sh $WORKING_PATH/tmp/armmanager
-						#Providing daemon (not anymore needed -> we get it from git)
-						#sudo cp --remove-destination daemon.tgz $WORKING_PATH/tmp/armmanager
-						#if [ $? -ne 0 ]
-						#then
-						#	second_action "Couldn't copy script for manipulation inside the image."
-						#	simple_action "Please retry or copy it manually"
-						#	exit 1
-						#fi
-					#fi
+					simple_action "Preparing files for chroot ..."
+					mkdir -p $WORKING_PATH/tmp/armmanager
+					sudo cp --remove-destination rasparchitect.sh $WORKING_PATH/tmp/armmanager
+					
 					simple_action "Going to chroot into mounted raspberry pi filesystem ..."
 					second_action "Careful ! For now only works for Raspbian"
 					rootasked "chroot"
@@ -323,13 +312,6 @@ for i in "$@"
 do
 	case $i in
 		-m|--mountfile)
-			FILE="${i#*=}"
-			if [ ! -e "$FILE" ]
-			then
-				second_action "Please give an existing file"
-				usage
-				exit 1
-			fi
 			MOUNTOPT=1
 		shift # past argument=value
 		;;
