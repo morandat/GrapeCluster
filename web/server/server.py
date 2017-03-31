@@ -185,7 +185,7 @@ def test():
 #ROUTE STACK
 
 @app.route("/stack/power", defaults={'id':None}, methods=['GET'])
-@app.route('/stack/power/<int:id>')
+@app.route('/stack/<int:id>/power')
 def routePower(id):
     def nestRaspsInStack(stack):
         for rasp in stack['rasps']:
@@ -207,7 +207,7 @@ def routePower(id):
         mimetype='application/json')
 	
 @app.route("/stack/temp", defaults={'id':None}, methods=['GET'])
-@app.route('/stack/temp/<int:id>')
+@app.route('/stack/<int:id>/temp')
 def routeTemperature(id):
     def nestRaspsInStack(stack):
         for rasp in stack['rasps']:
@@ -229,7 +229,7 @@ def routeTemperature(id):
         mimetype='application/json')
 
 @app.route("/stack/shutdown", defaults={'id':None}, methods=['POST'])
-@app.route('/stack/shutdown/<int:id>')
+@app.route('/stack/<int:id>/shutdown')
 def routeShutdown(id):
     def nestRaspsInStack(stack):
         for rasp in stack['rasps']:
@@ -253,7 +253,7 @@ def routeShutdown(id):
 #ROUTE RASP
        
 @app.route("/rasp/config", defaults={'id':None}, methods=['GET'])
-@app.route('/rasp/config/<int:id>')
+@app.route('/rasp/<int:id>/config')
 def routeConfig(id):
     rasp = getRasp(id)
     if rasp is None:
@@ -264,7 +264,7 @@ def routeConfig(id):
         mimetype='application/json')
 
 @app.route("/rasp/cpu", defaults={'id':None}, methods=['GET'])        
-@app.route('/rasp/cpu/<int:id>')
+@app.route('/rasp/<int:id>/cpu')
 def routeCPU(id):
     rasp = getRasp(id)
     if rasp is None:
@@ -275,7 +275,7 @@ def routeCPU(id):
         mimetype='application/json')
 
 @app.route("/rasp/start", defaults={'id':None}, methods=['POST'])
-@app.route('/rasp/start/<int:id>')
+@app.route('/rasp/<int:id>/start')
 def routeStart(id):
     rasp = getRasp(id)
     if rasp is None:
@@ -286,7 +286,7 @@ def routeStart(id):
         mimetype='application/json')
 
 @app.route("/rasp/stop", defaults={'id':None}, methods=['POST'])        
-@app.route('/rasp/stop/<int:id>')
+@app.route('/rasp/<int:id>/stop')
 def routeStop(id):
     rasp = getRasp(id)
     if rasp is None:
@@ -297,7 +297,7 @@ def routeStop(id):
         mimetype='application/json')
 
 @app.route("/rasp/restart", defaults={'id':None}, methods=['POST'])        
-@app.route('/rasp/restart/<int:id>')
+@app.route('/rasp/<int:id>/restart')
 def routeRestart(id):
     rasp = getRasp(id)
     if rasp is None:
