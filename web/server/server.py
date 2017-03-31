@@ -140,9 +140,9 @@ def getRasp(id=None):
 
     if id is not None:
         rasp = master.get_slave_by_i2c(id)
-        print id
-        print type(id)
-        print rasp
+        print(id)
+        print(type(id))
+        print(rasp)
         if rasp is not None:
             return renderRasp(rasp)
         else:
