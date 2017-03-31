@@ -1,4 +1,4 @@
-# coding: utf-8
+# -*- coding: utf-8 -*-
 from Stack import Stack
 
 """
@@ -19,8 +19,7 @@ Les actions possibles sur un slave sont :
 
 """
 
-"""
-func_stack = {
+"""func_stack = {
   'get_power': Communicator.ask_stack_power,
   'get_temp': Communicator.ask_stack_temp,
   'shutdown': Communicator.send_stack_shutdown,
@@ -37,7 +36,8 @@ func_slave = {
   'options': Communicator.ask_slave_options,
 }
 """
-          
+
+
 class Communicator():  # Interface Communicator to abstract communication (UDP or I2C)
 
 # Actions générales
@@ -54,7 +54,7 @@ class Communicator():  # Interface Communicator to abstract communication (UDP o
 
     def close_communication(self):
         raise NotImplementedError("Not implemented in interface")
-        
+
 # Actions/Demandes sur les stacks
 
     # Obtenir la consommation d'éléctricité (en volts)

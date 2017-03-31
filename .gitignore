@@ -1,3 +1,6 @@
 .armmanager/
 .wpath
 .idea
+cmake-build-debug
+*.out
+*.pyc
