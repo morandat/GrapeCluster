@@ -1,6 +1,6 @@
 import json
 import smbus
-#import psutil
+
 from grape import I2CDevice
 
 class PiDevice(I2CDevice):
@@ -28,11 +28,11 @@ class PiDevice(I2CDevice):
     def set_pos(self, pos):
         self._pos = pos
 
-  #  def get_cpu_usage(self):
-   #     return psutil.cpu_freq()
+    def get_cpu_usage(self):
+        return self.__last_cpu_usage
 
-    #def get_ram_usage(self):
-     #   return psutil.virtual_memory().percent
+    def get_ram_usage(self):
+        return self.__last_ram_usage
 
     def is_master(self):
         return False
