@@ -11,6 +11,7 @@ constants = {
     'maxStacks' : 16,
     'nSlavesByStack' : 6,
     'stackHeatLimit' : 75,
+    'raspCPULimit' : 0.8,
     'raspStatus' : [
         'Off',
         'On'
@@ -196,7 +197,7 @@ def viewRasp(id):
 
 # STACK GET
 
-@app.route("/stack/", defaults={'id':None}, methods=['GET'])
+@app.route("/stack/", defaults={'id':None})
 @app.route("/stack/<int:id>")
 def routeStack(id):
     def nestRaspsInStack(stack):
@@ -220,7 +221,7 @@ def routeStack(id):
 
 # RASP GET
 
-@app.route("/rasp/", defaults={'id':None}, methods=['GET'])
+@app.route("/rasp/", defaults={'id':None})
 @app.route("/rasp/<int:id>")
 def routeRasp(id):
     rasp = getRasp(id)
@@ -234,7 +235,7 @@ def routeRasp(id):
 # STACK ACTIONS
 
 @app.route("/stack/shutdown", defaults={'id':None}, methods=['POST'])
-@app.route('/stack/shutdown/<int:id>')
+@app.route('/stack/shutdown/<int:id>', methods=['POST'])
 def routeShutdown(id):
     stack = daemon.get_master().get_stack(id)
 
@@ -251,7 +252,7 @@ def routeShutdown(id):
 # RASP ACTIONS
 
 @app.route("/rasp/start", defaults={'id':None}, methods=['POST'])
-@app.route('/rasp/start/<int:id>')
+@app.route('/rasp/start/<int:id>', methods=['POST'])
 def routeStart(id):
     rasp = daemon.get_master().get_slave_by_i2c(id)
 
@@ -266,7 +267,7 @@ def routeStart(id):
         mimetype='application/json')
 
 @app.route("/rasp/stop", defaults={'id':None}, methods=['POST'])        
-@app.route('/rasp/stop/<int:id>')
+@app.route('/rasp/stop/<int:id>', methods=['POST'])
 def routeStop(id):
     rasp = daemon.get_master().get_slave_by_i2c(id)
 
@@ -281,7 +282,7 @@ def routeStop(id):
         mimetype='application/json')
 
 @app.route("/rasp/restart", defaults={'id':None}, methods=['POST'])        
-@app.route('/rasp/restart/<int:id>')
+@app.route('/rasp/restart/<int:id>', methods=['POST'])
 def routeRestart(id):
     rasp = daemon.get_master().get_slave_by_i2c(id)
 

@@ -10,7 +10,7 @@ $.fn.btnColor = function(condition){
 
 addAjaxHandler = function(url, handler, interval, method) {
 	if(interval === true)
-		interval = 20000;
+		interval = 5000;
   if(method === undefined)
     method = 'GET'
 
@@ -21,7 +21,7 @@ addAjaxHandler = function(url, handler, interval, method) {
 			type : method,
 			success : handler,
       error: function() {
-        alert("AJAX Error.");
+        console.log("AJAX Error.");
       }
 		});
 
@@ -33,17 +33,19 @@ addAjaxHandler = function(url, handler, interval, method) {
 }
 
 $('.statusBtn').click(function() {
-	if($(this).text() == CONSTANTS.raspStatus[0]) {
-		if(confirm("Allumer la Rasp ?")) {
+	var $this = $(this);
+
+	if($this.text() == CONSTANTS.raspStatus[0]) {
+		if(confirm("Allumer le Rasp ?")) {
 			addAjaxHandler('/rasp/start/'+$(this).attr('raspId'), function() {
-				$(this).text(CONSTANTS.raspStatus[1]).btnColor(1);
+				$this.text(CONSTANTS.raspStatus[1]).btnColor(true);
 			}, false, 'POST');
 		}
 	}
-	if($(this).text() == CONSTANTS.raspStatus[1]) {
-		if(confirm("Eteindre la Rasp ?")) {
+	if($this.text() == CONSTANTS.raspStatus[1]) {
+		if(confirm("Eteindre le Rasp ?")) {
 			addAjaxHandler('/rasp/start/'+$(this).attr('raspId'), function() {
-				$(this).text(CONSTANTS.raspStatus[0]).btnColor(0);
+				$this.text(CONSTANTS.raspStatus[0]).btnColor(false);
 			}, false, 'POST');
 		}
 	}

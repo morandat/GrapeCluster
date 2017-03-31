@@ -10,7 +10,10 @@ addAjaxHandler("/stack/"+STACKID, function(stack) {
 			$('#raspI2C'+raspSlot).text(raspData.address);
 			$('#raspOS'+raspSlot).text(raspData.os);
 			$('#raspIP'+raspSlot).text(raspData.ip);
-			$('#raspCPU'+raspSlot).text(raspData.cpu);
+			$('#raspCPU'+raspSlot)
+				.btnColor(raspData.cpu<CONSTANTS.raspCPULimit)
+				.text(Math.round(raspData.cpu*100))
+				.show();
 			$('#raspRAM'+raspSlot).text(raspData.ram);
 			$('#raspStatus'+raspSlot)
 				.btnColor(raspData.status)
@@ -25,7 +28,7 @@ addAjaxHandler("/stack/"+STACKID, function(stack) {
 			$('#raspI2C'+raspSlot).text('');
 			$('#raspOS'+raspSlot).text('');
 			$('#raspIP'+raspSlot).text('');
-			$('#raspCPU'+raspSlot).text('');
+			$('#raspCPU'+raspSlot).hide();
 			$('#raspRAM'+raspSlot).text('');
 			$('#raspStatus'+raspSlot).hide();
 
