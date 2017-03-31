@@ -10,5 +10,6 @@ addAjaxHandler("/rasp/"+RASPID, function(rasp) {
 		.text(CONSTANTS.raspStatus[rasp.status]);
 	$('#raspOS').text(rasp.os);
 	$('#raspIP').text(rasp.ip);
-	
+	$('#raspCPU').text(rasp.cpu);
+	$('#raspRAM').text(rasp.ram);
 }, true);

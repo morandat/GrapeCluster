@@ -15,8 +15,8 @@ class PiDevice(I2CDevice):
 
         self._stack_nb = stack_nb
         self._mac = mac_add
-        self._i2c = i2c_add
-        self._pos = pos
+        self._i2c = int(i2c_add)
+        self._pos = int(pos)
         self._ip_address = ip_address
 
         self.__cpu_usage = -1
@@ -42,6 +42,9 @@ class PiDevice(I2CDevice):
     def set_pos(self, pos):
         self._pos = pos
 
+    def get_pos(self):
+        return self._pos
+
     def get_cpu_usage(self):
         return self.__cpu_usage
 
@@ -59,7 +62,10 @@ class PiDevice(I2CDevice):
         return self.__os
 
     def get_i2c_address(self):
-        return self.__i2c_address
+        return self._i2c
+
+    def get_id(self):
+        return self.__id
 
     def is_master(self):
         return False

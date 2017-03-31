@@ -34,7 +34,7 @@ class Daemon(Thread):
                 self.__udp_comm.send("0;" + addr[0] + ";", new_slave.get_ip_address())
                 print("Configured new slave of ip_addr {}".format(addr[0]))
             elif data[:4] == b"cpu:":
-                slave = self.__master.get_slave(addr[0])
+                slave = self.__master.get_slave_by_ip(addr[0])
                 slave.set_cpu_usage(data[4:])
 
                 print("Received cpu_usage from slave {}, updating value".format(addr[0]))
