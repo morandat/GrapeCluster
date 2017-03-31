@@ -187,15 +187,15 @@ int main(int argc, char *argv[]) {
             case 'h':
                 usage_file = stdout;
             default: /* '?' */
-                fprintf(usage_file, "Usage: %s [-a addr] [-x|-c|-d] [device]\n", argv[0]);
+                fprintf(usage_file, "Usage: %s [-a addr] [-x|-c|-d] ip_address\n", argv[0]);
                 fprintf(usage_file, "defaults device: %s addr: %x\n", DEFAULT_DEVICE, 0x42);
                 exit(usage_file == stdout ? EXIT_SUCCESS : EXIT_FAILURE);
         }
     }
 
-    if (optind < argc) {
+    /*if (optind < argc) {
         input = argv[optind];
-    }
+    }*/
 
     if ((i2c_fd = open(input, O_RDWR)) == -1) {
         perror("open i2c device");
@@ -205,11 +205,6 @@ int main(int argc, char *argv[]) {
     orders = load_orders();
 
     struct daemon daemon;
-
-    if ((i2c_fd = open(input, O_RDWR)) == -1) {
-        perror("open i2c device");
-        exit(EXIT_FAILURE);
-    }
 
     struct sockaddr_in master_info, slave_info;
     socklen_t master_info_len;
@@ -228,6 +223,7 @@ int main(int argc, char *argv[]) {
     ssize_t recv_len;
     char buffer[BUFF_LEN];
     while (curr_status != STOPPED) {
+        printf("yolo\n");
         switch (curr_status) {
             case ACTIVE:
                 printf("waiting for data...\n");
