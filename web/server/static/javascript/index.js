@@ -23,6 +23,7 @@ addAjaxHandler("/stack", function(stacks) {
 				$('#raspStatus'+position)
 					.btnColor(raspData.status)
 					.text(CONSTANTS.raspStatus[raspData.status])
+					.attr('raspId', raspData.address)
 					.show();
 
 				//console.log(position+' : '+JSON.stringify(raspData))
@@ -42,5 +43,5 @@ addAjaxHandler("/stack", function(stacks) {
 
 		++stackCount;
 	}
-	
+
 }, true);

@@ -71,7 +71,7 @@ raspsTest = {
 
 
 ## GETTERS ##
-
+"""
 def getStack(id=None):
     if id is not None:
         if stacksTest.get(id) is not None:
@@ -90,15 +90,80 @@ def getRasp(id=None):
     else:
         return copy.deepcopy(raspsTest)
 
+"""
+
+def getStack(id=None):
+    master = daemon.get_master()
+
+    def renderStack(stack):
+
+        rasps = stack.get_pi_devices()
+
+        stackJSON = {
+            'heat': 80,
+            'rasps': {}
+        }
+
+        for rasp in stack.get_pi_devices():
+            stackJSON['rasps'][rasp.get_pos()] = rasp.get_i2c_address()
+
+        return stackJSON
+
+    if id is not None:
+        stack = master.get_stack(id)
+        if stack is not None:
+            return renderStack(stack)
+        else:
+            return None
+    else:
+        stacks = {}
+        counter = 1
+        for stack in master.get_stacks():
+            stacks[counter] = renderStack(stack)
+            counter += 1
+        return stacks
+
+def getRasp(id=None):
+    master = daemon.get_master()
+
+    def renderRasp(rasp):
+        return {
+            'name' : 'Name',
+            'address' : rasp.get_i2c_address(),
+            'stack' : 1,
+            'os' : rasp.get_os(),
+            'status' : 1,
+            'ip' : rasp.get_ip_address(),
+            'cpu' : rasp.get_cpu_usage(),
+            'ram' : rasp.get_ram_usage()
+        }
+
+    if id is not None:
+        rasp = master.get_slave_by_i2c(id)
+        print(id)
+        print(type(id))
+        print(rasp)
+        if rasp is not None:
+            return renderRasp(rasp)
+        else:
+            return None
+    else:
+        rasps = {}
+        for stack in master.get_stacks():
+            for rasp in stack.get_pi_devices():
+                rasps[rasp.get_i2c_address()] = renderRasp(rasp)
+        return rasps
+
 
 #######################################################################################
 #                                                                                     #
 #                                    VIEWS                                            #
 #                                                                                     #
-#################################(    stack.get_ip_addresses())######################################################
+#######################################################################################
 
 @app.route("/index")
 @app.route("/")
+@app.route("/view/stack")
 @app.route("/view/rasp")
 def routeDefault():
     return redirect("/view", code=302)
@@ -129,6 +194,8 @@ def viewRasp(id):
 #                                                                                     #
 #######################################################################################
 
+# STACK GET
+
 @app.route("/stack/", defaults={'id':None}, methods=['GET'])
 @app.route("/stack/<int:id>")
 def routeStack(id):
@@ -151,6 +218,8 @@ def routeStack(id):
         status=200,
         mimetype='application/json')
 
+# RASP GET
+
 @app.route("/rasp/", defaults={'id':None}, methods=['GET'])
 @app.route("/rasp/<int:id>")
 def routeRasp(id):
@@ -162,148 +231,67 @@ def routeRasp(id):
         status=200,
         mimetype='application/json')
 
-@app.route("/test/")
-def test():
-    master = daemon.get_master()
-    cpu_values = []
-    for stack in master.get_stacks():
-        for pi_device in stack.get_pi_devices():
-            cpu_values.append(pi_device.get_cpu_usage())
-    for value in cpu_values:
-        print(value)
-    return app.response_class(
-        response=json.dumps(cpu_values),
-        status=200,
-        mimetype='application/json')
-
-########
-#
-# ADDED
-#
-########
-
-#ROUTE STACK
-
-@app.route("/stack/power", defaults={'id':None}, methods=['GET'])
-@app.route('/stack/<int:id>/power')
-def routePower(id):
-    def nestRaspsInStack(stack):
-        for rasp in stack['rasps']:
-            stack['rasps'][rasp] = getRasp(stack['rasps'][rasp])
-
-    stack = getStack(id)
-    if stack is None:
-        stack = {}
-    else:
-        if id is None:
-            for stackId in stack:
-                nestRaspsInStack(stack[stackId])
-        else:
-            nestRaspsInStack(stack)
-
-    return app.response_class(
-        response=json.dumps(stack.getPower()),
-        status=200,
-        mimetype='application/json')
-	
-@app.route("/stack/temp", defaults={'id':None}, methods=['GET'])
-@app.route('/stack/<int:id>/temp')
-def routeTemperature(id):
-    def nestRaspsInStack(stack):
-        for rasp in stack['rasps']:
-            stack['rasps'][rasp] = getRasp(stack['rasps'][rasp])
-
-    stack = getStack(id)
-    if stack is None:
-        stack = {}
-    else:
-        if id is None:
-            for stackId in stack:
-                nestRaspsInStack(stack[stackId])
-        else:
-            nestRaspsInStack(stack)
-
-    return app.response_class(
-        response=json.dumps(stack.getTemp()),
-        status=200,
-        mimetype='application/json')
+# STACK ACTIONS
 
 @app.route("/stack/shutdown", defaults={'id':None}, methods=['POST'])
-@app.route('/stack/<int:id>/shutdown')
+@app.route('/stack/shutdown/<int:id>')
 def routeShutdown(id):
-    def nestRaspsInStack(stack):
-        for rasp in stack['rasps']:
-            stack['rasps'][rasp] = getRasp(stack['rasps'][rasp])
+    stack = daemon.get_master().get_stack(id)
 
-    stack = getStack(id)
     if stack is None:
-        stack = {}
+        response = 0
     else:
-        if id is None:
-            for stackId in stack:
-                nestRaspsInStack(stack[stackId])
-        else:
-            nestRaspsInStack(stack)
-
+        response = 1
+    
     return app.response_class(
-        response=json.dumps(stack.shutdown()),
+        response=json.dumps({'response': response}),
         status=200,
         mimetype='application/json')
         
-#ROUTE RASP
-       
-@app.route("/rasp/config", defaults={'id':None}, methods=['GET'])
-@app.route('/rasp/<int:id>/config')
-def routeConfig(id):
-    rasp = getRasp(id)
-    if rasp is None:
-        rasp = {}
-    return app.response_class(
-        response=json.dumps(rasp.getConfig()),
-        status=200,
-        mimetype='application/json')
-
-@app.route("/rasp/cpu", defaults={'id':None}, methods=['GET'])        
-@app.route('/rasp/<int:id>/cpu')
-def routeCPU(id):
-    rasp = getRasp(id)
-    if rasp is None:
-        rasp = {}
-    return app.response_class(
-        response=json.dumps(rasp.getCPU()),
-        status=200,
-        mimetype='application/json')
+# RASP ACTIONS
 
 @app.route("/rasp/start", defaults={'id':None}, methods=['POST'])
-@app.route('/rasp/<int:id>/start')
+@app.route('/rasp/start/<int:id>')
 def routeStart(id):
-    rasp = getRasp(id)
+    rasp = daemon.get_master().get_slave_by_i2c(id)
+
     if rasp is None:
-        rasp = {}
+        response = 0
+    else:
+        response = 1
+
     return app.response_class(
-        response=json.dumps(rasp.start()),
+        response=json.dumps({'response': response}),
         status=200,
         mimetype='application/json')
 
 @app.route("/rasp/stop", defaults={'id':None}, methods=['POST'])        
-@app.route('/rasp/<int:id>/stop')
+@app.route('/rasp/stop/<int:id>')
 def routeStop(id):
-    rasp = getRasp(id)
+    rasp = daemon.get_master().get_slave_by_i2c(id)
+
     if rasp is None:
-        rasp = {}
+        response = 0
+    else:
+        response = 1
+    
     return app.response_class(
-        response=json.dumps(rasp.stop()),
+        response=json.dumps({'response': response}),
         status=200,
         mimetype='application/json')
 
 @app.route("/rasp/restart", defaults={'id':None}, methods=['POST'])        
-@app.route('/rasp/<int:id>/restart')
+@app.route('/rasp/restart/<int:id>')
 def routeRestart(id):
-    rasp = getRasp(id)
+    rasp = daemon.get_master().get_slave_by_i2c(id)
+
     if rasp is None:
-        rasp = {}
+        response = 0
+    else:
+        response = 1
+    
     return app.response_class(
-        response=json.dumps(rasp.restart()),
+        response=json.dumps({'response': response}),
         status=200,
         mimetype='application/json')
         

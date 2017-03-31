@@ -26,6 +26,8 @@
                       <th>I2C Address</th>
                       <th>Operating System</th>
                       <th>IP Address</th>
+                      <th>CPU Usage</th>
+                      <th>RAM Usage</th>
                       <th>Status</th>
                     </tr>
                   </thead>
@@ -38,7 +40,9 @@
                               <td id="raspI2C{{ raspI }}"></td>
                               <td id="raspOS{{ raspI }}"></td>
                               <td id="raspIP{{ raspI }}"></td>
-                              <td><div class="btn btn-sm" id="raspStatus{{ raspI }}" style="display:none;"></div></td>
+                              <td id="raspCPU{{ raspI }}"></td>
+                              <td id="raspRAM{{ raspI }}"></td>
+                              <td><div class="btn btn-sm statusBtn" id="raspStatus{{ raspI }}" style="display:none;"></div></td>
                             </tr>
                         {% endfor %}
                   </tbody>

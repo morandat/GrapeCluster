@@ -42,45 +42,51 @@ int restart_slave(){
 }
 
 
-void action(enum sys_call call){
+char * action(enum sys_call call){
 	
 	
 	int i = 0; 
 
 	switch(call){
 		case TEST:
-			test_communication();
+			return "abcd";
 			break;
 		case CPU:
 			//get_cpu();
 			break;
 		case SHUTDOWN:
 			shutdown_slave();
+			return "abcd";
 			break;
 		case RESTART:
 			restart_slave();
+			return "abcd";
 			break;
 		case GET_IP:
 			//get_ip();
+			return "abcd";
 			break;
 		case GET_I2C:
 			//get_i2c();
+			return "abcd";
 			break;
 		case IS_NETWORK:
 			//is_network();
+			return "abcd";
 			break;
 	}
+
+	return "abcd";
 }
 
 int main(int argc, char **argv)
 {
 	char tx_buffer[TX_BUF_SIZE];
+	char tx_answer[TX_BUF_SIZE];
 	int fd;
 	uint8_t data;
 	int length;
-	int i;
-	
-		
+	int i;		
 
 	int opt;
 	int mode = 0; 
@@ -126,15 +132,18 @@ int main(int argc, char **argv)
 				switch (mode) {
 				case 1:
 					printf("1: Data received : %c\n", tx_buffer[i]);
-					action(tx_buffer[i]);
+					tx_answer = action(tx_buffer[i]);
+					write(fd, tx_answer, 4);
 					break;
 				case 2:
 					printf("2 :Data received : %02x\n ", tx_buffer[i]);
-					action(tx_buffer[i]);
+					tx_answer = action(tx_buffer[i]);
+					write(fd, tx_answer, 4);
 					break;
 				default:
 					printf("3 :Data received : %d \n", tx_buffer[i]);
-					action(tx_buffer[i]);
+					tx_answer = action(tx_buffer[i]);
+					write(fd, tx_answer, 4);
 					break;
 				}
 			}

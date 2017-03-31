@@ -41,8 +41,58 @@ WORKING_PATH=""
 MOUNT_ONLY=false
 CHROOT=false
 CHROOTOPTIONS=""
-POSSIBLEOPTIONS=("chroot-only" "install-only" "upgrade-clean" "no-update")
+POSSIBLEOPTIONS=("chroot-only" "install-only" "upgrade-clean" "no-update" "no-daemon" "no-kernel-recompile")
 FINALOPTIONS=""
+RESIZE_VALUE=-1
+
+resize_image(){
+	main_action "Resizing the image"
+
+	if [[ $FILE == *.img ]] || [[ $FILE == *.iso ]]
+	then
+
+		df -h | grep $FILE &> /dev/null
+		if [ $? -eq 0 ]
+		then
+			simple_action "The image is already mounted, unmounting it ..."
+			rootasked "Umount"
+			sudo umount $FILE
+		fi
+
+		simple_action "Getting the partition's offset, and resizing it ..."
+		part=`fdisk -l -o Start $FILE | cut -d' ' -f1,3 | tail -n1`
+		offset=$((512*$part))
+
+		truncate -s +1G $FILE
+		rootasked "Losetup"
+		sudo losetup /dev/loop0 $FILE
+
+		if [ $? -ne 0 ]
+		then
+			second_action "loopback device 0 is required to resize and mount on loop raspbian system"
+			exit 1
+		fi
+
+		simple_action "Re-creating partition in order to resize it ..."
+		rootasked "fdisk"
+		echo -e "d\n2\nn\np\n2\n$part\n\nw" | sudo fdisk /dev/loop0
+		sudo losetup -d /dev/loop0
+
+		sudo losetup -o $offset /dev/loop0 $FILE
+		simple_action "Verifying filesystem with e2fsck ..."
+		sudo e2fsck -f -y /dev/loop0
+		simple_action  "Resizing filesystem with resize2fs ..."
+		sudo resize2fs /dev/loop0
+
+		sudo losetup -d /dev/loop0
+		simple_action "Done !"
+
+	else
+		simple_action "Please give a valid file ... (img/iso)"
+		usage
+		exit 1
+	fi
+}
 
 mount_image(){
 	main_action "Mounting the image"
@@ -79,17 +129,40 @@ mount_image(){
 
 		#Seeking part to mount
 		simple_action "Mounting Linux partition of $FILE"
-		part=`fdisk -l -o Start $FILE | cut -d' ' -f1,3 | tail -n1`
-		offset=$((512*$part))
-
-		rootasked "Mount"
-		sudo mount -o offset=$offset -t ext4 $FILE $WORKING_PATH
+		#part_root=`fdisk -l -o Start $FILE | cut -d' ' -f1,3 | tail -n1`
+		#part_boot=`fdisk -l -o Start $FILE | cut -d' ' -f1,3 | tail -n2 | head -n1`
+		#offset_root=$((512*$part_root))
+		#offset_boot=$((512*$part_boot))
+		rootasked "Losetup"
+		FREE_LOOP=`sudo losetup -f`
 		if [ $? -ne 0 ]
 		then
-			simple_action "Something went wrong when trying to mount"
+			second_action "No free loop device could be found, cannot set loopback device."
+			exit 1
+		fi
+
+		sudo losetup -P $FREE_LOOP $FILE
+
+		rootasked "Mount"
+		#sudo mount -o offset=$offset_root -t ext4 $FILE $WORKING_PATH
+		sudo mount "$FREE_LOOP"p2 $WORKING_PATH
+
+		if [ $? -ne 0 ]
+		then
+			simple_action "Something went wrong when trying to mount root"
 			exit 1
 		else
-			simple_action "Successfully mounted `basename $FILE` to $WORKING_PATH"
+			#sudo mkdir -p $WORKING_PATH/boot
+			#sudo mount -o offset=$offset_boot -t vfat $FILE $WORKING_PATH/boot
+			sudo mount "$FREE_LOOP"p1 $WORKING_PATH/boot
+
+			if [ $? -ne 0 ]
+			then
+				simple_action "Something went wrong when trying to mount boot"
+				exit 1
+			else
+				simple_action "Successfully mounted `basename $FILE` to $WORKING_PATH"
+			fi
 		fi
 
 		#Then we copy qemu executable to make translation for chroot
@@ -109,7 +182,6 @@ copy_qemu(){
 	if [ -e "/usr/bin/qemu-arm-static" ]
 	then
 		second_action "Adding qemu-arm-static to /usr/bin of the image ..."
-		cd $WORKING_PATH
 		rootasked "cp (in mounted filesystem)"
 		sudo cp --remove-destination /usr/bin/qemu-arm-static $WORKING_PATH/usr/bin/
 	else
@@ -126,16 +198,26 @@ unmount_image(){
 	then
 		second_action "Unmounting `realpath $WORKING_PATH` filesystem ..."
 		rootasked "Umount"
+		sudo umount $WORKING_PATH/boot
 		sudo umount $WORKING_PATH
 		if [ $? -ne 0 ]
 		then
 			second_action "A problem occured when trying to unmount $WORKING_PATH"
 			exit 1
 		else
-			simple_action "Successfully unmounted $WORKING_PATH"
-			simple_action "Removing temporary file ..."
-			rm .wpath
-			rm -r $WORKING_PATH
+
+			sudo losetup -d /dev/loop0
+
+			if [ $? -ne 0 ]
+			then
+				second_action "A problem occured when unload loopback device"
+				exit 1
+			else
+				simple_action "Successfully unmounted $WORKING_PATH"
+				simple_action "Removing temporary file ..."
+				rm .wpath
+				rm -r $WORKING_PATH
+			fi
 		fi
 	else
 		simple_action "Unmount target must be a directory"
@@ -165,25 +247,14 @@ chroot_image(){
 					exit 1
 				else
 					simple_action "Successfully enabled translation through Qemu"
-					#Not activated yet for debug, really interesting ?
-					#if [ ! -e $WORKING_PATH/tmp/rasparchitect.sh ]
-					#then
-						simple_action "Preparing files for chroot ..."
-						mkdir -p $WORKING_PATH/tmp/armmanager
-						sudo cp --remove-destination rasparchitect.sh $WORKING_PATH/tmp/armmanager
-						#Providing daemon
-						sudo cp --remove-destination daemon.tgz $WORKING_PATH/tmp/armmanager
-						if [ $? -ne 0 ]
-						then
-							second_action "Couldn't copy script for manipulation inside the image."
-							simple_action "Please retry or copy it manually"
-							exit 1
-						fi
-					#fi
+					simple_action "Preparing files for chroot ..."
+					mkdir -p $WORKING_PATH/tmp/armmanager
+					sudo cp --remove-destination rasparchitect.sh $WORKING_PATH/tmp/armmanager
+					
 					simple_action "Going to chroot into mounted raspberry pi filesystem ..."
 					second_action "Careful ! For now only works for Raspbian"
 					rootasked "chroot"
-					sudo chroot $WORKING_PATH /usr/bin/qemu-arm-static /bin/bash /tmp/armmanager/rasparchitect.sh -f=daemon.tgz $FINALOPTIONS
+					sudo chroot $WORKING_PATH /usr/bin/qemu-arm-static /bin/bash /tmp/armmanager/rasparchitect.sh $FINALOPTIONS
 					simple_action "Finished chroot actions"
 				fi
 			else
@@ -240,14 +311,7 @@ fi
 for i in "$@"
 do
 	case $i in
-		-m=*|--mountfile=*)
-			FILE="${i#*=}"
-			if [ ! -e "$FILE" ]
-			then
-				second_action "Please give an existing file"
-				usage
-				exit 1
-			fi
+		-m|--mountfile)
 			MOUNTOPT=1
 		shift # past argument=value
 		;;
@@ -327,14 +391,41 @@ do
 			fi
 		shift # past argument=value
 		;;
+		-r|-r=*|--resize-image|--resize-image=*)
+			VALUE="${i#*=}"
+			if [ "$VALUE" == "$i" ]
+			then
+				RESIZE_VALUE=1G
+			else
+				RESIZE_VALUE=$VALUE
+			fi
+		shift
+		;;
 		-*)
 			simple_action "Unkown option : $i" # unknown option
 		;;
 		*)
-			simple_action "Unkown argument : $i" # unknown argument
+			if [ "$FILE" == "" ]
+			then
+				FILE="${i}"
+				if [ ! -e "$FILE" ]
+				then
+					second_action "Please give an existing file"
+					usage
+					exit 1
+				fi
+			else
+				simple_action "Unkown argument : $i" # unknown argument
+			fi
 		;;
 	esac
 done
+
+#resize the image
+if [ "$RESIZE_VALUE" != "-1" ]
+then
+	resize_image
+fi
 
 #Mount the filesystem
 if [ $MOUNTOPT -eq 1 ]
