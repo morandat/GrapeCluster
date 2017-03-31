@@ -56,18 +56,23 @@ char * action(enum sys_call call){
 			break;
 		case SHUTDOWN:
 			shutdown_slave();
+			return "abcd";
 			break;
 		case RESTART:
 			restart_slave();
+			return "abcd";
 			break;
 		case GET_IP:
 			//get_ip();
+			return "abcd";
 			break;
 		case GET_I2C:
 			//get_i2c();
+			return "abcd";
 			break;
 		case IS_NETWORK:
 			//is_network();
+			return "abcd";
 			break;
 	}
 }
