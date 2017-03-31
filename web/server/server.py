@@ -12,7 +12,7 @@ constants = {
     'nSlavesByStack' : 6,
     'stackHeatLimit' : 75,
     'raspCPULimit' : 0.8,
-    'raspStatus' : [
+    'status' : [
         'Off',
         'On'
     ]
@@ -20,7 +20,7 @@ constants = {
 
 
 ## DATA ##
-
+"""
 stacksTest = {
     1 : {
         'heat' : 80,
@@ -69,7 +69,7 @@ raspsTest = {
         'cpu' : 74
     }
 }
-
+"""
 
 ## GETTERS ##
 """
@@ -102,6 +102,7 @@ def getStack(id=None):
 
         stackJSON = {
             'heat': 80,
+            'status': 1,
             'rasps': {}
         }
 

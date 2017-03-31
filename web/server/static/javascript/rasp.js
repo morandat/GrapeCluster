@@ -4,14 +4,25 @@ addAjaxHandler("/rasp/"+RASPID, function(rasp) {
 
 	$('.raspStack').text(rasp.stack);
 	$('.raspName').text(rasp.name);
+	$('#raspSSH').val('ssh '+rasp.ip);
 	$('#raspStack').text('#'+rasp.stack);
 	$('#raspStatus')
 		.btnColor(rasp.status)
-		.text(CONSTANTS.raspStatus[rasp.status]);
+		.text(CONSTANTS.status[rasp.status]);
+	if(rasp.status)
+		$('#raspRestart').show();
+	else
+		$('#raspRestart').hide();
 	$('#raspOS').text(rasp.os);
 	$('#raspIP').text(rasp.ip);
 	$('#raspCPU').text(rasp.cpu)
 		.btnColor(rasp.cpu<CONSTANTS.raspCPULimit)
-		.text(Math.round(rasp.cpu*100));
+		.text(Math.round(rasp.cpu*100)+'%');
 	$('#raspRAM').text(rasp.ram);
 }, true);
+
+$(document).ready(function() {
+	$("#raspSSH").on("click", function () {
+	   $(this).select();
+	});
+});
