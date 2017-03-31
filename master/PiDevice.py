@@ -1,5 +1,6 @@
 # coding: utf-8
 import json
+
 from grape import I2CDevice
 
 class PiDevice(I2CDevice):
