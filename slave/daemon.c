@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string.h>
+#include <fcntl.h>
 
 
 #include "daemon.h"
@@ -107,16 +108,15 @@ long double get_cpu_usage() {
     return loadavg;
 }
 
-int init_network() {
-    struct sockaddr_in slave_info, master_info;
+int init_network(struct sockaddr_in* slave_info, struct sockaddr_in* master_info, socklen_t * master_info_len, char* ip_addr) {
 
     memset((char *) &master_info, 0, sizeof(master_info));
 
-    master_info.sin_family = AF_INET;
-    master_info.sin_port = htons(PORT);
-    master_info.sin_addr.s_addr = inet_addr(MASTER_IP_ADDRESS);
+    master_info->sin_family = AF_INET;
+    master_info->sin_port = htons(PORT);
+    master_info->sin_addr.s_addr = inet_addr(MASTER_IP_ADDRESS);
 
-    socklen_t master_info_len = sizeof(master_info);
+    *master_info_len = sizeof(master_info);
 
     int sock;
     CHKERR(sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP));
@@ -124,9 +124,9 @@ int init_network() {
     // zero out the structure
     memset((char *) &slave_info, 0, sizeof(slave_info));
 
-    slave_info.sin_family = AF_INET;
-    slave_info.sin_port = htons(PORT);
-    slave_info.sin_addr.s_addr = inet_addr(argv[1]);
+    slave_info->sin_family = AF_INET;
+    slave_info->sin_port = htons(PORT);
+    slave_info->sin_addr.s_addr = inet_addr(ip_addr);
 
     CHKERR(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int)));
     CHKERR(bind(sock, (struct sockaddr*)&slave_info, sizeof(slave_info)));
@@ -135,7 +135,7 @@ int init_network() {
 }
 
 char** load_orders() {
-    FILE* orders_file = fopen("../orders.txt", "r");
+    FILE* orders_file = fopen("orders.txt", "r");
     fseek(orders_file, 0, SEEK_END);
     long fsize = ftell(orders_file);
     fseek(orders_file, 0, SEEK_SET);
@@ -153,10 +153,14 @@ char** load_orders() {
 }
 
 int main(int argc, char *argv[]) {
+    fd_set rfds;
+
+    FD_ZERO(&rfds);
+
     char tx_buffer[TX_BUF_SIZE];
-    int fd;
+    int i2c_fd;
     uint8_t data;
-    int length;
+    size_t length;
     int i;
 
     int opt;
@@ -193,47 +197,33 @@ int main(int argc, char *argv[]) {
         input = argv[optind];
     }
 
-    if ((fd = open(input, O_RDWR)) == -1) {
+    if ((i2c_fd = open(input, O_RDWR)) == -1) {
         perror("open i2c device");
         exit(EXIT_FAILURE);
-    }
-
-    while (1) {
-        length = read(fd, tx_buffer, TX_BUF_SIZE);
-        for(i = 0; i < length; i++)
-        {
-            switch (mode) {
-                case 1:
-                    printf("1: Data received : %c\n", tx_buffer[i]);
-                    break;
-                case 2:
-                    printf("2 :Data received : %02x\n ", tx_buffer[i]);
-                    break;
-                default:
-                    printf("3 :Data received : %d \n", tx_buffer[i]);
-                    break;
-            }
-        }
-        //decode_data(com, &is_commande, &nb_opt, tx_buffer);
-
-        write(fd, tx_buffer, length);
     }
 
     orders = load_orders();
 
     struct daemon daemon;
 
-    if ((fd = open(input, O_RDWR)) == -1) {
+    if ((i2c_fd = open(input, O_RDWR)) == -1) {
         perror("open i2c device");
         exit(EXIT_FAILURE);
     }
 
+    struct sockaddr_in master_info, slave_info;
+    socklen_t master_info_len;
     int sock;
-
-    CHKERR(sock = init_network());
+    if (argc < 2) {
+        printf("Please provide ip address as first parameter\n");
+        exit(EXIT_FAILURE);
+    }
+    CHKERR(sock = init_network(&slave_info, &master_info, &master_info_len, argv[1]));
 
     printf("Sending configure message to master \n");
     CHKERR(sendto(sock, "configure", strlen("configure"), 0, (struct sockaddr *) &master_info, master_info_len));
+
+    int max_fd = (sock > i2c_fd) ? sock : i2c_fd;
 
     ssize_t recv_len;
     char buffer[BUFF_LEN];
@@ -241,44 +231,75 @@ int main(int argc, char *argv[]) {
         switch (curr_status) {
             case ACTIVE:
                 printf("waiting for data...\n");
+                int fd_modified_count = select(max_fd, &rfds, NULL, NULL, NULL);
 
-                CHKERR((recv_len = recvfrom(sock, buffer, BUFF_LEN, 0,
-                                            (struct sockaddr *) &master_info, &master_info_len)));
-                buffer[recv_len] = '\0';
+                CHKERR(fd_modified_count);
 
-                printf("received data : '%s'\n", buffer);
-                if (recv_len > 0) {
-                    int arg_num = count_args(buffer, recv_len);
-                    char** args = slice_args(buffer, recv_len, arg_num);
-                    printf("%s\n", args[0]);
-                    printf("%d\n", strcmp(args[0], "0"));
-                    if (strcmp(args[0], "9") == 0) {
-                        curr_status = STOPPED;
-                        close(sock);
-                    }
-                    else if(strcmp(args[0], "0") == 0) {
-                        printf("Received master configuration\n");
-                        slave_info.sin_addr.s_addr = inet_addr(args[1]);
+                /*if (fd_modified_count == 0) {
+                    continue;
+                }*/
 
-                    }
-                    else if(strcmp(args[0], "1") == 0) {
-                        char cpu_usage[20];
-                        sprintf(cpu_usage, "cpu:%Lf", get_cpu_usage());
-                        sendto(sock, cpu_usage, strlen(cpu_usage), 0, (struct sockaddr *) &master_info, master_info_len);
-                        printf("Sending cpu usage to master\n");
+                if(FD_ISSET(sock, &rfds)) {
+                    CHKERR((recv_len = recvfrom(sock, buffer, BUFF_LEN, 0,
+                                               (struct sockaddr *) &master_info, &master_info_len)));
+                    buffer[recv_len] = '\0';
+
+                    printf("received data : '%s'\n", buffer);
+                    if (recv_len > 0) {
+                        int arg_num = count_args(buffer, recv_len);
+                        char** args = slice_args(buffer, recv_len, arg_num);
+                        printf("%s\n", args[0]);
+                        printf("%d\n", strcmp(args[0], "0"));
+                        if (strcmp(args[0], "9") == 0) {
+                            curr_status = STOPPED;
+                            close(sock);
+                        }
+                        else if(strcmp(args[0], "0") == 0) {
+                            printf("Received master configuration\n");
+                            slave_info.sin_addr.s_addr = inet_addr(args[1]);
+
+                        }
+                        else if(strcmp(args[0], "1") == 0) {
+                            char cpu_usage[20];
+                            sprintf(cpu_usage, "cpu:%Lf", get_cpu_usage());
+                            sendto(sock, cpu_usage, strlen(cpu_usage), 0, (struct sockaddr *) &master_info, master_info_len);
+                            printf("Sending cpu usage to master\n");
+                        }
+                        else {
+                            printf("Order code : %s", args[0]);
+                            int order_code = atoi(args[0]);
+                            exec_order(order_code-1, &daemon);
+                            printf("order returned :\n%s\nSending to master...", daemon.exec_buff);
+                            CHKERR(sendto(sock, daemon.exec_buff, daemon.exec_len, 0, (struct sockaddr *) &master_info, master_info_len));
+                        }
+                        free_args(args, arg_num);
                     }
                     else {
-                        printf("Order code : %s", args[0]);
-                        int order_code = atoi(args[0]);
-                        exec_order(order_code-1, &daemon);
-                        printf("order returned :\n%s\nSending to master...", daemon.exec_buff);
-                        CHKERR(sendto(sock, daemon.exec_buff, daemon.exec_len, 0, (struct sockaddr *) &master_info, master_info_len));
+                        printf("received empty message\n");
                     }
-                    free_args(args, arg_num);
                 }
-                else {
-                    printf("received empty message\n");
+                else if(FD_ISSET(i2c_fd, &rfds)) {
+                    printf("received data over i2c\n");
+                    length = read(i2c_fd, tx_buffer, TX_BUF_SIZE);
+                    for(i = 0; i < length; i++)
+                    {
+                        switch (mode) {
+                            case 1:
+                                printf("1: Data received : %c\n", tx_buffer[i]);
+                                break;
+                            case 2:
+                                printf("2 :Data received : %02x\n ", tx_buffer[i]);
+                                break;
+                            default:
+                                printf("3 :Data received : %d \n", tx_buffer[i]);
+                                break;
+                        }
+                    }
+                    //decode_data(com, &is_commande, &nb_opt, tx_buffer);
+
+                    write(i2c_fd, tx_buffer, length);
                 }
+
                 break;
             default:
                 close(sock);
