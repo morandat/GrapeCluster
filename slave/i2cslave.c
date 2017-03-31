@@ -21,6 +21,74 @@ enum sys_call {
 	IS_NETWORK
 };
 
+int get_ip(char ** array){
+	FILE *fp;
+	char path[1035];
+
+	fp = popen("/bin/ifconfig", "r");
+	if (fp == NULL){
+		printf("Failed to run ifconfig");
+		exit(1);
+	}
+	
+	char t1[1024];
+	char t2[1024];
+	
+	char array[0][4];
+	char array[1][4];
+	char array[2][4];
+	char array[3][4];
+
+	
+	while(fgets(path, sizeof(path) - 1, fp) != NULL) {
+		//printf("YOOO : %s", path);
+		sscanf(path, "%s %s", t1, t2);
+		char *word;
+		int nb = 0;
+		int i = 0;
+		if (strcmp("inet", t1)== 0){
+			//printf("%s", path);
+			word = strtok(path, " .:");
+			while (word != NULL) {
+				if(nb == 0){
+					for(i = 0; i < 4 ; i++)
+						array[0][i] = 0;
+					for(i = 0; i < 4 ; i++)
+						array[1][i] = 0;
+					for(i = 0; i < 4 ; i++)
+						array[2][i] = 0;
+					for(i = 0; i < 4 ; i++)
+						array[3][i] = 0;
+
+				}
+    			else if(nb == 2)
+    				strcpy(array[0], word);
+    			else if (nb == 3)
+    				strcpy(array[1], word);
+    			else if (nb == 4)
+    				strcpy(array[2], word);
+    			else if (nb == 5)
+    				strcpy(array[3], word);
+    			else if (nb == 6){
+    				printf("%s : %s : %s : %s\n",array[0], array[1], array[2], array[3]);
+    				if (strcmp(array[0], "127") == 0 && strcmp(array[1], "0") == 0 && strcmp(array[2], "0") == 0){
+    					printf("No\n");
+    				}
+    				else{
+    					printf("C'est fini\n");
+    					return;
+    				}
+
+    			}
+    			word = strtok(NULL, " .:");
+    			nb ++;
+    			//nbr_words += 1;
+    		}
+
+		}
+	}
+}
+
 int test_communication(){
 	char cmd[64];
 	sprintf(cmd, "echo toto");
