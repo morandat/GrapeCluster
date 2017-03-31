@@ -75,6 +75,8 @@ char * action(enum sys_call call){
 			return "abcd";
 			break;
 	}
+
+	return "abcd";
 }
 
 int main(int argc, char **argv)
