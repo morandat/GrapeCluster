@@ -166,9 +166,9 @@ int main(int argc, char *argv[]) {
     int opt;
     int mode = 0;
 
-    int is_commande = 0;
+    //int is_commande = 0;
     int nb_opt = -1;
-    struct commande *com = malloc(sizeof(struct commande));
+    //struct commande *com = malloc(sizeof(struct commande));
 
     FILE *usage_file = stderr;
     const char *input = DEFAULT_DEVICE;
