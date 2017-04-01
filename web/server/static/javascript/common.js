@@ -10,7 +10,7 @@ $.fn.btnColor = function(condition){
 
 addAjaxHandler = function(url, handler, interval, method) {
 	if(interval === true)
-		interval = 20000;
+		interval = 5000;
   if(method === undefined)
     method = 'GET'
 
@@ -21,7 +21,7 @@ addAjaxHandler = function(url, handler, interval, method) {
 			type : method,
 			success : handler,
       error: function() {
-        alert("AJAX Error.");
+        console.log("AJAX Error.");
       }
 		});
 
@@ -32,19 +32,48 @@ addAjaxHandler = function(url, handler, interval, method) {
 	$(document).ready(upd);
 }
 
-$('.statusBtn').click(function() {
-	if($(this).text() == CONSTANTS.raspStatus[0]) {
-		if(confirm("Allumer la Rasp ?")) {
-			addAjaxHandler('/rasp/start/'+$(this).attr('raspId'), function() {
-				$(this).text(CONSTANTS.raspStatus[1]).btnColor(1);
+$(document).ready(function() {
+	$('.raspStatusBtn').click(function() {
+		var $this = $(this);
+
+		if($this.text() == CONSTANTS.status[0]) {
+			if(confirm("Allumer le Rasp ?")) {
+				addAjaxHandler('/rasp/start/'+$this.attr('raspId'), function() {
+					$this.text(CONSTANTS.status[1]).btnColor(true);
+					$('.raspRestartBtn[raspId="'+$this.attr('raspId')+'"]').show();
+				}, false, 'POST');
+			}
+		}
+		if($this.text() == CONSTANTS.status[1]) {
+			if(confirm("Eteindre le Rasp ?")) {
+				addAjaxHandler('/rasp/stop/'+$this.attr('raspId'), function() {
+					$this.text(CONSTANTS.status[0]).btnColor(false);
+					$('.raspRestartBtn[raspId="'+$this.attr('raspId')+'"]').hide();
+				}, false, 'POST');
+			}
+		}
+	});
+
+	$('.raspRestartBtn').click(function() {
+		var $this = $(this);
+
+		if(confirm("Redémarrer le Rasp ?")) {
+			addAjaxHandler('/rasp/restart/'+$this.attr('raspId'), function() {
+				$('.raspStatusBtn[raspId='+$this.attr('raspId')+']').text(CONSTANTS.status[0]).btnColor(false);
+				$this.hide();
 			}, false, 'POST');
 		}
-	}
-	if($(this).text() == CONSTANTS.raspStatus[1]) {
-		if(confirm("Eteindre la Rasp ?")) {
-			addAjaxHandler('/rasp/start/'+$(this).attr('raspId'), function() {
-				$(this).text(CONSTANTS.raspStatus[0]).btnColor(0);
-			}, false, 'POST');
+	});
+
+	$('.stackStatusBtn').click(function() {
+		var $this = $(this);
+
+		if($this.text() == CONSTANTS.status[1]) {
+			if(confirm("Eteindre la stack ?")) {
+				addAjaxHandler('/stack/shutdown/'+$this.attr('stackId'), function() {
+					$this.text(CONSTANTS.status[0]).btnColor(false);
+				}, false, 'POST');
+			}
 		}
-	}
+	});
 });

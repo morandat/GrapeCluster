@@ -16,7 +16,10 @@
             <div class="card" style="margin-bottom:30px;">
                 <div class="card-block">
                     <h2 style="float:left;" class="card-title">Stack #{{ stackId }}</h2>
-                    <div style="float:right;" class="btn" id="stackTemp"></div>
+                    <div class="btn-group" style="float:right;" role="group">
+                        <div class="btn stackStatusBtn" id="stackShutdown"></div>
+                        <div class="btn" id="stackTemp"></div>
+                    </div>
                 </div>
                 <table class="table">
                   <thead>
@@ -40,9 +43,14 @@
                               <td id="raspI2C{{ raspI }}"></td>
                               <td id="raspOS{{ raspI }}"></td>
                               <td id="raspIP{{ raspI }}"></td>
-                              <td id="raspCPU{{ raspI }}"></td>
+                              <td><div class="btn btn-sm" id="raspCPU{{ raspI }}" style="display:none;"></div></td>
                               <td id="raspRAM{{ raspI }}"></td>
-                              <td><div class="btn btn-sm statusBtn" id="raspStatus{{ raspI }}" style="display:none;"></div></td>
+                              <td>
+                                <div class="btn-group" style="float:right;" role="group">
+                                  <div class="btn btn-sm btn-secondary raspRestartBtn" id="raspRestart{{ raspI }}" style="display:none; cursor:pointer;">Restart</div>
+                                  <div class="btn btn-sm raspStatusBtn" id="raspStatus{{ raspI }}" style="display:none; cursor:pointer;"></div>
+                                </div>
+                              </td>
                             </tr>
                         {% endfor %}
                   </tbody>
