@@ -1,5 +1,6 @@
 from PiDevice import PiDevice
 from queue import Queue, Full
+from array import array
 
 #key = bytearray([0x13, 0x00, 0x00, 0x00, 0x08, 0x00])
 
@@ -31,14 +32,18 @@ class Slave(PiDevice):
             return -1
 
     def simple_test(self):
-        try:
-            data = Queue(4)
-            self.write_byte(0x42, 0x01)
-            for i in range(0, 4):
-                print(self.read_byte(self._i2c))
-        except Exception as e:
-            print("ça a planté", e )
-
+        data = [0,0,0,0,0]
+        self.write_byte(0x42, 0x01)
+        for i in range(0, 5):
+            while True :
+                try:
+                    tmp = self.read_byte(self._i2c)
+                    if tmp != 240 :
+                        data[i] = tmp
+                        break
+                except Exception as e:
+                    print("ça a planté", e)
+        print(data)
 
     def init(self):
         # Régler la clé en fonction du slave a qui l'on parle
