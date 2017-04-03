@@ -43,7 +43,7 @@ class ButtonPrinter(ButtonHandler):
         print("right")
 
 class I2CDevice(object):
-    CLASS_ADDRESS = 0x00 # Should be defined in each subclass
+    CLASS_ADDRESS = 0x42 # Should be defined in each subclass
     PROBE_WRITE_QUICK = False
 
     def __init__(self, bus, prefix):
