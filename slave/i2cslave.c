@@ -159,7 +159,7 @@ char * action(enum sys_call call){
 			restart_slave();
 			break;
 		case GET_IP:
-			char **array[4];
+			char *array[4];
 			get_ip(array);
 			return "abcd";
 			break;
