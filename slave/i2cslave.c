@@ -10,6 +10,8 @@
 #include "i2cslave.h"
 #include "utils.h"
 
+#define ENDSYMB		  240
+
 enum sys_call {
 	TEST,
 	CPU, 
@@ -20,62 +22,45 @@ enum sys_call {
 	IS_NETWORK
 };
 
-int test_communication(){
-	char cmd[64];
-	sprintf(cmd, "echo toto");
-	system(cmd);
-}
-
-int shutdown_slave(){
-	char cmd[64];
-	//printf("shutdown");
-	sprintf(cmd, "shutdown -h now");
-	system(cmd);
-	//printf("\n");
-}
-
-int restart_slave(){
-	char cmd[64];
-	sprintf(cmd, "shutdown -r");
-	system(cmd);
-}
-
 
 char * action(enum sys_call call){
-	
-	
+		
 	int i = 0; 
+	int test = 0;
+	char *in[4];
+	char out[4];
 
 	switch(call){
 		case TEST:
-			return "abcd";
+			test_communication();
+			return "1111";
 			break;
 		case CPU:
 			//get_cpu();
 			break;
 		case SHUTDOWN:
 			shutdown_slave();
-			return "abcd";
 			break;
 		case RESTART:
 			restart_slave();
-			return "abcd";
 			break;
 		case GET_IP:
-			//get_ip();
-			return "abcd";
+			get_ip(in);
+			encode_ip(out, in);
+			return out;
 			break;
 		case GET_I2C:
 			//get_i2c();
 			return "abcd";
 			break;
 		case IS_NETWORK:
-			//is_network();
-			return "abcd";
+			test = test_network();
+			if(test == 1)
+				return "1111";
+			else
+				return "0000";
 			break;
 	}
-
-	return "abcd";
 }
 
 int i2c_init(int* mode, int argc, char* argv[]) {
@@ -113,24 +98,43 @@ int i2c_init(int* mode, int argc, char* argv[]) {
 }
 
 void i2c_handle(int i2c_fd, char tx_buffer[], int mode) {
+    char *tx_answer;
+    enum sys_call commande;
+    char endstring[]={ENDSYMB};
+
+
     ssize_t length = read(i2c_fd, tx_buffer, TX_BUF_SIZE);
     for(int i = 0; i < length; i++)
     {
         switch (mode) {
             case 1:
                 printf("1: Data received : %c\n", tx_buffer[i]);
+				tx_answer = action(tx_buffer[i]);
+				write(fd, endstring, 1);
+				write(fd, tx_answer, 4);
+				write(fd, endstring, 1);
                 break;
             case 2:
                 printf("2 :Data received : %02x\n ", tx_buffer[i]);
-                break;
-            default:
+				tx_answer = action(tx_buffer[i]);
+				write(fd, endstring, 1);
+				write(fd, tx_answer, 4);
+				write(fd, endstring, 1);            default:
                 printf("3 :Data received : %d \n", tx_buffer[i]);
                 break;
+            default:
+            	printf("3 :Data received : %d \n", tx_buffer[i]);
+				tx_answer = action(tx_buffer[i]);
+				write(fd, endstring, 1);
+				write(fd, tx_answer, 4);
+				write(fd, endstring, 1);
+				break;
+
         }
     }
     //decode_data(com, &is_commande, &nb_opt, tx_buffer);
 
-    write(i2c_fd, tx_buffer, length);
+    //write(i2c_fd, tx_buffer, length);
 }
 
 /*

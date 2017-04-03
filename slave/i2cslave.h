@@ -5,6 +5,8 @@
 #ifndef SLAVE_I2CSLAVE_H
 #define SLAVE_I2CSLAVE_H
 
+#include "commands.h"
+
 #define TX_BUF_SIZE   4
 
 #define DEFAULT_DEVICE "/dev/null"
