@@ -23,17 +23,16 @@ enum sys_call {
 };
 
 
-char * action(enum sys_call call){
+void action(enum sys_call call, char *out){
 		
 	int i = 0; 
 	int test = 0;
 	char *in[4];
-	char out[4];
 
 	switch(call){
 		case TEST:
 			test_communication();
-			return "1111";
+			out = "1111";
 			break;
 		case CPU:
 			//get_cpu();
@@ -47,18 +46,17 @@ char * action(enum sys_call call){
 		case GET_IP:
 			get_ip(in);
 			encode_ip(out, in);
-			return out;
 			break;
 		case GET_I2C:
 			//get_i2c();
-			return "abcd";
+			out = "abcd";
 			break;
 		case IS_NETWORK:
 			test = test_network();
 			if(test == 1)
-				return "1111";
+				out = "1111";
 			else
-				return "0000";
+				out = "0000";
 			break;
 	}
 }
@@ -98,7 +96,7 @@ int i2c_init(int* mode, int argc, char* argv[]) {
 }
 
 void i2c_handle(int i2c_fd, char tx_buffer[], int mode) {
-    char *tx_answer;
+    char tx_answer[4];
     enum sys_call commande;
     char endstring[]={ENDSYMB};
 
@@ -109,21 +107,21 @@ void i2c_handle(int i2c_fd, char tx_buffer[], int mode) {
         switch (mode) {
             case 1:
                 printf("1: Data received : %c\n", tx_buffer[i]);
-				tx_answer = action(tx_buffer[i]);
+				action(tx_buffer[i],tx_answer);
 				write(i2c_fd, endstring, 1);
 				write(i2c_fd, tx_answer, 4);
 				write(i2c_fd, endstring, 1);
                 break;
             case 2:
                 printf("2 :Data received : %02x\n ", tx_buffer[i]);
-				tx_answer = action(tx_buffer[i]);
+				action(tx_buffer[i], tx_answer );
 				write(i2c_fd, endstring, 1);
 				write(i2c_fd, tx_answer, 4);
 				write(i2c_fd, endstring, 1);            
                 break;
             default:
             	printf("3 :Data received : %d \n", tx_buffer[i]);
-				tx_answer = action(tx_buffer[i]);
+				action(tx_buffer[i], tx_answer );
 				write(i2c_fd, endstring, 1);
 				write(i2c_fd, tx_answer, 4);
 				write(i2c_fd, endstring, 1);

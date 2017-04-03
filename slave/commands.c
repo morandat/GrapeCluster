@@ -74,7 +74,7 @@ int get_ip(char ** array){
     				}
     				else{
     					printf("C'est fini\n");
-    					return;
+    					return 1;
     				}
 
     			}
