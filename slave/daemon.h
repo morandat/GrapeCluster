@@ -7,7 +7,7 @@
 
 #define BUFF_LEN 1024
 
-#define MASTER_IP_ADDRESS "172.20.1.136"
+#define MASTER_IP_ADDRESS "127.0.0.2"
 
 #define PORT 42666
 

@@ -24,6 +24,7 @@ class Daemon(Thread):
 
     def run(self):
         while True:
+            print("Broadcasting cpu request")
             self.__udp_comm.broadcast("1;", self.__master.get_cluster_ip_addresses())
             data, addr = self.__udp_comm.receive(1024)
             print("received message: {} from {}".format(data, addr))
@@ -32,12 +33,11 @@ class Daemon(Thread):
                 #To-do : check for ip_address conflict, implement some kind of simple DHCP. May look for DHCP Py libs
                 new_slave = Slave(0, "AA:AA:AA:AA:AA:AA", addr[0], "0", len(stack.get_pi_devices()))
                 self.__master.get_stack(0).add_pi_device(new_slave)
-                print("0;" + addr[0] + ";")
                 self.__udp_comm.send("0;" + addr[0] + ";", new_slave.get_ip_address())
                 print("Configured new slave of ip_addr {}".format(addr[0]))
 
             elif data[:4] == b"cpu:":
-                self.__master.get_slave_by_id(addr[0]).cpu_usage = data[4:]
+                self.__master.get_slave_by_ip(addr[0]).cpu_usage = data[4:]
                 print("Received cpu_usage from slave {}, updating value".format(addr[0]))
 
     def get_master(self):

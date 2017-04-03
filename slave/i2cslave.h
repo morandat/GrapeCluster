@@ -7,6 +7,6 @@
 
 #define TX_BUF_SIZE   4000
 
-#define DEFAULT_DEVICE "/dev/i2c_slave"
+#define DEFAULT_DEVICE "/dev/null"
 
 #endif //SLAVE_I2CSLAVE_H

@@ -12,7 +12,7 @@
 #include <string.h>
 #include <fcntl.h>
 
-
+#include "commands.h"
 #include "daemon.h"
 #include "i2cslave.h"
 #include "utils.h"
@@ -89,53 +89,52 @@ int order_str_to_code(char* str) {
     }
 }
 
-long double get_cpu_usage() {
-    long double a[4], b[4], loadavg;
+
+int get_cpu_usage() {
+    float a[4], b[4], loadavg;
     FILE *fp;
     char dump[50];
-    fp = fopen("/proc/stat","r");
-    fscanf(fp,"%*s %Lf %Lf %Lf %Lf",&a[0],&a[1],&a[2],&a[3]);
+    fp = fopen("/proc/stat", "r");
+    fscanf(fp, "%*s %f %f %f %f", &a[0], &a[1], &a[2], &a[3]);
     fclose(fp);
     sleep(1);
 
-    fp = fopen("/proc/stat","r");
-    fscanf(fp,"%*s %Lf %Lf %Lf %Lf",&b[0],&b[1],&b[2],&b[3]);
+    fp = fopen("/proc/stat", "r");
+    fscanf(fp, "%*s %f %f %f %f", &b[0], &b[1], &b[2], &b[3]);
     fclose(fp);
 
-    loadavg = ((b[0]+b[1]+b[2]) - (a[0]+a[1]+a[2])) / ((b[0]+b[1]+b[2]+b[3]) - (a[0]+a[1]+a[2]+a[3]));
-    printf("Current CPU utilization is : %Lf\n",loadavg);
+    loadavg =
+            ((b[0] + b[1] + b[2]) - (a[0] + a[1] + a[2])) / ((b[0] + b[1] + b[2] + b[3]) - (a[0] + a[1] + a[2] + a[3]));
+    printf("Current CPU utilization is : %d\n", (int)(loadavg*100));
 
-    return loadavg;
+    return (int)loadavg*100;
 }
 
-int init_network(struct sockaddr_in* slave_info, struct sockaddr_in* master_info, socklen_t * master_info_len, char* ip_addr) {
+int init_network(struct sockaddr_in* slave_info, struct sockaddr_in* master_info, char* ip_addr) {
 
-    memset((char *) &master_info, 0, sizeof(master_info));
+    memset((char *) master_info, 0, sizeof(master_info));
 
     master_info->sin_family = AF_INET;
     master_info->sin_port = htons(PORT);
     master_info->sin_addr.s_addr = inet_addr(MASTER_IP_ADDRESS);
 
-    *master_info_len = sizeof(master_info);
-
     int sock;
     CHKERR(sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP));
 
-    // zero out the structure
-    memset((char *) &slave_info, 0, sizeof(slave_info));
+    memset((char*) slave_info, 0, sizeof(slave_info));
 
     slave_info->sin_family = AF_INET;
     slave_info->sin_port = htons(PORT);
     slave_info->sin_addr.s_addr = inet_addr(ip_addr);
 
     CHKERR(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int)));
-    CHKERR(bind(sock, (struct sockaddr*)&slave_info, sizeof(slave_info)));
+    CHKERR(bind(sock, (struct sockaddr*)slave_info, sizeof(*slave_info)));
 
     return sock;
 }
 
 char** load_orders() {
-    FILE* orders_file = fopen("orders.txt", "r");
+    FILE* orders_file = fopen("../orders.txt", "r");
     fseek(orders_file, 0, SEEK_END);
     long fsize = ftell(orders_file);
     fseek(orders_file, 0, SEEK_SET);
@@ -194,7 +193,7 @@ int main(int argc, char *argv[]) {
     }
 
     /*if (optind < argc) {
-        input = argv[optind];
+        input = argv[optind]; //+1 for ip ?
     }*/
 
     if ((i2c_fd = open(input, O_RDWR)) == -1) {
@@ -202,32 +201,42 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    //FD_SET(i2c_fd, &rfds);
+
     orders = load_orders();
 
     struct daemon daemon;
 
-    struct sockaddr_in master_info, slave_info;
+    struct sockaddr_in master_info;
+    struct sockaddr_in slave_info;
     socklen_t master_info_len;
     int sock;
     if (argc < 2) {
         printf("Please provide ip address as first parameter\n");
         exit(EXIT_FAILURE);
     }
-    CHKERR(sock = init_network(&slave_info, &master_info, &master_info_len, argv[1]));
 
+    CHKERR(sock = init_network(&slave_info, &master_info, argv[1]));
+    FD_SET(sock, &rfds);
+
+
+    master_info_len = sizeof(master_info);
     printf("Sending configure message to master \n");
     CHKERR(sendto(sock, "configure", strlen("configure"), 0, (struct sockaddr *) &master_info, master_info_len));
 
-    int max_fd = (sock > i2c_fd) ? sock : i2c_fd;
+    int max_fd = sock+1;//(sock > i2c_fd) ? sock : i2c_fd;
+
 
     ssize_t recv_len;
     char buffer[BUFF_LEN];
     while (curr_status != STOPPED) {
-        printf("yolo\n");
         switch (curr_status) {
             case ACTIVE:
                 printf("waiting for data...\n");
-                int fd_modified_count = select(max_fd, &rfds, NULL, NULL, NULL);
+                struct timeval timeval;
+                timeval.tv_sec = 1;
+                timeval.tv_usec = 0;
+                int fd_modified_count = select(max_fd, &rfds, NULL, NULL, &timeval);
 
                 CHKERR(fd_modified_count);
 
@@ -244,8 +253,6 @@ int main(int argc, char *argv[]) {
                     if (recv_len > 0) {
                         int arg_num = count_args(buffer, recv_len);
                         char** args = slice_args(buffer, recv_len, arg_num);
-                        printf("%s\n", args[0]);
-                        printf("%d\n", strcmp(args[0], "0"));
                         if (strcmp(args[0], "9") == 0) {
                             curr_status = STOPPED;
                             close(sock);
@@ -257,7 +264,7 @@ int main(int argc, char *argv[]) {
                         }
                         else if(strcmp(args[0], "1") == 0) {
                             char cpu_usage[20];
-                            sprintf(cpu_usage, "cpu:%Lf", get_cpu_usage());
+                            sprintf(cpu_usage, "cpu:%d", get_cpu_usage());
                             sendto(sock, cpu_usage, strlen(cpu_usage), 0, (struct sockaddr *) &master_info, master_info_len);
                             printf("Sending cpu usage to master\n");
                         }

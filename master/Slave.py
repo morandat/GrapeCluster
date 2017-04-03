@@ -21,8 +21,6 @@ class Slave(PiDevice):
         self.__param=param
         self.__data = Queue(4)
 
-        #self.init(self)
-
     def verif_key(self, key):
         self.write_byte(0x00, key)
         tmp = self.read_byte(0x00)
