@@ -110,24 +110,23 @@ void i2c_handle(int i2c_fd, char tx_buffer[], int mode) {
             case 1:
                 printf("1: Data received : %c\n", tx_buffer[i]);
 				tx_answer = action(tx_buffer[i]);
-				write(fd, endstring, 1);
-				write(fd, tx_answer, 4);
-				write(fd, endstring, 1);
+				write(i2c_fd, endstring, 1);
+				write(i2c_fd, tx_answer, 4);
+				write(i2c_fd, endstring, 1);
                 break;
             case 2:
                 printf("2 :Data received : %02x\n ", tx_buffer[i]);
 				tx_answer = action(tx_buffer[i]);
-				write(fd, endstring, 1);
-				write(fd, tx_answer, 4);
-				write(fd, endstring, 1);            default:
-                printf("3 :Data received : %d \n", tx_buffer[i]);
+				write(i2c_fd, endstring, 1);
+				write(i2c_fd, tx_answer, 4);
+				write(i2c_fd, endstring, 1);            
                 break;
             default:
             	printf("3 :Data received : %d \n", tx_buffer[i]);
 				tx_answer = action(tx_buffer[i]);
-				write(fd, endstring, 1);
-				write(fd, tx_answer, 4);
-				write(fd, endstring, 1);
+				write(i2c_fd, endstring, 1);
+				write(i2c_fd, tx_answer, 4);
+				write(i2c_fd, endstring, 1);
 				break;
 
         }
