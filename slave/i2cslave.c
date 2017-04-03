@@ -10,6 +10,8 @@
 
 #define TX_BUF_SIZE   4
 
+#define ENDSYMB		  240
+
 #define DEFAULT_DEVICE "/dev/i2c_slave"
 
 enum sys_call {
@@ -22,7 +24,13 @@ enum sys_call {
 	IS_NETWORK
 };
 
-
+int encode_ip(char *out, char ** in){
+	int i = 0;
+	for (i = 0 ; i < 4 ; i++){
+		out[i] = atoi(in[i]);
+	}	
+	return 0;
+}
 
 int get_ip(char ** array){
 	FILE *fp;
@@ -143,7 +151,8 @@ char * action(enum sys_call call){
 	
 	int i = 0; 
 	int test = 0;
-	char *array[4];
+	char *in[4];
+	char out[4];
 
 	switch(call){
 		case TEST:
@@ -160,8 +169,9 @@ char * action(enum sys_call call){
 			restart_slave();
 			break;
 		case GET_IP:
-			get_ip(array);
-			return "abcd";
+			get_ip(in);
+			encode_ip(out, in);
+			return out;
 			break;
 		case GET_I2C:
 			//get_i2c();
@@ -227,8 +237,8 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	char endline = 240;
-	char endstring[]={endline};
+
+	char endstring[]={ENDSYMB};
 
 	while (1) {	
 			length = read(fd, tx_buffer, 4);
@@ -238,18 +248,21 @@ int main(int argc, char **argv)
 				case 1:
 					printf("1: Data received : %c\n", tx_buffer[i]);
 					tx_answer = action(tx_buffer[i]);
+					write(fd, endstring, 1);
 					write(fd, tx_answer, 4);
 					write(fd, endstring, 1);
 					break;
 				case 2:
 					printf("2 :Data received : %02x\n ", tx_buffer[i]);
 					tx_answer = action(tx_buffer[i]);
+					write(fd, endstring, 1);
 					write(fd, tx_answer, 4);
 					write(fd, endstring, 1);
 					break;
 				default:
 					printf("3 :Data received : %d \n", tx_buffer[i]);
 					tx_answer = action(tx_buffer[i]);
+					write(fd, endstring, 1);
 					write(fd, tx_answer, 4);
 					write(fd, endstring, 1);
 					break;
