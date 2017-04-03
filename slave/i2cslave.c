@@ -21,6 +21,8 @@ enum sys_call {
 	IS_NETWORK
 };
 
+
+
 int get_ip(char ** array){
 	FILE *fp;
 	char path[1035];
@@ -89,6 +91,31 @@ int get_ip(char ** array){
 	}
 }
 
+//connect: Network is unreachable
+//PING 8.8.8.8
+int test_network(){
+	FILE *fp;
+	char path[1035];
+	char test[40];
+	char end[1035];
+
+	fp = popen("/bin/ping -c 1 8.8.8.8", "r");
+	if (fp == NULL){
+		printf("Failed to run ping");
+		exit(1);
+	}
+		
+	fgets(path, sizeof(path) - 1, fp);
+	sscanf(path, "%s %s", test, end);
+	//printf("%s ", test);
+	if(strcmp("PING", test) != 0 || strcmp("connect:", test) == 0){
+		pclose(fp);
+		return 0;
+	}
+	pclose(fp);
+	return 1;
+}
+
 int test_communication(){
 	char cmd[64];
 	sprintf(cmd, "echo toto");
@@ -114,24 +141,25 @@ char * action(enum sys_call call){
 	
 	
 	int i = 0; 
+	int test = 0;
 
 	switch(call){
 		case TEST:
-			return "abcd";
+			test_communication();
+			return "1111";
 			break;
 		case CPU:
 			//get_cpu();
 			break;
 		case SHUTDOWN:
 			shutdown_slave();
-			return "abcd";
 			break;
 		case RESTART:
 			restart_slave();
-			return "abcd";
 			break;
 		case GET_IP:
-			//get_ip();
+			char array[4];
+			get_ip(&array);
 			return "abcd";
 			break;
 		case GET_I2C:
@@ -139,8 +167,11 @@ char * action(enum sys_call call){
 			return "abcd";
 			break;
 		case IS_NETWORK:
-			//is_network();
-			return "abcd";
+			test = test_network();
+			if(test == 1)
+				return "1111";
+			else
+				return "0000";
 			break;
 	}
 
@@ -150,7 +181,7 @@ char * action(enum sys_call call){
 int main(int argc, char **argv)
 {
 	char tx_buffer[TX_BUF_SIZE];
-	char tx_answer[TX_BUF_SIZE];
+	char *tx_answer;
 	int fd;
 	uint8_t data;
 	int length;
@@ -184,6 +215,8 @@ int main(int argc, char **argv)
 		}
 	}
 
+
+
 	if (optind < argc) {
 		input = argv[optind];
 	}
@@ -192,6 +225,9 @@ int main(int argc, char **argv)
 		perror("open i2c device");
 		exit(EXIT_FAILURE);
 	}
+
+	char endline = 240;
+	char endstring[]={endline};
 
 	while (1) {	
 			length = read(fd, tx_buffer, 4);
@@ -202,16 +238,19 @@ int main(int argc, char **argv)
 					printf("1: Data received : %c\n", tx_buffer[i]);
 					tx_answer = action(tx_buffer[i]);
 					write(fd, tx_answer, 4);
+					write(fd, endstring, 1);
 					break;
 				case 2:
 					printf("2 :Data received : %02x\n ", tx_buffer[i]);
 					tx_answer = action(tx_buffer[i]);
 					write(fd, tx_answer, 4);
+					write(fd, endstring, 1);
 					break;
 				default:
 					printf("3 :Data received : %d \n", tx_buffer[i]);
 					tx_answer = action(tx_buffer[i]);
 					write(fd, tx_answer, 4);
+					write(fd, endstring, 1);
 					break;
 				}
 			}
