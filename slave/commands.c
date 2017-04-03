@@ -1,118 +1,133 @@
+
 //
 // Created by cyrbos on 4/3/17.
 //
 
+#include "commands.h"
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <fcntl.h>
+#include <stdlib.h>
+#include <string.h>
+#include <getopt.h>
+#include <curses.h>
 
 
-/* At least I tried
-// Better to use define for constants
-#define SUB_PROCESSES_NUMBER 3
-#define FILE_OUT "out.txt"
-#define FILE_LOGS "log.txt"
+int encode_ip(char *out, char ** in){
+	int i = 0;
+	for (i = 0 ; i < 4 ; i++){
+		out[i] = atoi(in[i]);
+	}	
+	return 0;
+}
 
-int get_cpu_usage() {
-    char *command0[] = {"mpstat", NULL};
-    char *command1[] = {"grep", "-A 5", "\"%idle\"", NULL};
-    char *command2[] = {"tail", "-n 1", NULL};
-    char *command3[] = {"awk", "'{print 100 - $13}'a", NULL};
-    char **commands[SUB_PROCESSES_NUMBER + 1] = {command0, command1, command2, command3};
+int get_ip(char ** array){
+	FILE *fp;
+	char path[1035];
 
-    pid_t pid[SUB_PROCESSES_NUMBER]; // good practice: fork() result is pid_t, not int
-    int fd[SUB_PROCESSES_NUMBER][2];
+	fp = popen("/bin/ifconfig", "r");
+	if (fp == NULL){
+		printf("Failed to run ifconfig");
+		exit(1);
+	}
+	
+	char t1[1024];
+	char t2[1024];
+	
+	/*char array[0][4];
+	char array[1][4];
+	char array[2][4];
+	char array[3][4];*/
 
-    // I recommend opening files now, so if you can't you won't create unecessary processes
-    int fd_file_out = open(FILE_OUT, O_WRONLY | O_CREAT | O_TRUNC, 00600);
-    if (fd_file_out < 0)
-    {
-        perror("open(" FILE_OUT ")");
-        return 2;
-    }
+	
+	while(fgets(path, sizeof(path) - 1, fp) != NULL) {
+		//printf("YOOO : %s", path);
+		sscanf(path, "%s %s", t1, t2);
+		char *word;
+		int nb = 0;
+		int i = 0;
+		if (strcmp("inet", t1)== 0){
+			//printf("%s", path);
+			word = strtok(path, " .:");
+			while (word != NULL) {
+				if(nb == 0){
+					for(i = 0; i < 4 ; i++)
+						array[0][i] = 0;
+					for(i = 0; i < 4 ; i++)
+						array[1][i] = 0;
+					for(i = 0; i < 4 ; i++)
+						array[2][i] = 0;
+					for(i = 0; i < 4 ; i++)
+						array[3][i] = 0;
 
-    int fd_file_logs = open(FILE_LOGS, O_WRONLY | O_CREAT | O_TRUNC, 00600);
-    if (fd_file_logs < 0)
-    {
-        perror("open(" FILE_LOGS ")");
-        close(fd_file_out); // Not necessary, but I like to do it explicitly
-        return 2;
-    }
+				}
+    			else if(nb == 2)
+    				strcpy(array[0], word);
+    			else if (nb == 3)
+    				strcpy(array[1], word);
+    			else if (nb == 4)
+    				strcpy(array[2], word);
+    			else if (nb == 5)
+    				strcpy(array[3], word);
+    			else if (nb == 6){
+    				printf("%s : %s : %s : %s\n",array[0], array[1], array[2], array[3]);
+    				if (strcmp(array[0], "127") == 0 && strcmp(array[1], "0") == 0 && strcmp(array[2], "0") == 0){
+    					printf("No\n");
+    				}
+    				else{
+    					printf("C'est fini\n");
+    					return;
+    				}
 
-    for (int i = 0; i < SUB_PROCESSES_NUMBER; i++) // If you decide to add more steps, this loop will be handy
-    {
-        if (pipe(fd[i]) < 0)
-        {
-            perror("pipe");
-            close(fd_file_out);
-            close(fd_file_logs);
-            if (i > 0)
-            {
-                close(fd[i - 1][0]);
-            }
-            return 2;
-        }
+    			}
+    			word = strtok(NULL, " .:");
+    			nb ++;
+    			//nbr_words += 1;
+    		}
 
-        pid[i] = fork();
-        if (pid[i] < 0)
-        {
-            perror("fork()");
-            close(fd_file_out);
-            close(fd_file_logs);
-            if (i > 0)
-            {
-                close(fd[i - 1][0]);
-            }
-            close(fd[i][0]);
-            close(fd[i][1]);
-            return 2;
-        }
+		}
+	}
+}
 
-        if (pid[i] == 0)
-        {
-            close(fd[i][0]); // First thing to do: close pipes and files you don't need any more
-            close(fd_file_out);
+//connect: Network is unreachable
+//PING 8.8.8.8
+int test_network(){
+	FILE *fp;
+	char path[1035];
+	char test[40];
+	char end[1035];
 
-            close(1);
-            dup(fd[i][1]);
-            close(fd[i][1]); // duplicated pipes are not useful any more
+	fp = popen("/bin/ping -c 1 8.8.8.8", "r");
+	if (fp == NULL){
+		printf("Failed to run ping");
+		exit(1);
+	}
+		
+	fgets(path, sizeof(path) - 1, fp);
+	sscanf(path, "%s %s", test, end);
+	//printf("%s ", test);
+	if(strcmp("PING", test) != 0 || strcmp("connect:", test) == 0){
+		pclose(fp);
+		return 0;
+	}
+	pclose(fp);
+	return 1;
+}
 
-            close(2); // Also need to redirect stderr
-            dup(fd_file_logs);
-            close(fd_file_logs);
+int test_communication(){
+	char cmd[64];
+	sprintf(cmd, "echo test");
+	system(cmd);
+}
 
-            if (i > 0)
-            {
-                close(0); // Also need to redirect stdin if this is not first process
-                dup(fd[i - 1][0]);
-                close(fd[i - 1][0]);
-            }
+int shutdown_slave(){
+	char cmd[64];
+	//printf("shutdown");
+	sprintf(cmd, "shutdown -h now");
+	system(cmd);
+	//printf("\n");
+}
 
-            execvp(commands[i][0], commands[i]); // In a loop, we need a execv()/execvp()/execvpe() call
-            return 2; // Should not be reached;
-        }
-
-        // sub process either did execvp() or return, he won't reach this point
-        close(fd[i][1]);
-        if (i > 0)
-        {
-            close(fd[i - 1][0]);
-        }
-    }
-
-    close(fd_file_logs);
-
-    close(0);
-    dup(fd[SUB_PROCESSES_NUMBER - 1][0]);
-    close(fd[SUB_PROCESSES_NUMBER - 1][0]);
-
-    close(1);
-    dup(fd_file_out);
-    close(fd_file_out);
-
-    execvp(commands[SUB_PROCESSES_NUMBER][0], commands[SUB_PROCESSES_NUMBER]);
-    perror("execvp");
-    return 2;
-}*/
+int restart_slave(){
+	char cmd[64];
+	sprintf(cmd, "shutdown -r");
+	system(cmd);
+}
