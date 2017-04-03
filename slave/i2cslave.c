@@ -36,10 +36,10 @@ int get_ip(char ** array){
 	char t1[1024];
 	char t2[1024];
 	
-	char array[0][4];
+	/*char array[0][4];
 	char array[1][4];
 	char array[2][4];
-	char array[3][4];
+	char array[3][4];*/
 
 	
 	while(fgets(path, sizeof(path) - 1, fp) != NULL) {
@@ -158,8 +158,8 @@ char * action(enum sys_call call){
 			restart_slave();
 			break;
 		case GET_IP:
-			char array[4];
-			get_ip(&array);
+			char **array[4];
+			get_ip(array);
 			return "abcd";
 			break;
 		case GET_I2C:
