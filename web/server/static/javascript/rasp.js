@@ -17,7 +17,7 @@ addAjaxHandler("/rasp/"+RASPID, function(rasp) {
 	$('#raspIP').text(rasp.ip);
 	$('#raspCPU').text(rasp.cpu)
 		.btnColor(rasp.cpu<CONSTANTS.raspCPULimit)
-		.text(Math.round(rasp.cpu*100)+'%');
+		.text(Math.round(rasp.cpu)+'%');
 	$('#raspRAM').text(rasp.ram);
 }, true);
 

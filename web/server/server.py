@@ -11,7 +11,7 @@ constants = {
     'maxStacks' : 16,
     'nSlavesByStack' : 6,
     'stackHeatLimit' : 75,
-    'raspCPULimit' : 0.8,
+    'raspCPULimit' : 80,
     'status' : [
         'Off',
         'On'
@@ -198,7 +198,7 @@ def viewRasp(id):
 
 # STACK GET
 
-@app.route("/stack/", defaults={'id':None})
+@app.route("/stack", defaults={'id':None})
 @app.route("/stack/<int:id>")
 def routeStack(id):
     def nestRaspsInStack(stack):
@@ -220,23 +220,9 @@ def routeStack(id):
         status=200,
         mimetype='application/json')
 
-# RASP GET
-
-@app.route("/rasp/", defaults={'id':None})
-@app.route("/rasp/<int:id>")
-def routeRasp(id):
-    rasp = getRasp(id)
-    if rasp is None:
-        rasp = {}
-    return app.response_class(
-        response=json.dumps(rasp),
-        status=200,
-        mimetype='application/json')
-
 # STACK ACTIONS
 
-@app.route("/stack/shutdown", defaults={'id':None}, methods=['POST'])
-@app.route('/stack/shutdown/<int:id>', methods=['POST'])
+@app.route('/stack/<int:id>/shutdown', methods=['POST'])
 def routeShutdown(id):
     stack = daemon.get_master().get_stack(id)
 
@@ -249,11 +235,23 @@ def routeShutdown(id):
         response=json.dumps({'response': response}),
         status=200,
         mimetype='application/json')
+
+# RASP GET
+
+@app.route("/rasp/", defaults={'id':None})
+@app.route("/rasp/<int:id>")
+def routeRasp(id):
+    rasp = getRasp(id)
+    if rasp is None:
+        rasp = {}
+    return app.response_class(
+        response=json.dumps(rasp),
+        status=200,
+        mimetype='application/json')
         
 # RASP ACTIONS
 
-@app.route("/rasp/start", defaults={'id':None}, methods=['POST'])
-@app.route('/rasp/start/<int:id>', methods=['POST'])
+@app.route('/rasp/<int:id>/start', methods=['POST'])
 def routeStart(id):
     rasp = daemon.get_master().get_slave_by_i2c(id)
 
@@ -266,9 +264,8 @@ def routeStart(id):
         response=json.dumps({'response': response}),
         status=200,
         mimetype='application/json')
-
-@app.route("/rasp/stop", defaults={'id':None}, methods=['POST'])        
-@app.route('/rasp/stop/<int:id>', methods=['POST'])
+    
+@app.route('/rasp/<int:id>/stop', methods=['POST'])
 def routeStop(id):
     rasp = daemon.get_master().get_slave_by_i2c(id)
 
@@ -281,9 +278,8 @@ def routeStop(id):
         response=json.dumps({'response': response}),
         status=200,
         mimetype='application/json')
-
-@app.route("/rasp/restart", defaults={'id':None}, methods=['POST'])        
-@app.route('/rasp/restart/<int:id>', methods=['POST'])
+     
+@app.route('/rasp/<int:id>/restart', methods=['POST'])
 def routeRestart(id):
     rasp = daemon.get_master().get_slave_by_i2c(id)
 
