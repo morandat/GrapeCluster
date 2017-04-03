@@ -143,6 +143,7 @@ char * action(enum sys_call call){
 	
 	int i = 0; 
 	int test = 0;
+	char *array[4];
 
 	switch(call){
 		case TEST:
@@ -159,7 +160,6 @@ char * action(enum sys_call call){
 			restart_slave();
 			break;
 		case GET_IP:
-			char *array[4];
 			get_ip(array);
 			return "abcd";
 			break;
