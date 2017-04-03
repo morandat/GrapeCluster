@@ -7,22 +7,23 @@
 
 #define BUFF_LEN 1024
 
-#define MASTER_IP_ADDRESS "127.0.0.2"
-
-#define PORT 42666
-
 enum status {
     ACTIVE,
     STOPPED
 };
 
-//master 172.20.1.165
-//slave 136
 char ** orders;
 
 struct daemon {
+    enum status curr_status;
     char exec_buff[BUFF_LEN];
     size_t exec_len;
 };
+
+int count_args(char* msg, ssize_t msg_len);
+char** slice_args(char* msg, ssize_t msg_len, int arg_num);
+void free_args(char** args, int arg_num);
+
+void exec_order(int order_code, struct daemon* daemon);
 
 #endif //SLAVE_DAEMON_H
