@@ -131,3 +131,23 @@ int restart_slave(){
 	sprintf(cmd, "shutdown -r");
 	system(cmd);
 }
+
+int get_cpu_usage() {
+    float a[4], b[4], loadavg;
+    FILE *fp;
+    char dump[50];
+    fp = fopen("/proc/stat", "r");
+    fscanf(fp, "%*s %f %f %f %f", &a[0], &a[1], &a[2], &a[3]);
+    fclose(fp);
+    sleep(1);
+
+    fp = fopen("/proc/stat", "r");
+    fscanf(fp, "%*s %f %f %f %f", &b[0], &b[1], &b[2], &b[3]);
+    fclose(fp);
+
+    loadavg =
+            ((b[0] + b[1] + b[2]) - (a[0] + a[1] + a[2])) / ((b[0] + b[1] + b[2] + b[3]) - (a[0] + a[1] + a[2] + a[3]));
+    printf("Current CPU utilization is : %d\n", (int)(loadavg*100));
+
+    return (int)loadavg*100;
+}
