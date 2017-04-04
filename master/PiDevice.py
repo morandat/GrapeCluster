@@ -1,7 +1,7 @@
 import json
 import datetime
 
-import psutil
+#import psutil
 from grape import I2CDevice
 
 class PiDevice(I2CDevice):
