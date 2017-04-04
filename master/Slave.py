@@ -38,9 +38,16 @@ class Slave(PiDevice):
             while True :
                 try:
                     tmp = self.read_byte(self._i2c)
+<<<<<<< HEAD
                     if tmp == 240:
                         break
 		    data[i] = tmp
+=======
+                    #if tmp != 240 :
+                    data[i] = tmp
+                    #    break
+                    break
+>>>>>>> a0294577caac7ebf799a6aeb81478b6ae2ce8902
                 except Exception as e:
                     print("ça a planté", e)
         print(data)
