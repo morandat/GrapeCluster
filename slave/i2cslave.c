@@ -12,53 +12,46 @@
 
 #define ENDSYMB		  240
 
-enum sys_call {
-	TEST,
-	CPU, 
-	SHUTDOWN,
-	RESTART,
-	GET_IP, 
-	GET_I2C, 
-	IS_NETWORK
-};
-
-
-void action(enum sys_call call, char *out){
+void action(int call, char *out){
 		
 	int i = 0; 
 	int test = 0;
 	char *in[4];
 
-	switch(call){
-		case TEST:
-			test_communication();
-			out = "1111";
-			break;
-		case CPU:
-			//get_cpu();
-			break;
-		case SHUTDOWN:
-			shutdown_slave();
-			break;
-		case RESTART:
-			restart_slave();
-			break;
-		case GET_IP:
-			get_ip(in);
-			encode_ip(out, in);
-			break;
-		case GET_I2C:
-			//get_i2c();
-			out = "abcd";
-			break;
-		case IS_NETWORK:
-			test = test_network();
-			if(test == 1)
-				out = "1111";
-			else
-				out = "0000";
-			break;
+	char *order; 
+	get_order(call, order)
+
+
+	if(strcmp("test", order) == 0){
+		test_communication();
+		out = "1111";	
 	}
+	else if(strcmp("cpu", order) == 0){
+		int cpu = get_cpu_usage();
+		char c = (char)cpu;
+		sprintf(out, "000%c", c);
+	}
+	else if(strcmp("shutdown", order) == 0){
+		shutdown_slave();
+	}
+	else if(strcmp("reboot", order) == 0){
+		restart_slave();
+	}
+	else if(strcmp("get_ip", order) == 0){
+		get_ip(in);
+		encode_ip(out, in);
+	}
+	else if(strcmp("get_i2c", order) == 0){
+		out = "0042";
+	}
+	else if(strcmp("is_network", order) == 0){
+		test = test_network();
+		if(test == 1)
+			out = "1111";
+		else
+			out = "0000";
+	} 
+	
 }
 
 int i2c_init(int* mode, int argc, char* argv[]) {
