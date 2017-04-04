@@ -92,6 +92,26 @@ int order_str_to_code(char* str) {
 }
 
 
+int get_cpu_usage() {
+    float a[4], b[4], loadavg;
+    FILE *fp;
+    char dump[50];
+    fp = fopen("/proc/stat", "r");
+    fscanf(fp, "%*s %f %f %f %f", &a[0], &a[1], &a[2], &a[3]);
+    fclose(fp);
+    sleep(1);
+
+    fp = fopen("/proc/stat", "r");
+    fscanf(fp, "%*s %f %f %f %f", &b[0], &b[1], &b[2], &b[3]);
+    fclose(fp);
+
+    loadavg =
+            ((b[0] + b[1] + b[2]) - (a[0] + a[1] + a[2])) / ((b[0] + b[1] + b[2] + b[3]) - (a[0] + a[1] + a[2] + a[3]));
+    printf("Current CPU utilization is : %d\n", (int)(loadavg*100));
+
+    return (int)loadavg*100;
+}
+
 char** load_orders() {
     FILE* orders_file = fopen("../orders.txt", "r");
     fseek(orders_file, 0, SEEK_END);
@@ -119,7 +139,7 @@ int main(int argc, char *argv[]) {
     char tx_buffer[TX_BUF_SIZE];
     int mode;
 
-    int i2c_fd = i2c_init(&mode, argc, argv, orders);
+    int i2c_fd = i2c_init(&mode, argc, argv);
     uint8_t data;
 
     struct sockaddr_in master_info;
