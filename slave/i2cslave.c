@@ -34,7 +34,7 @@ void action(int call, char **out){
     }
     else {
         get_order(call, &order);
-
+        printf("order %d %s", call, order);
 
         if (strcmp("test", order) == 0) {
             test_communication();
