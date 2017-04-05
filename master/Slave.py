@@ -41,7 +41,7 @@ class Slave(PiDevice):
                     tmp = self.read_byte(self._i2c)
                     print(tmp)
                     i = i + 1
-                else
+                else:
                     tmp = self.read_byte(self._i2c)
                     print("err :")
                     print(tmp)
