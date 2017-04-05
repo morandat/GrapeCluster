@@ -1,5 +1,5 @@
 # coding: utf-8
-# import socket
+import socket
 from Communicator import Communicator
 
 

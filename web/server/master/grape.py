@@ -58,7 +58,10 @@ class I2CDevice(object):
 
     def read_byte(self, register = 0x00):
         return self._bus.read_byte_data(self._address, register)
-    def write_byte(self, register, value):
+    def write_byte(self, register=0x00, value=0x00):
+        print(self._address)
+        print(register)
+        print(value)
         self._bus.write_byte_data(self._address, register, value)
     # TODO use big2little_endian here after, but check usage
     def read_word(self, register):
