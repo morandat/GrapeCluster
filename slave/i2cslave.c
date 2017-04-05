@@ -15,8 +15,8 @@
 
 char **orders;
 
-void get_order(int order_code, char *order){
-    order = orders[order_code];
+void get_order(int order_code, char **order){
+    *order = orders[order_code];
 }
 
 void action(int call, char *out){
@@ -26,7 +26,7 @@ void action(int call, char *out){
 	char *in[4];
 
 	char *order; 
-	get_order(call, order);
+	get_order(call, &order);
 
 
 	if(strcmp("test", order) == 0){
