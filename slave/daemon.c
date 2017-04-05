@@ -156,16 +156,18 @@ int main(int argc, char *argv[]) {
 
     master_info_len = sizeof(master_info);
 
-    fd_set rfds;
+    fd_set rfds, wfds;
 
     FD_ZERO(&rfds);
-    //FD_SET(i2c_fd, &rfds);
+    FD_ZERO(&wfds);
+    FD_SET(i2c_fd, &rfds);
+    FD_SET(i2c_fd, &wfds);
     FD_SET(sock, &rfds);
 
     printf("Sending configure message to master \n");
     CHKERR(sendto(sock, "configure", strlen("configure"), 0, (struct sockaddr *) &master_info, master_info_len));
 
-    int max_fd = sock+1;//(sock > i2c_fd) ? sock : i2c_fd;
+    int max_fd = (sock > i2c_fd) ? sock : i2c_fd;
 
 
     ssize_t recv_len;
