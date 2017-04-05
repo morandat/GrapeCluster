@@ -19,7 +19,7 @@ void get_order(int order_code, char **order){
     *order = orders[order_code];
 }
 
-void action(int call, char *out){
+void action(int call, char **out){
 		
 	int i = 0; 
 	int test = 0;
@@ -31,9 +31,9 @@ void action(int call, char *out){
 
 	if(strcmp("test", order) == 0){
 		test_communication();
-		out = "1111";	
+		*out = "abcd";	
 	}
-	else if(strcmp("cpu", order) == 0){
+	/*else if(strcmp("cpu", order) == 0){
 		int cpu = get_cpu_usage();
 		char c = (char)cpu;
 		sprintf(out, "000%c", c);
@@ -58,7 +58,7 @@ void action(int call, char *out){
 			out = "1111";
 		else
 			out = "0000";
-	} 
+	}*/ 
 	
 }
 
@@ -99,7 +99,7 @@ int i2c_init(int* mode, int argc, char* argv[], char **ord) {
 }
 
 void i2c_handle(int i2c_fd, char tx_buffer[], int mode) {
-    char tx_answer[4];
+    char *tx_answer;
     char endstring[]={ENDSYMB};
 
 
@@ -109,24 +109,25 @@ void i2c_handle(int i2c_fd, char tx_buffer[], int mode) {
         switch (mode) {
             case 1:
                 printf("1: Data received : %c\n", tx_buffer[i]);
-				action(tx_buffer[i],tx_answer);
-				write(i2c_fd, endstring, 1);
+				action(tx_buffer[i],&tx_answer);
+				//write(i2c_fd, endstring, 1);
 				write(i2c_fd, tx_answer, 4);
-				write(i2c_fd, endstring, 1);
+				//write(i2c_fd, endstring, 1);
                 break;
             case 2:
                 printf("2 :Data received : %02x\n ", tx_buffer[i]);
-				action(tx_buffer[i], tx_answer );
-				write(i2c_fd, endstring, 1);
+				action(tx_buffer[i], &tx_answer );
+				//write(i2c_fd, endstring, 1);
 				write(i2c_fd, tx_answer, 4);
-				write(i2c_fd, endstring, 1);            
+				//write(i2c_fd, endstring, 1);            
                 break;
             default:
             	printf("3 :Data received : %d \n", tx_buffer[i]);
-				action(tx_buffer[i], tx_answer );
-				write(i2c_fd, endstring, 1);
-				write(i2c_fd, tx_answer, 4);
-				write(i2c_fd, endstring, 1);
+				action(tx_buffer[i], &tx_answer );
+				//write(i2c_fd, endstring, 1);
+				//write(i2c_fd, tx_answer, 4);
+				write(i2c_fd, "abcd", 4);
+				//write(i2c_fd, endstring, 1);
 				break;
 
         }
