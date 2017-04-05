@@ -44,7 +44,7 @@ $(document).ready(function() {
 				}, false, 'POST');
 			}
 		}
-		if($this.text() == CONSTANTS.status[1]) {
+		else if($this.text() == CONSTANTS.status[1]) {
 			if(confirm("Eteindre le Rasp ?")) {
 				addAjaxHandler('/rasp/'+$this.attr('raspId')+'/stop', function() {
 					$this.text(CONSTANTS.status[0]).btnColor(false);
@@ -68,7 +68,14 @@ $(document).ready(function() {
 	$('.stackStatusBtn').click(function() {
 		var $this = $(this);
 
-		if($this.text() == CONSTANTS.status[1]) {
+		if($this.text() == CONSTANTS.status[0]) {
+			if(confirm("Allumer la stack ?")) {
+				addAjaxHandler('/stack/'+$this.attr('stackId')+'/start', function() {
+					$this.text(CONSTANTS.status[1]).btnColor(true);
+				}, false, 'POST');
+			}
+		}
+		else if($this.text() == CONSTANTS.status[1]) {
 			if(confirm("Eteindre la stack ?")) {
 				addAjaxHandler('/stack/'+$this.attr('stackId')+'/shutdown', function() {
 					$this.text(CONSTANTS.status[0]).btnColor(false);

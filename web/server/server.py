@@ -223,9 +223,23 @@ def routeStack(id):
 
 # STACK ACTIONS
 
+@app.route('/stack/<int:id>/start', methods=['POST'])
+def routeShutdown(id):
+    stack = daemon.get_master().get_stack(id).enable_alimentation()
+
+    if stack is None:
+        response = 0
+    else:
+        response = 1
+    
+    return app.response_class(
+        response=json.dumps({'response': response}),
+        status=200,
+        mimetype='application/json')
+
 @app.route('/stack/<int:id>/shutdown', methods=['POST'])
 def routeShutdown(id):
-    stack = daemon.get_master().get_stack(id)
+    stack = daemon.get_master().get_stack(id).disable_alimentation()
 
     if stack is None:
         response = 0
