@@ -32,18 +32,12 @@ class Slave(PiDevice):
             return -1
 
     def test_dede(self):
-        data = [-1,-1,-1,-1]
+       
 
         self.write_byte(0x00)
         for i in range(0, 4):
-            try:
-                tmp = self.read_byte(self._i2c)
-                data[i] = tmp
-                break
-
-            except Exception as e:
-                print("ça a planté", e)
-        print(data)
+            tmp = self.read_byte(self._i2c)
+            print(tmp)
 
 
     def simple_test(self):
