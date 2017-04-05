@@ -14,8 +14,7 @@ addAjaxHandler("/stack", function(stacks) {
 		$('#stackShutdown'+stackCount)
 			.btnColor(stack.status)
 			.text(CONSTANTS.status[stack.status])
-			.attr('stackId', stackId)
-			.css('cursor', stack.status?'pointer':'default');
+			.attr('stackId', stackId);
 		$('#stackTemp'+stackCount)
 			.btnColor(stack.heat<CONSTANTS.stackHeatLimit)
 			.text(stack.heat+'°C');
