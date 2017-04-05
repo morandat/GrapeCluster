@@ -34,13 +34,21 @@ class Slave(PiDevice):
     def test_dede(self):
         self.write_byte(0x00)
         i = 0
+        e = 0
         while (i < 4):
             try :
-                tmp = self.read_byte(self._i2c)
-                print(tmp)
-                i = i + 1
+                if(e == 0):
+                    tmp = self.read_byte(self._i2c)
+                    print(tmp)
+                    i = i + 1
+                else
+                    tmp = self.read_byte(self._i2c)
+                    print("err :")
+                    print(tmp)
+                    e = 0
                 #break
             except Exception as e:
+                e = 1
                 print("plant", e)  
 
 
