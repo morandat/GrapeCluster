@@ -40,3 +40,6 @@ class Slave(PiDevice):
 
     def get_name_instruction(self):
         return self.__name_instruction
+
+    def set_data(self,i,data):
+        self.__data[i] = data
