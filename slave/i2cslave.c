@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <curses.h>
+#include <string.h>
 
 #include <unistd.h>
 #include <fcntl.h>

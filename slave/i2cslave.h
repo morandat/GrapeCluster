@@ -12,6 +12,6 @@
 #define DEFAULT_DEVICE "/dev/null"
 
 void i2c_handle(int i2c_fd, char tx_buffer[], int mode);
-int i2c_init(int* mode, int argc, char* argv[]);
+int i2c_init(int* mode, int argc, char* argv[], char **ord);
 
 #endif //SLAVE_I2CSLAVE_H
