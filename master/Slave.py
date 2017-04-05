@@ -32,6 +32,8 @@ class Slave(PiDevice):
             return -1
 
     def test_dede(self):
+        data = [-1,-1,-1,-1]
+
         self.write_byte(0x00)
         for i in range(0, 4):
             try:
