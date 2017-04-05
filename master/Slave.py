@@ -42,6 +42,7 @@ class Slave(PiDevice):
     def decode_data(self):
         print("before decode", self.data)
         #add decode instructions
+        chr(self.data)
         print("after decode", self.data)
 
     def test_dede(self):
