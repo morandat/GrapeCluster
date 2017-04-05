@@ -30,7 +30,6 @@ void action(int call, char *out){
 
 
 	if(strcmp("test", order) == 0){
-		printf("Coucou\n");
 		test_communication();
 		out = "1111";	
 	}
@@ -50,6 +49,7 @@ void action(int call, char *out){
 		encode_ip(out, in);
 	}
 	else if(strcmp("get_i2c", order) == 0){
+		printf("Coucou\n");
 		out = "0042";
 	}
 	else if(strcmp("is_network", order) == 0){
