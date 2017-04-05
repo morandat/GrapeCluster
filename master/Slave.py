@@ -14,12 +14,14 @@ from array import array
 #                }
 
 class Slave(PiDevice):
-    CLASS_ADDRESS = None # to define for each slave
+    CLASS_ADDRESS = 0x00 # to define for each slave
 
     def __init__(self, i2c_add, instruction, stack_nb=None, mac_add=None, ip_address=None, pos=None):
-        super(Slave, self).__init__(stack_nb, mac_add, ip_address, i2c_add, pos)
         self.__instr=instruction
         self.CLASS_ADDRESS=i2c_add
+        print (self.CLASS_ADDRESS)
+        super(Slave, self).__init__(stack_nb, mac_add, ip_address, i2c_add, pos)
+        print(self.CLASS_ADDRESS)
 
 
     def verif_key(self, key):
