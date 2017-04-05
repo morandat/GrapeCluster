@@ -34,3 +34,6 @@ class Slave(PiDevice):
         for i in range(0, 4):
             data_decoded[i] = chr(self.__data[i])
         print("after decode", data_decoded)
+
+    def get_instr(self):
+        return self.__instr

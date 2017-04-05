@@ -13,7 +13,7 @@ class CommunicatorI2C(Communicator):  # Communicator for I2C
     def send_instruction(self, slave):
         while True:
             try:
-                slave.write_byte(slave.__instr)
+                slave.write_byte(slave.get_instr())
                 break
             except Exception as e:
                 print(e)
