@@ -157,11 +157,12 @@ if [ $CHROOT_ONLY == false ]; then
 		fi
 
 		simple_action "Moving to home directory"
-		cd /home/pi
 
 		second_action "Building modules and daemon"
-		simple_action "Cloning raspberry_slave_i2c"
-		git clone https://github.com/marilafo/raspberry_slave_i2c.git
+		if [ ! -e raspberry_slave_i2c ]; then
+			simple_action "Cloning raspberry_slave_i2c"
+			git clone https://github.com/marilafo/raspberry_slave_i2c.git
+		fi
 		cd raspberry_slave_i2c
 
 		simple_action "Device tree compiler ..."

@@ -88,6 +88,7 @@ def getRasp(id=None):
             return copy.deepcopy(raspsTest[id])
         else:
             return None
+
     else:
         return copy.deepcopy(raspsTest)
 
@@ -222,9 +223,23 @@ def routeStack(id):
 
 # STACK ACTIONS
 
+@app.route('/stack/<int:id>/start', methods=['POST'])
+def routeShutdown(id):
+    stack = daemon.get_master().get_stack(id).enable_alimentation()
+
+    if stack is None:
+        response = 0
+    else:
+        response = 1
+    
+    return app.response_class(
+        response=json.dumps({'response': response}),
+        status=200,
+        mimetype='application/json')
+
 @app.route('/stack/<int:id>/shutdown', methods=['POST'])
 def routeShutdown(id):
-    stack = daemon.get_master().get_stack(id)
+    stack = daemon.get_master().get_stack(id).disable_alimentation()
 
     if stack is None:
         response = 0
@@ -297,6 +312,6 @@ def routeRestart(id):
 ## RUN ##
 
 if __name__ == '__main__':
-    daemon = Daemon()
+    daemon = Daemon("127.0.0.2")
     daemon.start()
     app.run(debug=True)

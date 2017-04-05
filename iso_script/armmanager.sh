@@ -236,7 +236,12 @@ chroot_image() {
 					if [ ! -e ../slave ]; then
 						second_action "Impossible to copy sources of the slave daemon"
 					else
-						sudo cp --remove-destination ../slave/ $WORKING_PATH/home/pi/armmanager/slave
+						sudo cp -r --remove-destination ../slave/ $WORKING_PATH/home/pi/armmanager/slave
+					fi
+					if [ ! -e ../overlay_rasp ]; then
+						simple_action "overlay_rasp directory not found, going to clone repo once in chroot"
+					else
+						sudo cp -r --remove-destination ../overlay_rasp $WORKING_PATH/home/pi/armmanager/raspberry_slave_i2c
 					fi
 
 					simple_action "Going to chroot into mounted raspberry pi filesystem ..."

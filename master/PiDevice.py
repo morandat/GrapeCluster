@@ -61,7 +61,7 @@ class PiDevice(I2CDevice):
     def get_os(self):
         return self.__os
 
-    def get_i2c_address(self):
+    def get_i2c(self):
         return self._i2c
 
     def get_id(self):
