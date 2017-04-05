@@ -18,7 +18,7 @@ class Slave(PiDevice):
     def __init__(self, i2c_add, instruction, stack_nb=None, mac_add=None, ip_address=None, pos=None):
         self.__instr=instruction
         self.CLASS_ADDRESS=i2c_add
-        self.data = [-1, -1, -1, -1]
+        self.__data = [-1, -1, -1, -1]
         super(Slave, self).__init__(stack_nb, mac_add, ip_address, i2c_add, pos)
         self.send_instruction()
 
@@ -33,18 +33,19 @@ class Slave(PiDevice):
             while True:
                 try:
                     tmp = self.read_byte(self._i2c)
-                    self.data[i] = tmp
+                    self.__data[i] = tmp
                     break
                 except Exception as e:
                     print("Read from", self.CLASS_ADDRESS, "failed, trying again")
         self.decode_data()
 
     def decode_data(self):
-        print("before decode", self.data)
+        print("before decode", self.__data)
         #add decode instructions
-        for i in self.data:
-            i = chr(i)
-        print("after decode", self.data)
+        data_decoded = ['a', 'a', 'a', 'a']
+        for i in range(0, 4):
+            data_decoded[i] = chr(self.__data[i])
+        print("after decode", data_decoded)
 
     def test_dede(self):
         self.write_byte(0x00)
