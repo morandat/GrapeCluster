@@ -10,32 +10,42 @@
 # Description:       Start/stop an example script
 ### END INIT INFO
 
-DESC="Mock Daemon script"
-NAME=mockdaemon
-DAEMON=/usr/local/bin/mockdaemon
+DESC="Daemon script"
+NAME=daemon
+DAEMON=/usr/local/bin/daemon
 
-do_start()
-{
-   initlog -c "echo [ Info ] Starting mockdaemon ..."
-   $DAEMON &
-   initlog -c "echo [ Info ] Mock daemon started !"
+do_start() {
+	logger "[ Info ] Starting daemon ..."
+	nohup $DAEMON
+  if [ $? -ne 0 ]; then
+    logger "[ Warning ] An error occured when trying to start daemon"
+  else
+	  logger "[ Info ] daemon started !"
+  fi
 }
 
-do_stop()
-{
-   initlog -c "echo [ Info ] Stopping mockdaemon"
-   pkill $DAEMON
-   initlog -c "echo [ Info ] Mock daemon stopped !"
+do_stop() {
+	logger "[ Info ] Stopping daemon"
+	pkill $DAEMON
+	logger "[ Info ] daemon stopped !"
 }
 
+do_restart() {
+  logger "[ Info ] Going to restart daemon ..."
+  do_stop
+  do_start
+}
 
 case "$1" in
-   start)
-     do_start
-     ;;
-   stop)
-     do_stop
-     ;;
+	start)
+		do_start
+		;;
+	stop)
+		do_stop
+		;;
+  restart)
+    do_restart
+    ;;
 esac
 
 exit 0

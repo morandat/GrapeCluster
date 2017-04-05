@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <curses.h>
+#include <string.h>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -10,77 +11,62 @@
 #include "i2cslave.h"
 #include "utils.h"
 
-enum sys_call {
-	TEST,
-	CPU, 
-	SHUTDOWN,
-	RESTART,
-	GET_IP, 
-	GET_I2C, 
-	IS_NETWORK
-};
+#define ENDSYMB		  240
 
-int test_communication(){
-	char cmd[64];
-	sprintf(cmd, "echo toto");
-	system(cmd);
+char **orders;
+
+void get_order(int order_code, char **order){
+    *order = orders[order_code];
 }
 
-int shutdown_slave(){
-	char cmd[64];
-	//printf("shutdown");
-	sprintf(cmd, "shutdown -h now");
-	system(cmd);
-	//printf("\n");
-}
-
-int restart_slave(){
-	char cmd[64];
-	sprintf(cmd, "shutdown -r");
-	system(cmd);
-}
-
-
-char * action(enum sys_call call){
-	
-	
+void action(int call, char **out){
+		
 	int i = 0; 
+	int test = 0;
+	char *in[4];
 
-	switch(call){
-		case TEST:
-			return "abcd";
-			break;
-		case CPU:
-			//get_cpu();
-			break;
-		case SHUTDOWN:
-			shutdown_slave();
-			return "abcd";
-			break;
-		case RESTART:
-			restart_slave();
-			return "abcd";
-			break;
-		case GET_IP:
-			//get_ip();
-			return "abcd";
-			break;
-		case GET_I2C:
-			//get_i2c();
-			return "abcd";
-			break;
-		case IS_NETWORK:
-			//is_network();
-			return "abcd";
-			break;
+	char *order; 
+	get_order(call, &order);
+
+
+	if(strcmp("test", order) == 0){
+		test_communication();
+		*out = "abcd";	
 	}
-
-	return "abcd";
+	/*else if(strcmp("cpu", order) == 0){
+		int cpu = get_cpu_usage();
+		char c = (char)cpu;
+		sprintf(out, "000%c", c);
+	}
+	else if(strcmp("shutdown", order) == 0){
+		shutdown_slave();
+	}
+	else if(strcmp("reboot", order) == 0){
+		restart_slave();
+	}
+	else if(strcmp("get_ip", order) == 0){
+		get_ip(in);
+		encode_ip(out, in);
+	}
+	else if(strcmp("get_i2c", order) == 0){
+		printf("Coucou\n");
+		out = "0042";
+	}
+	else if(strcmp("is_network", order) == 0){
+		test = test_network();
+		if(test == 1)
+			out = "1111";
+		else
+			out = "0000";
+	}*/ 
+	
 }
 
-int i2c_init(int* mode, int argc, char* argv[]) {
+int i2c_init(int* mode, int argc, char* argv[], char **ord) {
     int opt;
     *mode = 0;
+
+    orders = ord;
 
     FILE *usage_file = stderr;
     const char *input = DEFAULT_DEVICE;
@@ -114,23 +100,40 @@ int i2c_init(int* mode, int argc, char* argv[]) {
 
 void i2c_handle(int i2c_fd, char tx_buffer[], int mode) {
     size_t length = read(i2c_fd, tx_buffer, TX_BUF_SIZE);
+    char *tx_answer;
+    char endstring[]={ENDSYMB};
+
     for(int i = 0; i < length; i++)
     {
         switch (mode) {
             case 1:
                 printf("1: Data received : %c\n", tx_buffer[i]);
+				action(tx_buffer[i],&tx_answer);
+				//write(i2c_fd, endstring, 1);
+				write(i2c_fd, tx_answer, 4);
+				//write(i2c_fd, endstring, 1);
                 break;
             case 2:
                 printf("2 :Data received : %02x\n ", tx_buffer[i]);
+				action(tx_buffer[i], &tx_answer );
+				//write(i2c_fd, endstring, 1);
+				write(i2c_fd, tx_answer, 4);
+				//write(i2c_fd, endstring, 1);            
                 break;
             default:
-                printf("3 :Data received : %d \n", tx_buffer[i]);
-                break;
+            	printf("3 :Data received : %d \n", tx_buffer[i]);
+				action(tx_buffer[i], &tx_answer );
+				//write(i2c_fd, endstring, 1);
+				//write(i2c_fd, tx_answer, 4);
+				write(i2c_fd, "abcd", 4);
+				//write(i2c_fd, endstring, 1);
+				break;
+
         }
     }
     //decode_data(com, &is_commande, &nb_opt, tx_buffer);
 
-    write(i2c_fd, tx_buffer, length);
+    //write(i2c_fd, tx_buffer, length);
 }
 
 /*

@@ -38,7 +38,7 @@ $(document).ready(function() {
 
 		if($this.text() == CONSTANTS.status[0]) {
 			if(confirm("Allumer le Rasp ?")) {
-				addAjaxHandler('/rasp/start/'+$this.attr('raspId'), function() {
+				addAjaxHandler('/rasp/'+$this.attr('raspId')+'/start', function() {
 					$this.text(CONSTANTS.status[1]).btnColor(true);
 					$('.raspRestartBtn[raspId="'+$this.attr('raspId')+'"]').show();
 				}, false, 'POST');
@@ -46,7 +46,7 @@ $(document).ready(function() {
 		}
 		if($this.text() == CONSTANTS.status[1]) {
 			if(confirm("Eteindre le Rasp ?")) {
-				addAjaxHandler('/rasp/stop/'+$this.attr('raspId'), function() {
+				addAjaxHandler('/rasp/'+$this.attr('raspId')+'/stop', function() {
 					$this.text(CONSTANTS.status[0]).btnColor(false);
 					$('.raspRestartBtn[raspId="'+$this.attr('raspId')+'"]').hide();
 				}, false, 'POST');
@@ -58,7 +58,7 @@ $(document).ready(function() {
 		var $this = $(this);
 
 		if(confirm("Redémarrer le Rasp ?")) {
-			addAjaxHandler('/rasp/restart/'+$this.attr('raspId'), function() {
+			addAjaxHandler('/rasp/'+$this.attr('raspId')+'/restart', function() {
 				$('.raspStatusBtn[raspId='+$this.attr('raspId')+']').text(CONSTANTS.status[0]).btnColor(false);
 				$this.hide();
 			}, false, 'POST');
@@ -70,7 +70,7 @@ $(document).ready(function() {
 
 		if($this.text() == CONSTANTS.status[1]) {
 			if(confirm("Eteindre la stack ?")) {
-				addAjaxHandler('/stack/shutdown/'+$this.attr('stackId'), function() {
+				addAjaxHandler('/stack/'+$this.attr('stackId')+'/shutdown', function() {
 					$this.text(CONSTANTS.status[0]).btnColor(false);
 				}, false, 'POST');
 			}

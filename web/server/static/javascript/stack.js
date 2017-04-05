@@ -17,7 +17,7 @@ addAjaxHandler("/stack/"+STACKID, function(stack) {
 			$('#raspIP'+raspSlot).text(raspData.ip);
 			$('#raspCPU'+raspSlot)
 				.btnColor(raspData.cpu<CONSTANTS.raspCPULimit)
-				.text(Math.round(raspData.cpu*100)+'%')
+				.text(Math.round(raspData.cpu)+'%')
 				.show();
 			$('#raspRAM'+raspSlot).text(raspData.ram);
 			$('#raspStatus'+raspSlot)
