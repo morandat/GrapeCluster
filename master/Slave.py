@@ -37,3 +37,6 @@ class Slave(PiDevice):
 
     def get_instr(self):
         return self.__instr
+
+    def get_name_instruction(self):
+        return self.__name_instruction

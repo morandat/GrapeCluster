@@ -18,7 +18,7 @@ class CommunicatorI2C(Communicator):  # Communicator for I2C
             except Exception as e:
                 print(e)
                 print("Write from", slave.CLASS_ADDRESS, " failed trying again")
-        if slave.__name_instruction not in Slave.no_return_instructions:
+        if slave.get_name_instruction() not in Slave.no_return_instructions:
             for i in range(0, 4):
                 while True:
                     try:
