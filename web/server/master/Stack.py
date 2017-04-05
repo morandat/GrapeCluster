@@ -1,3 +1,4 @@
+# coding: utf-8
 from IStack import IStack
 from logging import getLogger
 from grape import STACK_DEVICES

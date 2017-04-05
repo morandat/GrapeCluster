@@ -1,3 +1,4 @@
+# coding: utf-8
 from PiDevice import PiDevice
 from grape import STACK_DEVICES
 
@@ -15,26 +16,21 @@ class Master(PiDevice):
             for pi_device in stack.get_pi_devices():
                 if pi_device.get_ip_address() == ip_address:
                     return pi_device
-        return None
-
-    def get_slave_by_i2c(self, i2c):
-        i2c = int(i2c)
-        for stack in self.__stacks:
-            for pi_device in stack.get_pi_devices():
-                if pi_device.get_i2c_address() == i2c:
-                    return pi_device
-        return None
 
     def get_slave_by_id(self, id):
-        id = int(id)
         for stack in self.__stacks:
             for pi_device in stack.get_pi_devices():
                 if pi_device.get_id() == id:
                     return pi_device
-        return None
+
+    def get_slave_by_i2c(self, i2c):
+        for stack in self.__stacks:
+            for pi_device in stack.get_pi_devices():
+                if pi_device.get_i2c_address() == i2c:
+                    return pi_device
 
     def get_stack(self, number):
-        return self.__stacks[number-1]
+        return self.__stacks[number]
 
     def get_stacks(self):
         return self.__stacks
@@ -42,7 +38,7 @@ class Master(PiDevice):
     def get_cluster_ip_addresses(self):
         ip_addresses = []
         for stack in self.__stacks:
-            ip_addresses.extend(stack.get_ip_addresses())
+            ip_addresses.extend(    stack.get_ip_addresses())
         return ip_addresses
 
     def add_stack(self, stack):
