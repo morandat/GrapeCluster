@@ -19,7 +19,11 @@
 #include "bcm2835_slave_mod.h"
 
 #define I2C_WAIT_LOOP_COUNT	200
+
+#ifndef SLV_ADDRESS
 #define SLV_ADDRESS		0x42
+#endif
+
 #define DRV_NAME		"bcm2835_i2c_slave"
 #define DEVICE_NAME		"i2c_slave"
 #define BUFFER_SIZE		PAGE_SIZE
