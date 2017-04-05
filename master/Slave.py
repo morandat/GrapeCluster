@@ -17,7 +17,7 @@ class Slave(PiDevice):
     no_return_instructions = {'shutdown', 'restart'}
     #CLASS_ADDRESS = 0x00 # to define for each slave
 
-    def __init__(self, i2c_add, numb_instr, name_instruction, stack_nb=None, mac_add=None, ip_address=None, pos=None):
+    def __init__(self, i2c_add, numb_instr, name_instruction, stack_nb=0, mac_add="FF:FF:FF:FF:FF", ip_address="127.0.0.3", pos=0):
         self.__instr = numb_instr
         self.__name_instruction = name_instruction
         self.CLASS_ADDRESS = i2c_add
