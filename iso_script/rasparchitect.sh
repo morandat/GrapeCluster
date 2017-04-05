@@ -61,8 +61,8 @@ export LANGUAGE=en_GB.utf8
 export LANG=en_GB.utf8
 export LC_ALL=en_GB.utf8
 
-simple_action "Moving to /tmp/armmanager"
-cd /tmp/armmanager
+simple_action "Moving to /home/pi/armmanager"
+cd /home/pi/armmanager
 
 for i in "$@"; do
 	case $i in
@@ -84,9 +84,9 @@ for i in "$@"; do
 		-nd | --no-daemon)
 			DAEMON=false
 			;;
-        -nrk | --no-kernel-recompile)
-            RECOMPILE_KERNEL=false
-            ;;
+		-nrk | --no-kernel-recompile)
+			RECOMPILE_KERNEL=false
+			;;
 		*)
 			simple_action "Unkown option : $i" # unknown option
 			;;
@@ -113,9 +113,10 @@ if [ $CHROOT_ONLY == false ]; then
 	check_and_install_package bc bc bc
 	check_and_install libncurses5-dev
 	check_and_install sysstat
-	check_and_install python
-	check_and_install python-pip
-	check_and_install python-dev
+	#not needed
+	#check_and_install python
+	#check_and_install python-pip
+	#check_and_install python-dev
 
 	if [ $DAEMON == true ]; then
 		main_action "Installing daemon"
@@ -137,15 +138,15 @@ if [ $CHROOT_ONLY == false ]; then
 			simple_action "Making bcm2709_defconfig ..."
 			make bcm2709_defconfig
 
-			simple_action "Making zImage modules and dtbs ..."
+			#simple_action "Making zImage modules and dtbs ..."
 			#make -j4 zImage modules dtbs
-
-			simple_action "Making modules_install ..."
+			#simple_action "Making modules_install ..."
 			#make modules_install
 
 			#Testing with only overlays
-			make dtbs
-			make arch/arm/boot/dts
+			simple_action "Going to make dtbs, and overlays."
+			make -j4 zImage dtbs
+			#make arch/arm/boot/dts
 
 			simple_action "Copying new files to /boot ..."
 			cp arch/arm/boot/dts/*.dtb /boot/
@@ -155,10 +156,10 @@ if [ $CHROOT_ONLY == false ]; then
 			cd ../
 		fi
 
-        simple_action "Moving to home directory"
-        cd /home/pi
+		simple_action "Moving to home directory"
+		cd /home/pi
 
-        second_action "Building modules and daemon"
+		second_action "Building modules and daemon"
 		simple_action "Cloning raspberry_slave_i2c"
 		git clone https://github.com/marilafo/raspberry_slave_i2c.git
 		cd raspberry_slave_i2c
@@ -167,8 +168,16 @@ if [ $CHROOT_ONLY == false ]; then
 		dtc -@ -I dts -O dtb i2cslave-bcm2708-overlay.dts -o i2cslave-bcm2708.dtbo
 		simple_action "Copying to overlays ..."
 		cp i2cslave-bcm2708.dtbo /boot/overlays/
-		simple_action "Building daemon ..."
-		gcc -o $EXEC_NAME i2ccat.c -lncurses
+
+		cd ../
+		second_action "Starting daemon compilation ..."
+		if [ -e slave ]; then
+			cd slave
+			simple_action "Building daemon ..."
+			gcc -o $EXEC_NAME -std=gnu99 i2cslave.c udpslave.c daemon.c commands.c -lncurses
+		else
+			second_action "Unable to find Daemon sources"
+		fi
 
 		if [ -e $EXEC_NAME ]; then
 			simple_action "Copying executable and launching script ..."
@@ -201,6 +210,6 @@ else
 fi
 
 if [ ! -e /boot/ssh ]; then
-    simple_action "Activating ssh ..."
-    touch /boot/ssh
+	simple_action "Activating ssh ..."
+	touch /boot/ssh
 fi
