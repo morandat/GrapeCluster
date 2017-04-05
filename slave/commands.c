@@ -9,6 +9,7 @@
 #include <string.h>
 #include <getopt.h>
 #include <curses.h>
+#include <unistd.h>
 
 
 int encode_ip(char *out, char ** in){
