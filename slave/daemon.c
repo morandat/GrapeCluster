@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
                 }
                 else if(FD_ISSET(i2c_fd, &rfds)) {
                     printf("received data over i2c\n");
-                    i2c_handle(i2c_fd, tx_buffer, mode);
+                    i2c_handle(i2c_fd, tx_buffer, mode, &wfds);
                 }
 
                 break;
