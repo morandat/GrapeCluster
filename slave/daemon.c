@@ -136,12 +136,12 @@ int main(int argc, char *argv[]) {
 
     master_info_len = sizeof(master_info);
 
-    fd_set rfds, wfds;
+    fd_set rfds;
 
     FD_ZERO(&rfds);
-    FD_ZERO(&wfds);
+
     FD_SET(i2c_fd, &rfds);
-    FD_SET(i2c_fd, &wfds);
+
 
     FD_SET(sock, &rfds);
 
@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
                 }
                 else if(FD_ISSET(i2c_fd, &rfds)) {
                     printf("received data over i2c\n");
-                    i2c_handle(i2c_fd, tx_buffer, mode, &wfds);
+                    i2c_handle(i2c_fd, tx_buffer, mode);
                 }
 
                 break;

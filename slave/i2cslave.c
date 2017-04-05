@@ -105,7 +105,7 @@ int i2c_init(int* mode, int argc, char* argv[], char **ord) {
     return fd;
 }
 
-void i2c_handle(int i2c_fd, char tx_buffer[], int mode, fd_set* wfds) {
+void i2c_handle(int i2c_fd, char tx_buffer[], int mode) {
     size_t length = read(i2c_fd, tx_buffer, TX_BUF_SIZE);
     char *tx_answer;
     char endstring[]={ENDSYMB};
@@ -117,18 +117,18 @@ void i2c_handle(int i2c_fd, char tx_buffer[], int mode, fd_set* wfds) {
                 printf("1: Data received : %c\n", tx_buffer[i]);
                 action(tx_buffer[i], &tx_answer);
                 //write(i2c_fd, endstring, 1);
-                if (FD_ISSET(i2c_fd, wfds)) {
+
                     write(i2c_fd, tx_answer, 4);
-                }
+
                 //write(i2c_fd, endstring, 1);
                 break;
             case 2:
                 printf("2 :Data received : %02x\n ", tx_buffer[i]);
                 action(tx_buffer[i], &tx_answer);
                 //write(i2c_fd, endstring, 1);
-                if (FD_ISSET(i2c_fd, wfds)) {
+
                     write(i2c_fd, tx_answer, 4);
-                }
+
                 //write(i2c_fd, endstring, 1);
                 break;
             default:
@@ -136,9 +136,9 @@ void i2c_handle(int i2c_fd, char tx_buffer[], int mode, fd_set* wfds) {
                 action(tx_buffer[i], &tx_answer);
                 //write(i2c_fd, endstring, 1);
                 //write(i2c_fd, tx_answer, 4);
-                if (FD_ISSET(i2c_fd, wfds)) {
+
                     write(i2c_fd, tx_answer, 4);
-                }
+
                 //write(i2c_fd, endstring, 1);
                 break;
             }
