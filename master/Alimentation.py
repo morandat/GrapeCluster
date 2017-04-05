@@ -7,7 +7,7 @@ class Alimentation(PiDevice):
         super(Alimentation, self).__init__(stack_nb, mac_add, ip_address, i2c_add, pos)
 
     def enable_alimentation(self):
-        self.write_byte(0x38, 0x00, 0x00)
+        self.write_byte(0x38, 0x00)
 
     def disable_alimentation(self):
-        self.write_byte(0x38, 0x00, 0xff)
+        self.write_byte(0x38, 0xff)
