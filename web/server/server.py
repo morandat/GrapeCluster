@@ -301,6 +301,6 @@ def routeRestart(id):
 ## RUN ##
 
 if __name__ == '__main__':
-    daemon = Daemon()
+    daemon = Daemon("127.0.0.2")
     daemon.start()
     app.run(debug=True)
