@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
     fd_set rfds;
 
     FD_ZERO(&rfds);
-    //FD_SET(i2c_fd, &rfds);
+    FD_SET(i2c_fd, &rfds);
     FD_SET(sock, &rfds);
 
     printf("Sending configure message to master \n");
