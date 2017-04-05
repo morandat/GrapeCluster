@@ -20,6 +20,7 @@ class Slave(PiDevice):
         self.CLASS_ADDRESS=i2c_add
         self.data = [-1, -1, -1, -1]
         super(Slave, self).__init__(stack_nb, mac_add, ip_address, i2c_add, pos)
+        self.send_instruction()
 
     def send_instruction(self):
         while True:
