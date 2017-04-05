@@ -17,6 +17,7 @@ char **orders;
 
 void get_order(int order_code, char *order){
     order = orders[order_code];
+    printf("order : %s\n", order);
 }
 
 void action(int call, char *out){
