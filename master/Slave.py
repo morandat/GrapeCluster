@@ -23,6 +23,8 @@ class Slave(PiDevice):
         self.CLASS_ADDRESS = i2c_add
         self.__data = [-1, -1, -1, -1]
         super(Slave, self).__init__(stack_nb, mac_add, ip_address, i2c_add, pos)
+        print(self.__instr)
+        print(self.CLASS_ADDRESS)
         #self.send_instruction()
 
     def decode_data(self):
