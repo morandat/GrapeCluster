@@ -15,7 +15,7 @@ from queue import Queue, Full
 
 class Slave(PiDevice):
     CLASS_ADDRESS = 0x42  # 42 for slaves
-    def __init__(self, stack_nb=None, mac_add=None, ip_address=None, i2c_add=0x42, pos=None, instruction=0x00, param=None):
+    def __init__(self, stack_nb=None, mac_add=None, ip_address=None, i2c_add=0x42, pos=0, instruction=0x00, param=None):
         super(Slave, self).__init__(stack_nb, mac_add, ip_address, i2c_add, pos)
         self.__instr=instruction
         self.__param=param
