@@ -17,9 +17,7 @@ class Slave(PiDevice):
     no_return_instructions = {'shutdown', 'restart'}
     #CLASS_ADDRESS = 0x00 # to define for each slave
 
-    def __init__(self, i2c_add, numb_instr, name_instruction, stack_nb=0, mac_add="FF:FF:FF:FF:FF", ip_address="127.0.0.3", pos=0):
-        self.__instr = numb_instr
-        self.__name_instruction = name_instruction
+    def __init__(self, i2c_add, stack_nb=0, mac_add="FF:FF:FF:FF:FF", ip_address="127.0.0.3", pos=0):
         self.CLASS_ADDRESS = i2c_add
         self.__data = [-1, -1, -1, -1]
         super(Slave, self).__init__(stack_nb, mac_add, ip_address, i2c_add, pos)
@@ -35,11 +33,11 @@ class Slave(PiDevice):
             data_decoded[i] = chr(self.__data[i])
         print("after decode", data_decoded)
 
-    def get_instr(self):
-        return self.__instr
-
     def get_name_instruction(self):
         return self.__name_instruction
 
-    def set_data(self,i,data):
+    def set_data(self, i, data):
         self.__data[i] = data
+
+    def get_data(self):
+        return self.__data
