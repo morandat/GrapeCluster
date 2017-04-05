@@ -14,14 +14,13 @@ from array import array
 #                }
 
 class Slave(PiDevice):
-    CLASS_ADDRESS = 0x42  # 42 for slaves
-    def __init__(self, stack_nb=None, mac_add=None, ip_address=None, i2c_add=0x42, pos=None, instruction=0x00, param=None):
+    CLASS_ADDRESS = None # to define for each slave
+
+    def __init__(self, i2c_add, instruction, stack_nb=None, mac_add=None, ip_address=None, pos=None):
         super(Slave, self).__init__(stack_nb, mac_add, ip_address, i2c_add, pos)
         self.__instr=instruction
-        self.__param=param
-        self.__data = Queue(4)
+        self.CLASS_ADDRESS=i2c_add
 
-        #self.init(self)
 
     def verif_key(self, key):
         self.write_byte(0x00, key)
@@ -55,7 +54,7 @@ class Slave(PiDevice):
 
     def simple_test(self):
         data = [-1,-1,-1,-1]
-        self.write_byte(0x42, 0x00)
+        self.write_byte(self.__instr)
         for i in range(0, 4):
             while True :
                 try:
