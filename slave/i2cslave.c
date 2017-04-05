@@ -112,8 +112,8 @@ int i2c_init(int* mode, int argc, char* argv[]) {
     return fd;
 }
 
-void i2c_handle(int i2c_fd, char tx_buffer[], int mode) {
-    ssize_t length = read(i2c_fd, tx_buffer, TX_BUF_SIZE);
+void i2c_handle(int i2c_fd, char tx_buffer[], int mode, fd_set* rfds) {
+    size_t length = read(i2c_fd, tx_buffer, TX_BUF_SIZE);
     for(int i = 0; i < length; i++)
     {
         switch (mode) {
@@ -129,8 +129,9 @@ void i2c_handle(int i2c_fd, char tx_buffer[], int mode) {
         }
     }
     //decode_data(com, &is_commande, &nb_opt, tx_buffer);
-
+    FD_CLR(i2c_fd, rfds);
     write(i2c_fd, tx_buffer, length);
+    FD_SET(i2c_fd, rfds);
 }
 
 /*
