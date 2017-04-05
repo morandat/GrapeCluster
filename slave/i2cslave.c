@@ -105,38 +105,41 @@ void i2c_handle(int i2c_fd, char tx_buffer[], int mode, fd_set* wfds) {
 
     for(int i = 0; i < length; i++)
     {
-        switch (mode) {
+        if (strcmp(tx_buffer[i], "6") != 0) {
+            printf("eh mdr tu fais quoi\n");
+            switch (mode) {
             case 1:
                 printf("1: Data received : %c\n", tx_buffer[i]);
-				action(tx_buffer[i],&tx_answer);
-				//write(i2c_fd, endstring, 1);
+                action(tx_buffer[i], &tx_answer);
+                //write(i2c_fd, endstring, 1);
                 if (FD_ISSET(i2c_fd, wfds)) {
                     write(i2c_fd, tx_answer, 4);
                 }
-				//write(i2c_fd, endstring, 1);
+                //write(i2c_fd, endstring, 1);
                 break;
             case 2:
                 printf("2 :Data received : %02x\n ", tx_buffer[i]);
-				action(tx_buffer[i], &tx_answer );
-				//write(i2c_fd, endstring, 1);
+                action(tx_buffer[i], &tx_answer);
+                //write(i2c_fd, endstring, 1);
                 if (FD_ISSET(i2c_fd, wfds)) {
                     write(i2c_fd, tx_answer, 4);
                 }
-				//write(i2c_fd, endstring, 1);            
+                //write(i2c_fd, endstring, 1);
                 break;
             default:
-            	printf("3 :Data received : %d \n", tx_buffer[i]);
-				action(tx_buffer[i], &tx_answer );
-				//write(i2c_fd, endstring, 1);
-				//write(i2c_fd, tx_answer, 4);
+                printf("3 :Data received : %d \n", tx_buffer[i]);
+                action(tx_buffer[i], &tx_answer);
+                //write(i2c_fd, endstring, 1);
+                //write(i2c_fd, tx_answer, 4);
                 if (FD_ISSET(i2c_fd, wfds)) {
                     write(i2c_fd, tx_answer, 4);
                 }
-				//write(i2c_fd, endstring, 1);
-				break;
-
+                //write(i2c_fd, endstring, 1);
+                break;
+            }
         }
     }
+}
     //decode_data(com, &is_commande, &nb_opt, tx_buffer);
 
     //write(i2c_fd, tx_buffer, length);

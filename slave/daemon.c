@@ -180,6 +180,7 @@ int main(int argc, char *argv[]) {
                 break;
             default:
                 close(sock);
+                close(i2c_fd);
                 break;
         }
         //sleep(1);
