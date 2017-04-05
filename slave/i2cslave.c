@@ -12,6 +12,12 @@
 
 #define ENDSYMB		  240
 
+char **orders;
+
+void get_order(int order_code, char *order){
+    order = orders[order_code];
+}
+
 void action(int call, char *out){
 		
 	int i = 0; 
@@ -19,7 +25,7 @@ void action(int call, char *out){
 	char *in[4];
 
 	char *order; 
-	get_order(call, order)
+	get_order(call, order);
 
 
 	if(strcmp("test", order) == 0){
@@ -54,9 +60,11 @@ void action(int call, char *out){
 	
 }
 
-int i2c_init(int* mode, int argc, char* argv[]) {
+int i2c_init(int* mode, int argc, char* argv[], char **ord) {
     int opt;
     *mode = 0;
+
+    orders = ord;
 
     FILE *usage_file = stderr;
     const char *input = DEFAULT_DEVICE;
@@ -90,7 +98,6 @@ int i2c_init(int* mode, int argc, char* argv[]) {
 
 void i2c_handle(int i2c_fd, char tx_buffer[], int mode) {
     char tx_answer[4];
-    enum sys_call commande;
     char endstring[]={ENDSYMB};
 
 

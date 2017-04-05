@@ -61,10 +61,6 @@ void free_args(char** args, int arg_num) {
     free(args);
 }
 
-void get_order(int order_code, char *order){
-    order = orders[order_code];
-}
-
 void exec_order(int order_code, struct daemon* daemon) {//, char** args, int arg_num) {
     char* order = orders[order_code];
     printf("executing order %i : %s\n", order_code, order);
@@ -123,7 +119,7 @@ int main(int argc, char *argv[]) {
     char tx_buffer[TX_BUF_SIZE];
     int mode;
 
-    int i2c_fd = i2c_init(&mode, argc, argv);
+    int i2c_fd = i2c_init(&mode, argc, argv, orders);
     uint8_t data;
 
     struct sockaddr_in master_info;
