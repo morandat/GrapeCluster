@@ -7,7 +7,7 @@
 
 #include "commands.h"
 
-#define TX_BUF_SIZE   4
+#define TX_BUF_SIZE  10 
 
 #define DEFAULT_DEVICE "/dev/i2c_slave"
 
