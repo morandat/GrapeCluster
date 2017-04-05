@@ -9,7 +9,7 @@
 
 #define TX_BUF_SIZE   4
 
-#define DEFAULT_DEVICE "/dev/null"
+#define DEFAULT_DEVICE "/dev/i2c_slave"
 
 void i2c_handle(int i2c_fd, char tx_buffer[], int mode);
 int i2c_init(int* mode, int argc, char* argv[], char **ord);
