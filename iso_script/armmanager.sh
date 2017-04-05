@@ -232,6 +232,7 @@ chroot_image() {
 					simple_action "Preparing files for chroot ..."
 					mkdir -p $WORKING_PATH/home/pi/armmanager
 					sudo cp --remove-destination rasparchitect.sh $WORKING_PATH/home/pi/armmanager
+					sudo cp --remove-destination bcm_slave_mod_install.sh $WORKING_PATH/home/pi/armmanager
 					if [ ! -e ../slave ]; then
 						second_action "Impossible to copy sources of the slave daemon"
 					else

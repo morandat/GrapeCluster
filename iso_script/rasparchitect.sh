@@ -174,7 +174,7 @@ if [ $CHROOT_ONLY == false ]; then
 		if [ -e slave ]; then
 			cd slave
 			simple_action "Building daemon ..."
-			gcc -o $EXEC_NAME -std=gnu99 i2cslave.c udpslave.c daemon.c commands.c -lncurses
+			gcc -o $EXEC_NAME -std=gnu99 i2cslave.c udpslave.c daemon.c commands.c
 		else
 			second_action "Unable to find Daemon sources"
 		fi
