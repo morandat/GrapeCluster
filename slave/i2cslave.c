@@ -148,7 +148,7 @@ void i2c_handle(int i2c_fd, char tx_buffer[], int mode) {
     //decode_data(com, &is_commande, &nb_opt, tx_buffer);
 
     //write(i2c_fd, tx_buffer, length);
-}
+
 
 /*
 int main(int argc, char **argv)
