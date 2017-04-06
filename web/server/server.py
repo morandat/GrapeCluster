@@ -138,7 +138,7 @@ def getRasp(id=None):
 
     def renderRasp(rasp):
         return {
-            'id': rasp.get_id()
+            'id': rasp.get_id(),
             'name' : 'Name',
             'address' : rasp.get_i2c(),
             'stack' : 1,
