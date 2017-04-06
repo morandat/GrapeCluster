@@ -23,6 +23,7 @@ class CommunicatorI2C(Communicator):  # Communicator for I2C
                         slave.set_data(i, tmp)
                         break
                     except Exception as e:
+                        print(e) 
                         print("Read from", slave.CLASS_ADDRESS, "failed, trying again")
             slave.decode_data()
             return slave.decode_data

@@ -60,7 +60,6 @@ class I2CDevice(object):
         return self._bus.read_byte_data(self._address, register)
 
     def write_byte(self,value, register=0x00):
-        print("beer")
         print(self._address)
         print(register)
         print(value)
