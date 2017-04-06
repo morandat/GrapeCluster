@@ -308,7 +308,7 @@ def disableI2C(id):
 ## RUN ##
 
 if __name__ == '__main__':
-    ip = "127.0.0.2"
+    ip = "192.168.1.21"
     if (len(sys.argv) > 1):
         ip = sys.argv[1]
     daemon = Daemon(ip)
