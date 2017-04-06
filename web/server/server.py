@@ -94,6 +94,12 @@ def getRasp(id=None):
 
 """
 
+def json_response(response):
+    return app.response_class(
+        response=json.dumps({'response': response}),
+        status=200,
+        mimetype='application/json')
+
 def getStack(id=None):
     master = daemon.get_master()
 
@@ -180,14 +186,14 @@ def viewStack(id):
     if getStack(id) is not None:
         return render_template('stack.html', constants=constants, stackId=id)
     else:
-        return routeDefault()
+        return routeDefault()#would be better to say there's an error... To-Do
 
 @app.route('/view/rasp/<int:id>') # = route options
 def viewRasp(id):
     if getRasp(id) is not None:
         return render_template('rasp.html', constants=constants, raspId=id)
     else:
-        return routeDefault()
+        return routeDefault()#same here
         
 
         
@@ -216,10 +222,7 @@ def routeStack(id):
         else:
             nestRaspsInStack(stack)
 
-    return app.response_class(
-        response=json.dumps(stack),
-        status=200,
-        mimetype='application/json')
+    return json_response()
 
 # STACK ACTIONS
 
@@ -232,10 +235,7 @@ def routeShutdown(id):
     else:
         response = 1
     
-    return app.response_class(
-        response=json.dumps({'response': response}),
-        status=200,
-        mimetype='application/json')
+    return json_response(response)
 
 @app.route('/stack/<int:id>/shutdown', methods=['POST'])
 def routeShutdown(id):
@@ -246,10 +246,7 @@ def routeShutdown(id):
     else:
         response = 1
     
-    return app.response_class(
-        response=json.dumps({'response': response}),
-        status=200,
-        mimetype='application/json')
+    return json_response(response)
 
 # RASP GET
 
@@ -259,10 +256,7 @@ def routeRasp(id):
     rasp = getRasp(id)
     if rasp is None:
         rasp = {}
-    return app.response_class(
-        response=json.dumps(rasp),
-        status=200,
-        mimetype='application/json')
+    return json_response(json.dumps(rasp))
         
 # RASP ACTIONS
 
@@ -275,10 +269,7 @@ def routeStart(id):
     else:
         response = 1
 
-    return app.response_class(
-        response=json.dumps({'response': response}),
-        status=200,
-        mimetype='application/json')
+    return json_response(json.dumps({'response': response}))
     
 @app.route('/rasp/<int:id>/stop', methods=['POST'])
 def routeStop(id):
@@ -289,10 +280,7 @@ def routeStop(id):
     else:
         response = 1
     
-    return app.response_class(
-        response=json.dumps({'response': response}),
-        status=200,
-        mimetype='application/json')
+    return json_response(json.dumps({'response': response}))
      
 @app.route('/rasp/<int:id>/restart', methods=['POST'])
 def routeRestart(id):
@@ -303,10 +291,7 @@ def routeRestart(id):
     else:
         response = 1
     
-    return app.response_class(
-        response=json.dumps({'response': response}),
-        status=200,
-        mimetype='application/json')
+    return json_response(json.dumps({'response': response}))
         
         
 ## RUN ##
