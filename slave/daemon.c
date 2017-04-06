@@ -19,6 +19,10 @@
 
 #include "utils.h"
 
+#ifndef ORDERS_PATH
+#define ORDERS_PATH "../orders.txt"
+#endif
+
 enum status curr_status = ACTIVE;
 
 int orders_num;
@@ -93,7 +97,7 @@ int order_str_to_code(char* str) {
 
 
 char** load_orders() {
-    FILE* orders_file = fopen("../orders.txt", "r");
+    FILE* orders_file = fopen(ORDERS_PATH, "r");
     fseek(orders_file, 0, SEEK_END);
     long fsize = ftell(orders_file);
     fseek(orders_file, 0, SEEK_SET);
