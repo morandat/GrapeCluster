@@ -6,7 +6,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from Stack import Stack
 from Master import Master
 from Slave import Slave
-from CommunicatorUDP import CommunicatorUDP
+from CommunicatorUDP import CommunicatorUDP, CommunicatorI2C
 from logging import getLogger
 
 class Daemon(Thread):
@@ -22,6 +22,8 @@ class Daemon(Thread):
         self.__udp_comm.open_communication()
         print("Master listening on {}:{}".format(ip_address, 42666))
 
+        self.__i2c_comm = CommunicatorI2C()
+
     def run(self):
         while True:
             print("Broadcasting cpu request")
@@ -30,11 +32,11 @@ class Daemon(Thread):
             print("received message: {} from {}".format(data, addr))
             if data == b"configure":
                 stack = self.__master.get_stack(0)
-                print("sfjldkfjslf lkjdsfl kdsjf e", addr[0])
                 new_slave = Slave(0x42, 0, "test", 0, "AA:AA:AA:AA:AA:AA", ip_address=addr[0], pos=len(stack.get_pi_devices()))
                 self.__master.get_stack(0).add_pi_device(new_slave)
                 self.__udp_comm.send("0;" + addr[0] + ";", new_slave.get_ip_address())
                 print("Configured new slave of ip_addr {}".format(addr[0]))
+                self.__i2c_comm.send_instruction(new_slave)
 
             elif data[:4] == b"cpu:":
                 self.__master.get_slave_by_ip(addr[0]).cpu_usage = data[4:]
