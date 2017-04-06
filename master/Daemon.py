@@ -30,6 +30,7 @@ class Daemon(Thread):
             print("received message: {} from {}".format(data, addr))
             if data == b"configure":
                 stack = self.__master.get_stack(0)
+                print("poaizepoaizeaopziepazoielskqjfl ", addr[0])
                 new_slave = Slave(0, "AA:AA:AA:AA:AA:AA", addr[0], "0", len(stack.get_pi_devices()))
                 self.__master.get_stack(0).add_pi_device(new_slave)
                 self.__udp_comm.send("0;" + addr[0] + ";", new_slave.get_ip_address())
@@ -37,7 +38,7 @@ class Daemon(Thread):
 
             elif data[:4] == b"cpu:":
                 self.__master.get_slave_by_ip(addr[0]).cpu_usage = data[4:]
-                print("Received cpu_usage from slave {}, updating value".format(addr[0]))
+                print("Received cpu_usage ({}) from slave {}, updating value".format(addr[0], data[4:]))
 
     def get_master(self):
         return self.__master
