@@ -116,7 +116,7 @@ void i2c_handle(int i2c_fd, char tx_buffer[], int mode, fd_set* rdfs) {
 
     size_t length = read(i2c_fd, tx_buffer, TX_BUF_SIZE); 
 
-    if (str_cmp(tx_buffer, "8") == 0) {
+    if (strcmp(tx_buffer, "8") == 0) {
         FD_CLR(i2c_fd, rdfs);
     }
 
