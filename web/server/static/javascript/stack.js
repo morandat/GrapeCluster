@@ -18,7 +18,10 @@ addAjaxHandler("/stack/"+STACKID, function(stack) {
 				.btnColor(raspData.cpu<CONSTANTS.raspCPULimit)
 				.text(Math.round(raspData.cpu)+'%')
 				.show();
-			$('#raspRAM'+raspSlot).text(raspData.ram);
+			$('#raspRAM'+raspSlot)
+				.btnColor(raspData.ram<CONSTANTS.raspRAMLimit)
+				.text(Math.round(raspData.ram)+'%')
+				.show();
 			$('#raspStatus'+raspSlot)
 				.btnColor(raspData.status)
 				.text(CONSTANTS.status[raspData.status])

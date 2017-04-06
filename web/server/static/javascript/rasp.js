@@ -15,10 +15,14 @@ addAjaxHandler("/rasp/"+RASPID, function(rasp) {
 		$('#raspRestart').hide();
 	$('#raspOS').text(rasp.os);
 	$('#raspIP').text(rasp.ip);
-	$('#raspCPU').text(rasp.cpu)
+	$('#raspCPU')
+		.text(rasp.cpu)
 		.btnColor(rasp.cpu<CONSTANTS.raspCPULimit)
 		.text(Math.round(rasp.cpu)+'%');
-	$('#raspRAM').text(rasp.ram);
+	$('#raspRAM')
+		.text(rasp.ram)
+		.btnColor(rasp.ram<CONSTANTS.raspRAMLimit)
+		.text(Math.round(rasp.ram)+'%');
 }, true);
 
 $(document).ready(function() {
