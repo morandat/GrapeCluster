@@ -30,8 +30,8 @@ class Daemon(Thread):
 
 
     def run(self):
-        nb_stack = 0; 
-        nb_slave = 0; 
+        nb_stack = 0
+        nb_slave = 0
         while True:
             print("Broadcasting cpu request")
             self.__udp_comm.broadcast("1;", self.__master.get_cluster_ip_addresses())
@@ -69,6 +69,7 @@ class Daemon(Thread):
 
     def get_i2c_comm(self):
         return self.__i2c_comm
+
     def enable_alimentation_stack(self, stack):
         """ TODO for all the stack
         Only for one stack
