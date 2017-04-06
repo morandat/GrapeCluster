@@ -1,6 +1,6 @@
 import sys
 from flask import Flask, render_template, json, redirect
-#from master.Daemon import Daemon
+from master.Daemon import Daemon
 import copy
 
 app = Flask(__name__)
@@ -20,7 +20,7 @@ constants = {
     ]
 }
 
-DEBUG = True
+DEBUG = False
 
 
 ## DATA ##
@@ -321,9 +321,9 @@ def disableI2C(id):
 ## RUN ##
 
 if __name__ == '__main__':
-    #ip = "127.0.0.2"
-    #if (len(sys.argv) > 1):
-    #    ip = sys.argv[1]
-    #daemon = Daemon(ip)
-    #daemon.start()
+    ip = "127.0.0.2"
+    if (len(sys.argv) > 1):
+        ip = sys.argv[1]
+    daemon = Daemon(ip)
+    daemon.start()
     app.run(debug=True)

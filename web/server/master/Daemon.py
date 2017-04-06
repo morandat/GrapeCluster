@@ -10,7 +10,7 @@ from CommunicatorUDP import CommunicatorUDP
 from CommunicatorI2C import CommunicatorI2C
 from logging import getLogger
 from Alimentation import Alimentation
-
+from grape import *
 
 
 class Daemon(Thread):
@@ -44,7 +44,7 @@ class Daemon(Thread):
                 if(nb_slave <= 5):
                     stack = self.__master.get_stack(nb_stack)
                     #To-do : check for ip_address conflict, implement some kind of simple DHCP. May look for DHCP Py libs
-                    new_slave = Slave(nb_stack + Slave.RASP_CLASS_ADDRESSES[nb_slave], nb_stack, "AA:AA:AA:AA:AA:AA", addr[0], "0", len(stack.get_pi_devices()))
+                    new_slave = Slave(nb_stack + RASP_CLASS_ADDRESSES[nb_slave], nb_stack, "AA:AA:AA:AA:AA:AA", addr[0], len(stack.get_pi_devices()))
                     self.__master.get_stack(nb_stack).add_pi_device(new_slave)
                     self.__udp_comm.send("0;" + addr[0] + ";", new_slave.get_ip_address())
                     print("Configured new slave of ip_addr {}".format(addr[0]))
