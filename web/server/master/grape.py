@@ -8,7 +8,7 @@ BUSES = [0, 1]
 DSP_INTERUPT_PIN = 17
 TMP_INTERUPT_PIN = 27
 
-# Currently Unused, this should be the base address for the PiDevice Class
+# The base address for the PiDevice Class
 # E.g. second pi of stack 013 in octal (bus 1, stack 3):
 # 3 + RASP_CLASS_ADDRESSES[1] == 0x5b 
 RASP_CLASS_ADDRESSES = [ 0x50, 0x58, 0x60, 0x68, 0x70, 0x78 ]
@@ -58,8 +58,8 @@ class I2CDevice(object):
 
     def read_byte(self, register = 0x00):
         return self._bus.read_byte_data(self._address, register)
+
     def write_byte(self,value, register=0x00):
-        print("beer")
         print(self._address)
         print(register)
         print(value)
@@ -136,6 +136,10 @@ class Temperature(I2CDevice):
             return - (~(data & 0x7F)) - (0.5 if data & 0x8000 else 0.0)
         else:
             return (data & 0xff) + (0.5 if 0x8000 else 0.0)
+
+class PowerMeter():  # Interface PowerMeter
+    def get_power(self):
+        raise NotImplementedError("Not implemented in interface")
 
 class PowerMeter(I2CDevice):
     CLASS_ADDRESS = 0x40
