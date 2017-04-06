@@ -6,7 +6,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from Stack import Stack
 from Master import Master
 from Slave import Slave
-from CommunicatorUDP import CommunicatorUDP, CommunicatorI2C
+from CommunicatorUDP import CommunicatorUDP
+from CommunicatorI2C import CommunicatorI2C
 from logging import getLogger
 
 class Daemon(Thread):
