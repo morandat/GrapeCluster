@@ -115,7 +115,7 @@ def getStack(id=None):
         }
 
         for rasp in stack.get_pi_devices():
-            stackJSON['rasps'][rasp.get_pos()] = rasp.get_i2c_address()
+            stackJSON['rasps'][rasp.get_pos()] = rasp.get_i2c()
 
         return stackJSON
 
@@ -161,7 +161,7 @@ def getRasp(id=None):
         rasps = {}
         for stack in master.get_stacks():
             for rasp in stack.get_pi_devices():
-                rasps[rasp.get_i2c_address()] = renderRasp(rasp)
+                rasps[rasp.get_i2c()] = renderRasp(rasp)
         return rasps
 
 
