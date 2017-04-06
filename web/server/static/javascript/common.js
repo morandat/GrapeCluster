@@ -11,18 +11,21 @@ $.fn.btnColor = function(condition){
 addAjaxHandler = function(url, handler, interval, method) {
 	if(interval === true)
 		interval = 5000;
-  if(method === undefined)
-    method = 'GET'
+	if(method === undefined)
+		method = 'GET'
 
 	var upd = function() {
 		$.ajax({
 			url : url,
 			dataType : 'json',
 			type : method,
-			success : handler,
-      error: function() {
-        console.log("AJAX Error.");
-      }
+			success: handler,
+			success : function(data) {
+				handler(JSON.parse(data))
+			},
+			error: function() {
+				console.log("AJAX Error.");
+			}
 		});
 
 		if(interval)
@@ -46,7 +49,7 @@ $(document).ready(function() {
 		}
 		else if($this.text() == CONSTANTS.status[1]) {
 			if(confirm("Eteindre le Rasp ?")) {
-				addAjaxHandler('/rasp/'+$this.attr('raspId')+'/stop', function() {
+				addAjaxHandler('/rasp/'+$this.attr('raspId')+'/shutdown', function() {
 					$this.text(CONSTANTS.status[0]).btnColor(false);
 					$('.raspRestartBtn[raspId="'+$this.attr('raspId')+'"]').hide();
 				}, false, 'POST');

@@ -6,6 +6,7 @@ addAjaxHandler("/stack", function(stacks) {
 	var stackCount = 0;
 
 	for(var stackId in stacks) {
+
 		var stack = stacks[stackId];
 
 		$('#stackId'+stackCount)
