@@ -17,6 +17,7 @@
 
 
 char **orders;
+int is_addr;
 
 void get_order(int order_code, char **order) {
     *order = orders[order_code];
@@ -35,16 +36,18 @@ void action(int call, char **out){
     }
     else {
         get_order(call, &order);
-        printf("order %d %s", call, order);
+        printf("order %d %s\n", call, order);
 
         if (strcmp("test", order) == 0) {
             test_communication();
             *out = "abcd";
         }
-        /*else if(strcmp("cpu", order) == 0){
+        else if(strcmp("cpu", order) == 0){
             int cpu = get_cpu_usage();
-            char c = (char)cpu;
-            sprintf(out, "000%c", c);
+            printf("Fonction termin√©\n");
+	    char c = (char)cpu;
+            *out = "efgh";
+	    //sprintf(*out, "000%c", c);
         }
         else if(strcmp("shutdown", order) == 0){
             shutdown_slave();
@@ -52,15 +55,15 @@ void action(int call, char **out){
         else if(strcmp("reboot", order) == 0){
             restart_slave();
         }
-        else if(strcmp("get_ip", order) == 0){
+        /*else if(strcmp("get_ip", order) == 0){
             get_ip(in);
             encode_ip(out, in);
-        }
+        }*/
         else if(strcmp("get_i2c", order) == 0){
             printf("Coucou\n");
-            out = "0042";
+            *out = "0042";
         }
-        else if(strcmp("is_network", order) == 0){
+        /*else if(strcmp("is_network", order) == 0){
             test = test_network();
             if(test == 1)
                 out = "1111";
@@ -103,45 +106,70 @@ int i2c_init(int* mode, int argc, char* argv[], char **ord) {
 
     CHKERR(fd = open(input, O_RDWR));
 
+    is_addr = 1;
     return fd;
 }
 
 void i2c_handle(int i2c_fd, char tx_buffer[], int mode) {
-    size_t length = read(i2c_fd, tx_buffer, TX_BUF_SIZE);
+    int test;
+    for (test = 0 ; test < TX_BUF_SIZE; test++)
+	tx_buffer[test]=-1 ; 
+ 
+    size_t length = read(i2c_fd, tx_buffer, TX_BUF_SIZE); 
+
+    printf("D√but test\n");
+
+    for (test = 0 ; test < TX_BUF_SIZE; test++)
+	printf("%d :%d\n",test, tx_buffer[test]); 
+    printf("Fin test\n");
+
     char *tx_answer;
     char endstring[]={ENDSYMB};
 
-    for(int i = 0; i < length; i++)
-    {
-        switch (mode) {
-        case 1:
-            printf("1: Data received : %c\n", tx_buffer[i]);
-            action(tx_buffer[i], &tx_answer);
-            //write(i2c_fd, endstring, 1);
+    /*if(is_addr == 1){
+    	/*for(int i = 0; i < length; i++)
+    	{
+        	switch (mode) {
+        	case 1:
+            		printf("1: Data received : %c\n", tx_buffer[i]);
+            		action(tx_buffer[i], &tx_answer);
+            		//write(i2c_fd, endstring, 1);
 
-                write(i2c_fd, tx_answer, 4);
+                	write(i2c_fd, tx_answer, 4);
 
-            //write(i2c_fd, endstring, 1);
-            break;
-        case 2:
-            printf("2 :Data received : %02x\n ", tx_buffer[i]);
-            action(tx_buffer[i], &tx_answer);
-            //write(i2c_fd, endstring, 1);
+            		//write(i2c_fd, endstring, 1);
+            	break;
+        	case 2:
+            		printf("2 :Data received : %02x\n ", tx_buffer[i]);
+            		action(tx_buffer[i], &tx_answer);
+            		//write(i2c_fd, endstring, 1);
 
-                write(i2c_fd, tx_answer, 4);
+                	write(i2c_fd, tx_answer, 4);
 
-            //write(i2c_fd, endstring, 1);
-            break;
-        default:
-            printf("3 :Data received : %d \n", tx_buffer[i]);
-            action(tx_buffer[i], &tx_answer);
-            //write(i2c_fd, endstring, 1);
-            //write(i2c_fd, tx_answer, 4);
-
-                write(i2c_fd, tx_answer, 4);
-
-            //write(i2c_fd, endstring, 1);
-            break;
-        }
+            		//write(i2c_fd, endstring, 1);
+            	break;
+        	default:
+ 	   	
+           		printf("3 :Data received : %d \n", tx_buffer[i]);
+            		action(tx_buffer[i], &tx_answer);
+            		//write(i2c_fd, endstring, 1);
+            		//write(i2c_fd, tx_answer, 4);
+	    		if(tx_buffer[i] != 66)
+            			write(i2c_fd, tx_answer, 4);
+	    
+	    
+            	break;
+        	}
+   	}
+ 	printf("3 :Data received : %d \n", tx_buffer[2]);
+        action(tx_buffer[2], &tx_answer);
+        //write(i2c_fd, endstring, 1);
+        //write(i2c_fd, tx_answer, 4);
+	if(tx_buffer[3] != 66)
+            	write(i2c_fd, tx_answer, 4);
+	is_addr=0;	
     }
+    else
+	is_addr=1;*/
+    write(i2c_fd, "x", 1);   
 }
