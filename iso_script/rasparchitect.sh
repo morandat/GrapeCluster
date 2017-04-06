@@ -64,6 +64,10 @@ export LC_ALL=en_GB.utf8
 simple_action "Moving to /home/pi/armmanager"
 cd /home/pi/armmanager
 
+simple_action "chmoding scripts for future use ..."
+sudo chmod a+x bcm_slave_mod_install.sh
+sudo chmod a+x rasparchitect.sh
+
 for i in "$@"; do
 	case $i in
 		--chroot-only)
@@ -138,14 +142,14 @@ if [ $CHROOT_ONLY == false ]; then
 			simple_action "Making bcm2709_defconfig ..."
 			make bcm2709_defconfig
 
-			#simple_action "Making zImage modules and dtbs ..."
-			#make -j4 zImage modules dtbs
-			#simple_action "Making modules_install ..."
-			#make modules_install
+			simple_action "Making zImage modules and dtbs ..."
+			make -j4 zImage modules dtbs
+			simple_action "Making modules_install ..."
+			make modules_install
 
 			#Testing with only overlays
-			simple_action "Going to make dtbs, and overlays."
-			make -j4 zImage dtbs
+			#simple_action "Going to make dtbs, and overlays."
+			#make -j4 zImage dtbs
 			#make arch/arm/boot/dts
 
 			simple_action "Copying new files to /boot ..."
@@ -175,7 +179,7 @@ if [ $CHROOT_ONLY == false ]; then
 		if [ -e slave ]; then
 			cd slave
 			simple_action "Building daemon ..."
-			gcc -o $EXEC_NAME -std=gnu99 i2cslave.c udpslave.c daemon.c commands.c
+			gcc -DORDERS_PATH=\"/etc/daemon.d/orders.txt\" -o $EXEC_NAME -std=gnu99 i2cslave.c udpslave.c daemon.c commands.c
 		else
 			second_action "Unable to find Daemon sources"
 		fi

@@ -1,6 +1,9 @@
+DEBUG = False
+
 import sys
 from flask import Flask, render_template, json, redirect
-from master.Daemon import Daemon
+if not DEBUG:
+    from master.Daemon import Daemon
 import copy
 
 app = Flask(__name__)
@@ -15,8 +18,6 @@ constants = {
     'raspCPULimit' : 80,
     'raspRAMLimit' : 80
 }
-
-DEBUG = False
 
 
 ## DATA ##
@@ -75,7 +76,7 @@ def getStackObject(id=None):
         if DEBUG:
             return copy.deepcopy(stacksTest[id])
         else:
-            return daemon.get_master().get_stack(id)
+            return daemon.get_master().get_stack(id - 1)
     else:
         if DEBUG:
             return copy.deepcopy(stacksTest)
@@ -92,14 +93,14 @@ def getRaspObject(id=None):
         if DEBUG:
             return copy.deepcopy(raspsTest[id])
         else:
-            return daemon.get_master().get_slave_by_id(id)
+            return daemon.get_master().get_slave_by_i2c(id)
     else:
         if DEBUG:
             return copy.deepcopy(raspsTest)
         else:
             rasps = {}
             for stack in daemon.get_master().get_stacks():
-                for rasp in stack.get_pi_devices():
+                for rasp in stack.get_pi_enable():
                     rasps[rasp.get_i2c()] = rasp
             return rasps
 
@@ -119,15 +120,16 @@ def getStack(id=None):
         if DEBUG:
             return stack
         else:
-            rasps = stack.get_pi_devices()
+            #rasps = stack.get_pi_enable()
+            #master = daemon.get_master()
 
             stackJSON = {
                 'heat': 80,
                 'rasps': {}
             }
-
-            for rasp in stack.get_pi_devices():
-                stackJSON['rasps'][rasp.get_pos()] = rasp.get_id()
+        
+            for rasp in stack.get_pi_enable():
+                stackJSON['rasps'][rasp.get_pos()] = rasp.get_i2c()
 
             return stackJSON
 
@@ -284,7 +286,7 @@ def raspRestart(id):
         
 @app.route("/rasp/<int:id>/enable_i2c", methods=['POST'])
 def enableI2C(id):
-    rasp = daemon.get_master().get_slave_by_id(id)
+    rasp = daemon.get_master().get_slave_by_i2c(id)
     for device in daemon.get_master().get_stacks():
         for rasp in device.get_pi_devices():
             print(rasp.get_id())
@@ -297,7 +299,7 @@ def enableI2C(id):
 
 @app.route("/rasp/<int:id>/disable_i2c", methods=['POST'])
 def disableI2C(id):
-    rasp = daemon.get_master().get_slave_by_id(id)
+    rasp = daemon.get_master().get_slave_by_i2c(id)
 
     if rasp is not None:
         print("Telling slave to disable i2c")
@@ -308,9 +310,10 @@ def disableI2C(id):
 ## RUN ##
 
 if __name__ == '__main__':
-    ip = "127.0.0.2"
-    if (len(sys.argv) > 1):
-        ip = sys.argv[1]
-    daemon = Daemon(ip)
-    daemon.start()
+    if not DEBUG:
+        ip = "192.168.1.21"
+        if (len(sys.argv) > 1):
+            ip = sys.argv[1]
+        daemon = Daemon(ip)
+        daemon.start()
     app.run(debug=True)

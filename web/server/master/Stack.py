@@ -10,6 +10,7 @@ class Stack(IStack):
         self._prefix = prefix
         self._bus = bus
         self.__pi_devices = []
+        self.__pi_enable = []
         self.__devices = {}
         for dev in STACK_DEVICES:
             if dev.probe(bus, prefix):
@@ -23,6 +24,35 @@ class Stack(IStack):
 
     def get_pi_devices(self):
         return self.__pi_devices
+
+    def update_pi_enable(self, pi_device, value):
+        for rasp in self.__pi_enable:
+            if rasp[0] == pi_device:
+                rasp[1] = value
+            else : 
+                self.__pi_devices.append([pi_device, value])
+
+
+    def test_rasp_exists(self, value):
+        for rasp in self.__pi_enable:
+            if rasp[1] <= value - 60:
+                rasp[1] = 0
+
+
+    def get_pi_enable(self):
+        tab = []
+        for rasp in self.__pi_enable:
+            if rasp[1] != 0:
+                tab.append(rasp[0])
+        return tab
+
+
+    def reset_pi_enable(self, value):
+        for rasp in self.__pi_enable:
+            if rasp[1] >= 1:
+                rasp[1] = value
+
+
 
     def add_pi_device(self, pi_device):
         if len(self.__pi_devices) <= MAX_PI_DEVICES_PER_STACK:

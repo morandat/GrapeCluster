@@ -26,7 +26,7 @@ addAjaxHandler("/stack", function(stacks) {
 			var position = stackCount+'_'+raspSlot;
 
 			if(raspData !== undefined) {
-				$('#raspName'+position).html('<a href="/view/rasp/'+raspData.address+'" class="card-link">'+raspData.name+' ('+raspData.address+')</a>');
+				$('#raspName'+position).html('<a href="/view/rasp/'+raspData.address+'" class="card-link">'+raspData.name+' ('+raspData.address.toString()+')</a>');
 				$('#raspStatus'+position)
 					.btnColor(false)
 					.attr('raspId', raspData.address)
