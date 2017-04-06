@@ -44,7 +44,7 @@ void slice_args(char** args, char* msg, ssize_t msg_len, int arg_num) {
     for (int i = 0; i < msg_len; ++i) {//msg contains first order char, so start at 1
         if (msg[i] == ';') {
             int length = i - start;
- 		args[j] = malloc(sizeof(char) * length);           
+ 		args[j] = malloc(sizeof(char) * length);
             strncpy(args[j], msg + start, (size_t) length);
             args[j][length] = 0;
             start = i + 1;

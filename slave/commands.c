@@ -78,9 +78,10 @@ int get_ip(char ** array){
     			nb ++;
     			//nbr_words += 1;
     		}
-
 		}
 	}
+
+    return 0;
 }
 
 //connect: Network is unreachable
@@ -112,6 +113,8 @@ int test_communication(){
 	char cmd[64];
 	sprintf(cmd, "echo test");
 	system(cmd);
+
+    return 1;
 }
 
 int shutdown_slave(){
@@ -120,18 +123,22 @@ int shutdown_slave(){
 	sprintf(cmd, "shutdown -h now");
 	system(cmd);
 	//printf("\n");
+
+    return 1;
 }
 
 int restart_slave(){
 	char cmd[64];
 	sprintf(cmd, "shutdown -r");
 	system(cmd);
+
+    return 1;
 }
 
 int get_cpu_usage() {
     float a[4], b[4], loadavg;
     FILE *fp;
-    char dump[50];
+
     fp = fopen("/proc/stat", "r");
     fscanf(fp, "%*s %f %f %f %f", &a[0], &a[1], &a[2], &a[3]);
     fclose(fp);

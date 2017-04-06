@@ -24,11 +24,6 @@ void get_order(int order_code, char **order) {
 }
 
 void action(int call, char **out){
-		
-	int i = 0; 
-	int test = 0;
-	char *in[4];
-
 	char *order;
 
     if (call == 66) {
