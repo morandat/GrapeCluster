@@ -2,7 +2,6 @@ import smbus
 import json
 import datetime
 
-#import psutil
 from grape import I2CDevice
 
 class PiDevice(I2CDevice):

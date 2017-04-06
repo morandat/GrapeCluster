@@ -44,7 +44,7 @@ void action(int call, char **out){
         }
         else if(strcmp("cpu", order) == 0){
             int cpu = get_cpu_usage();
-            printf("Fonction terminé\n");
+            printf("Fonction terminée\n");
 	    char c = (char)cpu;
             *out = "efgh";
 	    //sprintf(*out, "000%c", c);
@@ -117,7 +117,7 @@ void i2c_handle(int i2c_fd, char tx_buffer[], int mode) {
  
     size_t length = read(i2c_fd, tx_buffer, TX_BUF_SIZE); 
 
-    printf("D�but test\n");
+    printf("Début test\n");
 
     for (test = 0 ; test < TX_BUF_SIZE; test++)
 	printf("%d :%d\n",test, tx_buffer[test]); 
