@@ -7,6 +7,7 @@ from Stack import Stack
 from Master import Master
 from Slave import Slave
 from CommunicatorUDP import CommunicatorUDP
+from CommunicatorI2C import CommunicatorI2C
 from logging import getLogger
 from Alimentation import Alimentation
 
@@ -25,6 +26,8 @@ class Daemon(Thread):
         self.__udp_comm.open_communication()
         print("Master listening on {}:{}".format(ip_address, 42666))
         
+        self.__i2c_comm = CommunicatorI2C()
+
 
     def run(self):
         nb_stack = 0; 
