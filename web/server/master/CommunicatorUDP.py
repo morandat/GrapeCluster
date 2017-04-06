@@ -14,7 +14,6 @@ class CommunicatorUDP(Communicator):  # Communicator for UDP
         self.__sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.__sock.bind((self.__address, self.__port))
 
-
     def send(self, message, address):
         self.__sock.sendto(message.encode(), (address, self.__port))
 
@@ -33,7 +32,7 @@ class CommunicatorUDP(Communicator):  # Communicator for UDP
         nb=0
         for pi_device in stack.__pi_devices:
             if not pi_device.is_master():
-                self.send("power" ,pi_device.get_ip_address())
+                self.send("power", pi_device.get_ip_address())
                 data, addr = self.receive(10) #taille à voir
                 total= total + data
                 nb=nb+1
@@ -45,7 +44,7 @@ class CommunicatorUDP(Communicator):  # Communicator for UDP
         nb=0
         for pi_device in stack.__pi_devices:
             if not pi_device.is_master():
-                self.send("temperature" ,pi_device.get_ip_address())
+                self.send("temperature", pi_device.get_ip_address())
                 data, addr = self.receive(10) #taille à voir
                 total= total + data
                 nb=nb+1

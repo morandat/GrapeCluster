@@ -5,9 +5,11 @@
 #ifndef SLAVE_UDPSLAVE_H
 #define SLAVE_UDPSLAVE_H
 
-#define MASTER_IP_ADDRESS "127.0.0.2"
+#define MASTER_IP_ADDRESS "192.168.1.21"
 
 #define PORT 42666
+
+#define MAX_ARG_SIZE 16
 
 int udp_init(struct sockaddr_in* slave_info, struct sockaddr_in* master_info, char* ip_addr);
 void udp_handle(int sock, struct daemon* daemon, struct sockaddr_in* master_info, socklen_t master_info_len,

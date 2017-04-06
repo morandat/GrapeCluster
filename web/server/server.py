@@ -1,3 +1,4 @@
+import sys
 from flask import Flask, render_template, json, redirect
 from master.Daemon import Daemon
 import copy
@@ -94,6 +95,12 @@ def getRasp(id=None):
 
 """
 
+def json_response(response):
+    return app.response_class(
+        response=json.dumps({'response': response}),
+        status=200,
+        mimetype='application/json')
+
 def getStack(id=None):
     master = daemon.get_master()
 
@@ -108,7 +115,7 @@ def getStack(id=None):
         }
 
         for rasp in stack.get_pi_devices():
-            stackJSON['rasps'][rasp.get_pos()] = rasp.get_i2c_address()
+            stackJSON['rasps'][rasp.get_pos()] = rasp.get_id()
 
         return stackJSON
 
@@ -131,8 +138,9 @@ def getRasp(id=None):
 
     def renderRasp(rasp):
         return {
+            'id': rasp.get_id(),
             'name' : 'Name',
-            'address' : rasp.get_i2c_address(),
+            'address' : rasp.get_i2c(),
             'stack' : 1,
             'os' : rasp.get_os(),
             'status' : 1,
@@ -142,10 +150,7 @@ def getRasp(id=None):
         }
 
     if id is not None:
-        rasp = master.get_slave_by_i2c(id)
-        print(id)
-        print(type(id))
-        print(rasp)
+        rasp = master.get_slave_by_id(id)
         if rasp is not None:
             return renderRasp(rasp)
         else:
@@ -154,7 +159,7 @@ def getRasp(id=None):
         rasps = {}
         for stack in master.get_stacks():
             for rasp in stack.get_pi_devices():
-                rasps[rasp.get_i2c_address()] = renderRasp(rasp)
+                rasps[rasp.get_i2c()] = renderRasp(rasp)
         return rasps
 
 
@@ -178,16 +183,16 @@ def viewDefault():
 @app.route('/view/stack/<int:id>') # = route options
 def viewStack(id):
     if getStack(id) is not None:
-        return render_template('stack.html', constants=constants, stackId=id)
+       return render_template('stack.html', constants=constants, stackId=id)
     else:
-        return routeDefault()
+        return routeDefault()#would be better to say there's an error... To-Do
 
 @app.route('/view/rasp/<int:id>') # = route options
 def viewRasp(id):
     if getRasp(id) is not None:
         return render_template('rasp.html', constants=constants, raspId=id)
     else:
-        return routeDefault()
+        return routeDefault()#same here
         
 
         
@@ -216,15 +221,12 @@ def routeStack(id):
         else:
             nestRaspsInStack(stack)
 
-    return app.response_class(
-        response=json.dumps(stack),
-        status=200,
-        mimetype='application/json')
+    return json_response(json.dumps(stack))
 
 # STACK ACTIONS
 
 @app.route('/stack/<int:id>/start', methods=['POST'])
-def routeShutdown(id):
+def stackStart(id):
     stack = daemon.get_master().get_stack(id).enable_alimentation()
 
     if stack is None:
@@ -232,13 +234,10 @@ def routeShutdown(id):
     else:
         response = 1
     
-    return app.response_class(
-        response=json.dumps({'response': response}),
-        status=200,
-        mimetype='application/json')
+    return json_response(json.dumps({'response': response}))
 
 @app.route('/stack/<int:id>/shutdown', methods=['POST'])
-def routeShutdown(id):
+def stackShutdown(id):
     stack = daemon.get_master().get_stack(id).disable_alimentation()
 
     if stack is None:
@@ -246,10 +245,7 @@ def routeShutdown(id):
     else:
         response = 1
     
-    return app.response_class(
-        response=json.dumps({'response': response}),
-        status=200,
-        mimetype='application/json')
+    return json_response(json.dumps({'response': response}))
 
 # RASP GET
 
@@ -259,59 +255,50 @@ def routeRasp(id):
     rasp = getRasp(id)
     if rasp is None:
         rasp = {}
-    return app.response_class(
-        response=json.dumps(rasp),
-        status=200,
-        mimetype='application/json')
+    return json_response(json.dumps(rasp))
         
 # RASP ACTIONS
 
 @app.route('/rasp/<int:id>/start', methods=['POST'])
-def routeStart(id):
-    rasp = daemon.get_master().get_slave_by_i2c(id)
+def raspStart(id):
+    rasp = daemon.get_master().get_slave_by_id(id)
 
     if rasp is None:
         response = 0
     else:
         response = 1
 
-    return app.response_class(
-        response=json.dumps({'response': response}),
-        status=200,
-        mimetype='application/json')
+    return json_response(json.dumps({'response': response}))
     
 @app.route('/rasp/<int:id>/stop', methods=['POST'])
-def routeStop(id):
-    rasp = daemon.get_master().get_slave_by_i2c(id)
+def raspStop(id):
+    rasp = daemon.get_master().get_slave_by_id(id)
 
     if rasp is None:
         response = 0
     else:
         response = 1
     
-    return app.response_class(
-        response=json.dumps({'response': response}),
-        status=200,
-        mimetype='application/json')
+    return json_response(json.dumps({'response': response}))
      
 @app.route('/rasp/<int:id>/restart', methods=['POST'])
-def routeRestart(id):
-    rasp = daemon.get_master().get_slave_by_i2c(id)
+def raspRestart(id):
+    rasp = daemon.get_master().get_slave_by_id(id)
 
     if rasp is None:
         response = 0
     else:
         response = 1
     
-    return app.response_class(
-        response=json.dumps({'response': response}),
-        status=200,
-        mimetype='application/json')
+    return json_response(json.dumps({'response': response}))
         
         
 ## RUN ##
 
 if __name__ == '__main__':
-    daemon = Daemon("127.0.0.2")
+    ip = "127.0.0.2"
+    if (len(sys.argv) > 1):
+        ip = sys.argv[1]
+    daemon = Daemon(ip)
     daemon.start()
     app.run(debug=True)

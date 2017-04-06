@@ -21,7 +21,7 @@ struct daemon {
 };
 
 int count_args(char* msg, ssize_t msg_len);
-char** slice_args(char* msg, ssize_t msg_len, int arg_num);
+void slice_args(char** args, char* msg, ssize_t msg_len, int arg_num);
 void free_args(char** args, int arg_num);
 
 void exec_order(int order_code, struct daemon* daemon);

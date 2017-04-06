@@ -35,6 +35,7 @@ class Daemon(Thread):
             
             data, addr = self.__udp_comm.receive(1024)    
             print("received message: {} from {}".format(data, addr))
+<<<<<<< HEAD
                 
             
             if data == b"configure":#To-Do: check why data is bstr
@@ -55,10 +56,22 @@ class Daemon(Thread):
 
             elif data[:4] == b"cpu:":
                 self.__master.get_slave_by_ip(addr[0]).cpu_usage = data[4:]
-                print("Received cpu_usage from slave {}, updating value".format(addr[0]))
+                print("Received cpu_usage ({}) from slave {}, updating value".format(addr[0], data[4:]))
 
 
     def get_master(self):
         return self.__master
 
-    def 
+    def enable_alimentation_stack(self, stack):
+        """ TODO for all the stack
+        Only for one stack
+        """
+        self.__master.enable_alim()
+
+    def disbale_alimentation_stack(self, stack):
+        """ TODO for all the stack
+        Only for one stack
+        """
+        self.__master.disable_alim()
+
+

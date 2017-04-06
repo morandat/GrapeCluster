@@ -19,6 +19,10 @@
 
 #include "utils.h"
 
+#ifndef ORDERS_PATH
+#define ORDERS_PATH "../orders.txt"
+#endif
+
 enum status curr_status = ACTIVE;
 
 int orders_num;
@@ -33,32 +37,26 @@ int count_args(char* msg, ssize_t msg_len) {
     return arg_num;
 }
 
-char** slice_args(char* msg, ssize_t msg_len, int arg_num) {
-    char** args = malloc(sizeof(char*) * arg_num);
-
+void slice_args(char** args, char* msg, ssize_t msg_len, int arg_num) {
     int start = 0;
     int j = 0;
 
     for (int i = 0; i < msg_len; ++i) {//msg contains first order char, so start at 1
         if (msg[i] == ';') {
             int length = i - start;
-            args[j] = malloc(length * sizeof(char));
+ 		args[j] = malloc(sizeof(char) * length);
             strncpy(args[j], msg + start, (size_t) length);
             args[j][length] = 0;
             start = i + 1;
-            //sprintf("Sliced : args[%i] = %s\n", j, args[j]);
             j++;
         }
     }
-
-    return args;
 }
 
 void free_args(char** args, int arg_num) {
-    for (arg_num; arg_num > 0; arg_num--) {
-        free(args[arg_num-1]);
-    }
-    free(args);
+	for (int i = 0; i < arg_num; i++) {
+		free(args[i]);
+	}
 }
 
 void exec_order(int order_code, struct daemon* daemon) {//, char** args, int arg_num) {
@@ -93,7 +91,7 @@ int order_str_to_code(char* str) {
 
 
 char** load_orders() {
-    FILE* orders_file = fopen("../orders.txt", "r");
+    FILE* orders_file = fopen(ORDERS_PATH, "r");
     fseek(orders_file, 0, SEEK_END);
     long fsize = ftell(orders_file);
     fseek(orders_file, 0, SEEK_SET);
@@ -107,7 +105,7 @@ char** load_orders() {
 
     orders_num = count_args(orders_file_str, oflen);
 
-    return slice_args(orders_file_str, oflen, orders_num);
+    return slice_args(orders, orders_file_str, oflen, orders_num);
 }
 
 int main(int argc, char *argv[]) {
@@ -120,7 +118,6 @@ int main(int argc, char *argv[]) {
     int mode;
 
     int i2c_fd = i2c_init(&mode, argc, argv, orders);
-    uint8_t data;
 
     struct sockaddr_in master_info;
     struct sockaddr_in slave_info;
@@ -140,9 +137,7 @@ int main(int argc, char *argv[]) {
 
     FD_ZERO(&rfds);
 
-    FD_SET(i2c_fd, &rfds);
-
-
+    //FD_SET(i2c_fd, &rfds);
     FD_SET(sock, &rfds);
 
     printf("Sending configure message to master \n");
@@ -150,9 +145,6 @@ int main(int argc, char *argv[]) {
 
     int max_fd = (sock > i2c_fd) ? sock : i2c_fd;
 
-
-    ssize_t recv_len;
-    char buffer[BUFF_LEN];
     while (daemon.curr_status != STOPPED) {
         switch (daemon.curr_status) {
             case ACTIVE:
@@ -160,7 +152,7 @@ int main(int argc, char *argv[]) {
                 struct timeval timeval;
                 timeval.tv_sec = 1;
                 timeval.tv_usec = 0;
-                int fd_modified_count = select(max_fd, &rfds, NULL, NULL, &timeval);
+                int fd_modified_count = select(max_fd+1, &rfds, NULL, NULL, &timeval);
 
                 CHKERR(fd_modified_count);
 

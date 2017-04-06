@@ -2,14 +2,18 @@ import smbus
 import json
 import datetime
 
+<<<<<<< HEAD
 #import psutil
 from grape import *
+=======
+from grape import I2CDevice
+>>>>>>> 739e11ba1c321d2303c660afda97fd9e98135747
 
 class PiDevice(I2CDevice):
     nb = 0
 
     def __init__(self, stack_nb, mac_add, ip_address, i2c_add, pos):
-        super(PiDevice, self).__init__(smbus.SMBus(1), 0)#To-Do : bus, prefix
+        super(PiDevice, self).__init__(smbus.SMBus(1), 0)
 
         self.__id = PiDevice.nb
         PiDevice.nb+=1
