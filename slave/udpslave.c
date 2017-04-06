@@ -42,11 +42,15 @@ void udp_handle(int sock, struct daemon* daemon, struct sockaddr_in* master_info
     CHKERR((recv_len = recvfrom(sock, buffer, BUFF_LEN, 0,
                                 (struct sockaddr *) &master_info, &master_info_len)));
     buffer[recv_len] = '\0';
-
+	
     printf("received data : '%s'\n", buffer);
     if (recv_len > 0) {
         int arg_num = count_args(buffer, recv_len);
-        char **args = slice_args(buffer, recv_len, arg_num);
+        char *args[MAX_ARG_SIZE];
+	slice_args(args, buffer, recv_len, arg_num);
+	for (int i = 0; i < arg_num; i++) {
+		printf("arg[%d]=%s", i, args[i]);
+	}
         if (strcmp(args[0], "9") == 0) {
             daemon->curr_status = STOPPED;
             close(sock);
@@ -67,7 +71,7 @@ void udp_handle(int sock, struct daemon* daemon, struct sockaddr_in* master_info
             CHKERR(sendto(sock, daemon->exec_buff, daemon->exec_len, 0, (struct sockaddr *) &master_info,
                           master_info_len));
         }
-        free_args(args, arg_num);
+        //free_args(args, arg_num);
     }
     else {
         printf("received empty message\n");

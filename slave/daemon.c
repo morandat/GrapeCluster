@@ -37,31 +37,26 @@ int count_args(char* msg, ssize_t msg_len) {
     return arg_num;
 }
 
-char** slice_args(char* msg, ssize_t msg_len, int arg_num) {
-    char** args = malloc(sizeof(char*) * arg_num);
-
+void slice_args(char** args, char* msg, ssize_t msg_len, int arg_num) {
     int start = 0;
     int j = 0;
 
     for (int i = 0; i < msg_len; ++i) {//msg contains first order char, so start at 1
         if (msg[i] == ';') {
             int length = i - start;
-            args[j] = malloc(length * sizeof(char));
+ 		args[j] = malloc(sizeof(char) * length);           
             strncpy(args[j], msg + start, (size_t) length);
             args[j][length] = 0;
             start = i + 1;
             j++;
         }
     }
-
-    return args;
 }
 
 void free_args(char** args, int arg_num) {
-    for (arg_num; arg_num > 0; arg_num--) {
-        free(args[arg_num-1]);
-    }
-    free(args);
+	for (int i = 0; i < arg_num; i++) {
+		free(args[i];
+	}
 }
 
 void exec_order(int order_code, struct daemon* daemon) {//, char** args, int arg_num) {
@@ -143,7 +138,7 @@ int main(int argc, char *argv[]) {
 
     FD_ZERO(&rfds);
 
-    FD_SET(i2c_fd, &rfds);
+    //FD_SET(i2c_fd, &rfds);
     FD_SET(sock, &rfds);
 
     printf("Sending configure message to master \n");
