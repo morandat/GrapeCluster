@@ -8,7 +8,7 @@ BUSES = [0, 1]
 DSP_INTERUPT_PIN = 17
 TMP_INTERUPT_PIN = 27
 
-# Currently Unused, this should be the base address for the PiDevice Class
+# The base address for the PiDevice Class
 # E.g. second pi of stack 013 in octal (bus 1, stack 3):
 # 3 + RASP_CLASS_ADDRESSES[1] == 0x5b 
 RASP_CLASS_ADDRESSES = [ 0x50, 0x58, 0x60, 0x68, 0x70, 0x78 ]

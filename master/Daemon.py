@@ -28,9 +28,8 @@ class Daemon(Thread):
             self.__udp_comm.broadcast("1;", self.__master.get_cluster_ip_addresses())
             data, addr = self.__udp_comm.receive(1024)
             print("received message: {} from {}".format(data, addr))
-            if data == b"configure":#To-Do: check why data is bstr
+            if data == b"configure":
                 stack = self.__master.get_stack(0)
-                #To-do : check for ip_address conflict, implement some kind of simple DHCP. May look for DHCP Py libs
                 new_slave = Slave(0, "AA:AA:AA:AA:AA:AA", addr[0], "0", len(stack.get_pi_devices()))
                 self.__master.get_stack(0).add_pi_device(new_slave)
                 self.__udp_comm.send("0;" + addr[0] + ";", new_slave.get_ip_address())

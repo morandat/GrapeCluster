@@ -25,9 +25,9 @@ class CommunicatorUDP(Communicator):  # Communicator for UDP
         self.__sock.close()
         pass
 
-# Actions/Demandes sur les stacks
+# Action for stacks
 
-    # Obtenir la consommation d'éléctricité (en volts)
+    # Get the power usage (V)
     def ask_stack_power(self, stack):
         total=0
         nb=0
@@ -39,7 +39,7 @@ class CommunicatorUDP(Communicator):  # Communicator for UDP
                 nb=nb+1
         return total/nb
 
-    # Obtenir la température (en degré)
+    # Get the temperature (°C)
     def ask_stack_temp(self, stack):
         total=0
         nb=0
@@ -51,55 +51,55 @@ class CommunicatorUDP(Communicator):  # Communicator for UDP
                 nb=nb+1
         return total/nb
 
-    # Allumer ou éteindre les rasp
+    # Shutdown the rasp of the stack
     def send_stack_shutdown(self, stack):
         for pi_device in stack.__pi_devices:
             if not pi_device.is_master():
                 self.send("shutdown" ,pi_device.get_ip_address())
-                #verification retour ?
+                #verification of response ?
 
-    # Obtenir les actions disponibles
+    # Get actions that are available
     def ask_stack_options(self, stack):
-        #actions disponibles à mettre en dur ou dépend vraiment de chaque rasp ?
+        #actions available to defined
         return
 
-# Actions sur les slaves
+# Actions for slaves
 
-    # Connaître le slave à qui l'on parle ??
+    # To know which slave we are talking
     def ask_slave_slaves(self, slave):
         self.send("info", slave.ip_address)
-        data, addr = self.receive(10)  # taille à voir
+        data, addr = self.receive(4)  # all responses are in 4 bytes
         return data
 
-    # Obtenir l'identité (quintuplet de configuration + adresse IP)
+    # Get the identity of slave
     def ask_slave_config(self, slave):
         self.send("config", slave.ip_address)
-        data, addr = self.receive(10)  # taille à voir
+        data, addr = self.receive(4)  
         return data
 
-    # Obtenir son taux d'utilisation CPU
+    # Get the CPU usage
     def ask_slave_cpu(self, slave):
         self.send("cpu", slave.ip_address)
-        data, addr = self.receive(10)  # taille à voir
+        data, addr = self.receive(4)  
         return data
 
-    # Allumer/éteindre le slave
+     # Start, stop or restart slaves
     def ask_slave_start(self, slave):
         self.send("start", slave.ip_address)
-        data, addr = self.receive(10)  # taille à voir
+        data, addr = self.receive(4)  
         return data
 
     def ask_slave_stop(self, slave):
         self.send("stop", slave.ip_address)
-        data, addr = self.receive(10)  # taille à voir
+        data, addr = self.receive(4)  
         return data
 
     def ask_slave_restart(self, slave):
         self.send("restart", slave.ip_address)
-        data, addr = self.receive(10)  # taille à voir
+        data, addr = self.receive(4)  
         return data
 
-    # Obtenir les actions disponibles
+    # Get actions that are available
     def ask_slave_options(self, slave):
-        #actions disponibles à mettre en dur ou dépend vraiment de chaque rasp ?
+        #actions available to defined
         return

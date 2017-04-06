@@ -1,7 +1,4 @@
 
-//
-// Created by cyrbos on 4/3/17.
-//
 
 #include "commands.h"
 #include <stdio.h>
@@ -40,13 +37,11 @@ int get_ip(char ** array){
 
 	
 	while(fgets(path, sizeof(path) - 1, fp) != NULL) {
-		//printf("YOOO : %s", path);
 		sscanf(path, "%s %s", t1, t2);
 		char *word;
 		int nb = 0;
 		int i = 0;
 		if (strcmp("inet", t1)== 0){
-			//printf("%s", path);
 			word = strtok(path, " .:");
 			while (word != NULL) {
 				if(nb == 0){
