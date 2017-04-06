@@ -245,6 +245,11 @@ unmount_image() {
 	fi
 }
 
+copy_orders(){
+	sudo mkdir -p $WORKING_PATH/etc/daemon.d
+	sudo cp --remove-destination $1 $WORKING_PATH/etc/daemon.d/orders.txt
+}
+
 chroot_image() {
 	second_action "Verifying given path for chroot ..."
 	df -h | grep $WORKING_PATH &>/dev/null
@@ -275,6 +280,15 @@ chroot_image() {
 						simple_action "overlay_rasp directory not found, going to clone repo once in chroot"
 					else
 						sudo cp -r --remove-destination ../overlay_rasp $WORKING_PATH/home/pi/armmanager/raspberry_slave_i2c
+					fi
+					if [ ! -e ../orders.txt ]; then
+						if [ ! -e orders.txt ]; then
+							second_action "orders.txt not found ! It is absolutely needed for daemon. Please place it"
+						else
+							copy_orders "orders.txt"
+						fi
+					else
+						copy_orders "../orders.txt"
 					fi
 
 					simple_action "Going to chroot into mounted raspberry pi filesystem ..."
