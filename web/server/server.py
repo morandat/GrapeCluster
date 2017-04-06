@@ -1,4 +1,4 @@
-DEBUG = True
+DEBUG = False
 
 import sys
 from flask import Flask, render_template, json, redirect
@@ -127,9 +127,9 @@ def getStack(id=None):
                 'heat': 80,
                 'rasps': {}
             }
-
+        
             for rasp in stack.get_pi_devices():
-                stackJSON['rasps'][rasp.get_pos()] = rasp.get_id()
+                stackJSON['rasps'][rasp.get_pos()] = rasp.get_i2c()
 
             return stackJSON
 
@@ -311,7 +311,7 @@ def disableI2C(id):
 
 if __name__ == '__main__':
     if not DEBUG:
-        ip = "127.0.0.2"
+        ip = "192.168.1.21"
         if (len(sys.argv) > 1):
             ip = sys.argv[1]
         daemon = Daemon(ip)
