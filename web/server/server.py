@@ -292,7 +292,20 @@ def raspRestart(id):
     
     return json_response(json.dumps({'response': response}))
         
-        
+@app.route("/rasp/<int:id>/enable_i2c", methods=['POST'])
+def enableI2C(id):
+    rasp = daemon.get_master().get_slave_by_id(id)
+
+    if rasp is not None:
+        daemon.get_udp_comm().send("8", rasp.get_ip_address())
+
+
+def disableI2C(id):
+    rasp = daemon.get_master().get_slave_by_id(id)
+
+    if rasp is not None:
+        daemon.get_i2c_comm().send_custom_instruction(rasp, 8, "8")
+
 ## RUN ##
 
 if __name__ == '__main__':

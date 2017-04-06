@@ -37,7 +37,6 @@ class Daemon(Thread):
                 self.__master.get_stack(0).add_pi_device(new_slave)
                 self.__udp_comm.send("0;" + addr[0] + ";", new_slave.get_ip_address())
                 print("Configured new slave of ip_addr {}".format(addr[0]))
-                self.__i2c_comm.send_instruction(new_slave)
 
             elif data[:4] == b"cpu:":
                 self.__master.get_slave_by_ip(addr[0]).cpu_usage = data[4:]
@@ -45,3 +44,9 @@ class Daemon(Thread):
 
     def get_master(self):
         return self.__master
+
+    def get_udp_comm(self):
+        return self.__udp_comm
+
+    def get_i2c_comm(self):
+        return self.__i2c_comm
