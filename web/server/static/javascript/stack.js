@@ -3,10 +3,6 @@ addAjaxHandler("/stack/"+STACKID, function(stack) {
 	$('#stackTemp')
 		.btnColor(stack.heat<CONSTANTS.stackHeatLimit)
 		.text(stack.heat+'°C');
-	$('#stackShutdown')
-		.btnColor(stack.status)
-		.text(CONSTANTS.status[stack.status])
-		.attr('stackId', STACKID);
 
 	var raspAction = function(raspSlot, raspData) {
 		if(raspData !== undefined) {
@@ -23,17 +19,12 @@ addAjaxHandler("/stack/"+STACKID, function(stack) {
 				.text(Math.round(raspData.ram)+'%')
 				.show();
 			$('#raspStatus'+raspSlot)
-				.btnColor(raspData.status)
-				.text(CONSTANTS.status[raspData.status])
+				.btnColor(false)
 				.attr('raspId', raspData.address)
 				.show();
-			$('#raspRestart'+raspSlot).attr('raspId', raspData.address);
-			if(raspData.status)
-				$('#raspRestart'+raspSlot).show();
-			else
-				$('#raspRestart'+raspSlot).hide();
-
-			//console.log(raspSlot+' : '+JSON.stringify(raspData))
+			$('#raspRestart'+raspSlot)
+				.attr('raspId', raspData.address)
+				.show();
 		}
 		else {
 			$('#raspName'+raspSlot).html('---');
@@ -43,8 +34,6 @@ addAjaxHandler("/stack/"+STACKID, function(stack) {
 			$('#raspCPU'+raspSlot).hide();
 			$('#raspRAM'+raspSlot).text('');
 			$('#raspStatus'+raspSlot).hide();
-
-			//console.log(raspSlot+' : Empty')
 		}
 	}
 
@@ -52,3 +41,12 @@ addAjaxHandler("/stack/"+STACKID, function(stack) {
 		raspAction(i, stack.rasps[i]);
 
 }, true);
+
+$(document).ready(function() {
+	$('#stackStart')
+		.btnColor(true)
+		.attr('stackId', STACKID);
+	$('#stackShutdown')
+		.btnColor(false)
+		.attr('stackId', STACKID);
+});

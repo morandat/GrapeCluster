@@ -6,13 +6,6 @@ addAjaxHandler("/rasp/"+RASPID, function(rasp) {
 	$('.raspName').text(rasp.name);
 	$('#raspSSH').val('ssh '+rasp.ip);
 	$('#raspStack').text('#'+rasp.stack);
-	$('#raspStatus')
-		.btnColor(rasp.status)
-		.text(CONSTANTS.status[rasp.status]);
-	if(rasp.status)
-		$('#raspRestart').show();
-	else
-		$('#raspRestart').hide();
 	$('#raspOS').text(rasp.os);
 	$('#raspIP').text(rasp.ip);
 	$('#raspCPU')
@@ -29,4 +22,6 @@ $(document).ready(function() {
 	$("#raspSSH").on("click", function () {
 	   $(this).select();
 	});
+
+	$('#raspStatus').btnColor(false);
 });

@@ -16,10 +16,13 @@
                 <div class="card" style="margin-bottom:30px;">
                     <div class="card-block">
                         <h2 style="float:left;" class="card-title"><a href="#" id="stackId{{ stackI }}">Stack</a></h2>
+
                         <div class="btn-group" style="float:right;" role="group">
-                            <div class="btn stackStatusBtn" id="stackShutdown{{ stackI }}" style="cursor:pointer;"></div>
-                            <div class="btn" id="stackTemp{{ stackI }}"></div>
+                            <div class="btn btn-sm stackStatusBtn" id="stackStart{{ stackI }}" style="cursor:pointer;">On</div>
+                            <div class="btn btn-sm stackStatusBtn" id="stackShutdown{{ stackI }}" style="cursor:pointer;">Off</div>
                         </div>
+
+                        <div style="float:right; margin-right:5px;" class="btn btn-sm" id="stackTemp{{ stackI }}"></div>
                     </div>
                     <ul class="list-group list-group-flush">
 
@@ -40,7 +43,7 @@
                                 <td style="text-align:right;">
                                     <div class="btn-group" style="float:right;" role="group">
                                         <div class="btn btn-sm btn-secondary raspRestartBtn" id="raspRestart{{ raspPos }}" style="display:none; cursor:pointer;">Restart</div>
-                                        <div class="btn btn-sm raspStatusBtn" id="raspStatus{{ raspPos }}" style="display:none; cursor:pointer;"></div>
+                                        <div class="btn btn-sm raspStatusBtn" id="raspStatus{{ raspPos }}" style="display:none; cursor:pointer;">Off</div>
                                     </div>
                                 </td>
                                 </tr></table>
