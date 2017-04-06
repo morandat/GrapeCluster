@@ -22,7 +22,7 @@ class CommunicatorI2C(Communicator):  # Communicator for I2C
             for i in range(0, 4):
                 while True:
                     try:
-                        tmp = slave.read_byte(slave._i2c)
+                        tmp = slave.read_byte()
                         slave.set_data(i,tmp)
                         break
                     except Exception as e:
