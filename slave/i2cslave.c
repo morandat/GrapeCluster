@@ -118,8 +118,8 @@ void i2c_handle(int i2c_fd, char tx_buffer[], int mode) {
 	    printf("%d :%d\n",test, tx_buffer[test]);
     printf("Fin test\n");
 
-    char *tx_answer;
-    char endstring[]={ENDSYMB};
+    //char *tx_answer;
+    //char endstring[]={ENDSYMB};
 
     /*if(is_addr == 1){
     	/*for(int i = 0; i < length; i++)

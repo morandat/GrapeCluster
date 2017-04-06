@@ -55,7 +55,7 @@ void slice_args(char** args, char* msg, ssize_t msg_len, int arg_num) {
 
 void free_args(char** args, int arg_num) {
 	for (int i = 0; i < arg_num; i++) {
-		free(args[i];
+		free(args[i]);
 	}
 }
 
@@ -105,7 +105,7 @@ char** load_orders() {
 
     orders_num = count_args(orders_file_str, oflen);
 
-    return slice_args(orders_file_str, oflen, orders_num);
+    return slice_args(orders, orders_file_str, oflen, orders_num);
 }
 
 int main(int argc, char *argv[]) {
@@ -118,7 +118,6 @@ int main(int argc, char *argv[]) {
     int mode;
 
     int i2c_fd = i2c_init(&mode, argc, argv, orders);
-    uint8_t data;
 
     struct sockaddr_in master_info;
     struct sockaddr_in slave_info;
@@ -146,7 +145,6 @@ int main(int argc, char *argv[]) {
 
     int max_fd = (sock > i2c_fd) ? sock : i2c_fd;
 
-    char buffer[BUFF_LEN];
     while (daemon.curr_status != STOPPED) {
         switch (daemon.curr_status) {
             case ACTIVE:
