@@ -31,7 +31,7 @@ class Daemon(Thread):
             if data == b"configure":
                 stack = self.__master.get_stack(0)
                 print("sfjldkfjslf lkjdsfl kdsjf e", addr[0])
-                new_slave = Slave(0, "AA:AA:AA:AA:AA:AA", addr[0], "0", len(stack.get_pi_devices()))
+                new_slave = Slave(0x42, 0, "test", 0, "AA:AA:AA:AA:AA:AA", ip_address=addr[0], pos=len(stack.get_pi_devices()))
                 self.__master.get_stack(0).add_pi_device(new_slave)
                 self.__udp_comm.send("0;" + addr[0] + ";", new_slave.get_ip_address())
                 print("Configured new slave of ip_addr {}".format(addr[0]))
