@@ -8,8 +8,8 @@ class Master(PiDevice):
         self.__stack_nb = stack_nb
         self.__stacks = []
         for s in STACK_DEVICES:
+			#add_stack(s)
             pass
-            # To-Do: initialisation
 
     def get_slave_by_ip(self, ip_address):
         for stack in self.__stacks:
