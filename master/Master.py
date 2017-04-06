@@ -1,12 +1,14 @@
 # coding: utf-8
 from PiDevice import PiDevice
 from grape import STACK_DEVICES
+from Alimentation import Alimentation
 
 class Master(PiDevice):
     def __init__(self, stack_nb, mac_add, ip_address, i2c_add, pos):
         super(Master, self).__init__(stack_nb, mac_add, ip_address, i2c_add, pos)
         self.__stack_nb = stack_nb
         self.__stacks = []
+        self.__alim = Alimentation()
         for s in STACK_DEVICES:
             pass
             # To-Do: initialisation
@@ -46,3 +48,10 @@ class Master(PiDevice):
 
     def is_master(self):
         return True
+
+    def enable_alim(self):
+        __alim.enable_alimentation()
+
+    def disable_alim(self):
+        __alim.disable_alimentation()
+
