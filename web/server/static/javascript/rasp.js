@@ -4,6 +4,7 @@ addAjaxHandler("/rasp/"+RASPID, function(rasp) {
 
 	$('.raspStack').text(rasp.stack);
 	$('.raspName').text(rasp.name);
+	$('#raspId').text('0x'+RASPID.toString(16));
 	$('#raspSSH').val('ssh '+rasp.ip);
 	$('#raspStack').text('#'+rasp.stack);
 	$('#raspOS').text(rasp.os);
