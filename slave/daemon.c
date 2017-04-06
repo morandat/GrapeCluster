@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
                 struct timeval timeval;
                 timeval.tv_sec = 1;
                 timeval.tv_usec = 0;
-                int fd_modified_count = select(max_fd, &rfds, NULL, NULL, &timeval);
+                int fd_modified_count = select(max_fd+1, &rfds, NULL, NULL, &timeval);
 
                 CHKERR(fd_modified_count);
 
