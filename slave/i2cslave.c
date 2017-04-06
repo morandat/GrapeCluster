@@ -120,7 +120,7 @@ void i2c_handle(int i2c_fd, char tx_buffer[], int mode) {
     printf("Début test\n");
 
     for (test = 0 ; test < TX_BUF_SIZE; test++)
-	printf("%d :%d\n",test, tx_buffer[test]); 
+	    printf("%d :%d\n",test, tx_buffer[test]);
     printf("Fin test\n");
 
     char *tx_answer;

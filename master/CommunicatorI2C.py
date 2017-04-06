@@ -5,7 +5,7 @@ class CommunicatorI2C(Communicator):  # Communicator for I2C
         pass
 
     def open_communication(self):
-        pass
+        pass#send something directly, open communication is not needed
 
     def send_instruction(self, slave, num_instr, name_instruction,):
         while True:
@@ -13,8 +13,7 @@ class CommunicatorI2C(Communicator):  # Communicator for I2C
                 slave.write_byte(num_instr)
                 break
             except Exception as e:
-                print(e)
-                print("Write from", slave.CLASS_ADDRESS, " failed trying again")
+                print("Write from", slave.CLASS_ADDRESS, " failed trying again(", e, ")")
         if name_instruction not in Slave.no_return_instructions:
             for i in range(0, 4):
                 while True:
@@ -23,7 +22,6 @@ class CommunicatorI2C(Communicator):  # Communicator for I2C
                         slave.set_data(i, tmp)
                         break
                     except Exception as e:
-                        print(e) 
-                        print("Read from", slave.CLASS_ADDRESS, "failed, trying again")
+                        print("Read from", slave.CLASS_ADDRESS, "failed, trying again (", e, ")")
             slave.decode_data()
             return slave.decode_data
