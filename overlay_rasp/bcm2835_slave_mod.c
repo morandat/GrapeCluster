@@ -21,7 +21,7 @@
 #define I2C_WAIT_LOOP_COUNT	200
 
 #ifndef SLV_ADDRESS
-#define SLV_ADDRESS		0x42
+#define SLV_ADDRESS		0x50
 #endif
 
 #define DRV_NAME		"bcm2835_i2c_slave"
