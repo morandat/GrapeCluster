@@ -115,7 +115,7 @@ def getStack(id=None):
         }
 
         for rasp in stack.get_pi_devices():
-            stackJSON['rasps'][rasp.get_pos()] = rasp.get_i2c()
+            stackJSON['rasps'][rasp.get_pos()] = rasp.get_id()
 
         return stackJSON
 
@@ -138,6 +138,7 @@ def getRasp(id=None):
 
     def renderRasp(rasp):
         return {
+            'id': rasp.get_id()
             'name' : 'Name',
             'address' : rasp.get_i2c(),
             'stack' : 1,
@@ -149,10 +150,7 @@ def getRasp(id=None):
         }
 
     if id is not None:
-        rasp = master.get_slave_by_i2c(id)
-        print(id)
-        print(type(id))
-        print(rasp)
+        rasp = master.get_slave_by_id(id)
         if rasp is not None:
             return renderRasp(rasp)
         else:
@@ -263,7 +261,7 @@ def routeRasp(id):
 
 @app.route('/rasp/<int:id>/start', methods=['POST'])
 def raspStart(id):
-    rasp = daemon.get_master().get_slave_by_i2c(id)
+    rasp = daemon.get_master().get_slave_by_id(id)
 
     if rasp is None:
         response = 0
@@ -274,7 +272,7 @@ def raspStart(id):
     
 @app.route('/rasp/<int:id>/stop', methods=['POST'])
 def raspStop(id):
-    rasp = daemon.get_master().get_slave_by_i2c(id)
+    rasp = daemon.get_master().get_slave_by_id(id)
 
     if rasp is None:
         response = 0
@@ -285,7 +283,7 @@ def raspStop(id):
      
 @app.route('/rasp/<int:id>/restart', methods=['POST'])
 def raspRestart(id):
-    rasp = daemon.get_master().get_slave_by_i2c(id)
+    rasp = daemon.get_master().get_slave_by_id(id)
 
     if rasp is None:
         response = 0
