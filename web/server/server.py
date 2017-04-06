@@ -317,7 +317,7 @@ def enableI2C(id):
 
     return json_response(json.dumps({'response': 1}))
 
-@app.route("/rasp<int:id>disable_i2c", methods=['POST'])
+@app.route("/rasp<int:id>/disable_i2c", methods=['POST'])
 def disableI2C(id):
     rasp = daemon.get_master().get_slave_by_id(id)
 
