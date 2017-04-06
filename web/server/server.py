@@ -1,6 +1,6 @@
 import sys
 from flask import Flask, render_template, json, redirect
-#from master.Daemon import Daemon
+from master.Daemon import Daemon
 import copy
 
 app = Flask(__name__)
@@ -13,14 +13,10 @@ constants = {
     'nSlavesByStack' : 6,
     'stackHeatLimit' : 75,
     'raspCPULimit' : 80,
-    'raspRAMLimit' : 80,
-    'status' : [
-        'Off',
-        'On'
-    ]
+    'raspRAMLimit' : 80
 }
 
-DEBUG = True
+DEBUG = False
 
 
 ## DATA ##
@@ -28,7 +24,6 @@ DEBUG = True
 stacksTest = {
     1 : {
         'heat' : 80,
-        'status' : 1,
         'rasps' : {
             0 : 1,
             2 : 2
@@ -36,7 +31,6 @@ stacksTest = {
     },
     2 : {
         'heat' : 25,
-        'status' : 1,
         'rasps' : {
             3 : 42
         }
@@ -49,7 +43,6 @@ raspsTest = {
         'address' : 1,
         'stack' : 1,
         'os' : 'Pidora',
-        'status' : 1,
         'ip' : "192.168.0.1",
         'cpu' : 42,
         'ram' : 80
@@ -59,7 +52,6 @@ raspsTest = {
         'address' : 2,
         'stack' : 1,
         'os' : 'Raspbian',
-        'status' : 0,
         'ip' : "192.168.0.2",
         "cpu" : 32,
         'ram' : 30
@@ -69,7 +61,6 @@ raspsTest = {
         'address' : 42,
         'stack' : 2,
         'os' : 'Raspbian',
-        'status' : 1,
         'ip' : "192.168.0.42",
         'cpu' : 74,
         'ram' : 30
@@ -132,7 +123,6 @@ def getStack(id=None):
 
             stackJSON = {
                 'heat': 80,
-                'status': 1,
                 'rasps': {}
             }
 
@@ -165,7 +155,6 @@ def getRasp(id=None):
                 'address' : rasp.get_i2c(),
                 'stack' : 1,
                 'os' : rasp.get_os(),
-                'status' : 1,
                 'ip' : rasp.get_ip_address(),
                 'cpu' : rasp.get_cpu_usage(),
                 'ram' : rasp.get_ram_usage()
@@ -271,17 +260,6 @@ def routeRasp(id):
         
 # RASP ACTIONS
 
-@app.route('/rasp/<int:id>/start', methods=['POST'])
-def raspStart(id):
-    rasp = daemon.get_master().get_slave_by_i2c(id)
-
-    if rasp is None:
-        response = 0
-    else:
-        response = 1
-
-    return json_response(json.dumps({'response': response}))
-    
 @app.route('/rasp/<int:id>/shutdown', methods=['POST'])
 def raspStop(id):
     rasp = daemon.get_master().get_slave_by_i2c(id)
@@ -308,9 +286,9 @@ def raspRestart(id):
 ## RUN ##
 
 if __name__ == '__main__':
-    #ip = "127.0.0.2"
-    #if (len(sys.argv) > 1):
-    #    ip = sys.argv[1]
-    #daemon = Daemon(ip)
-    #daemon.start()
+    ip = "127.0.0.2"
+    if (len(sys.argv) > 1):
+        ip = sys.argv[1]
+    daemon = Daemon(ip)
+    daemon.start()
     app.run(debug=True)

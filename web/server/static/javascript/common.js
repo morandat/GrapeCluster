@@ -12,7 +12,7 @@ addAjaxHandler = function(url, handler, interval, method) {
 	if(interval === true)
 		interval = 5000;
 	if(method === undefined)
-		method = 'GET'
+		method = 'GET';
 
 	var upd = function() {
 		$.ajax({
@@ -39,21 +39,10 @@ $(document).ready(function() {
 	$('.raspStatusBtn').click(function() {
 		var $this = $(this);
 
-		if($this.text() == CONSTANTS.status[0]) {
-			if(confirm("Allumer le Rasp ?")) {
-				addAjaxHandler('/rasp/'+$this.attr('raspId')+'/start', function() {
-					$this.text(CONSTANTS.status[1]).btnColor(true);
-					$('.raspRestartBtn[raspId="'+$this.attr('raspId')+'"]').show();
-				}, false, 'POST');
-			}
-		}
-		else if($this.text() == CONSTANTS.status[1]) {
-			if(confirm("Eteindre le Rasp ?")) {
-				addAjaxHandler('/rasp/'+$this.attr('raspId')+'/shutdown', function() {
-					$this.text(CONSTANTS.status[0]).btnColor(false);
-					$('.raspRestartBtn[raspId="'+$this.attr('raspId')+'"]').hide();
-				}, false, 'POST');
-			}
+		if(confirm("Eteindre le Rasp ?")) {
+			addAjaxHandler('/rasp/'+$this.attr('raspId')+'/shutdown', function() {
+				console.log("Command Sent : Shutdown Rasp "+$this.attr('raspId'));
+			}, false, 'POST');
 		}
 	});
 
@@ -62,8 +51,7 @@ $(document).ready(function() {
 
 		if(confirm("Redémarrer le Rasp ?")) {
 			addAjaxHandler('/rasp/'+$this.attr('raspId')+'/restart', function() {
-				$('.raspStatusBtn[raspId='+$this.attr('raspId')+']').text(CONSTANTS.status[0]).btnColor(false);
-				$this.hide();
+				console.log("Command Sent : Restart Rasp "+$this.attr('raspId'));
 			}, false, 'POST');
 		}
 	});
@@ -71,17 +59,17 @@ $(document).ready(function() {
 	$('.stackStatusBtn').click(function() {
 		var $this = $(this);
 
-		if($this.text() == CONSTANTS.status[0]) {
-			if(confirm("Allumer la stack ?")) {
+		if($this.text() == "On") {
+			if(confirm("Allumer tous les rasps de la stack ?")) {
 				addAjaxHandler('/stack/'+$this.attr('stackId')+'/start', function() {
-					$this.text(CONSTANTS.status[1]).btnColor(true);
+					console.log("Command Sent : Start every Rasp from Stack "+$this.attr('stackId'));
 				}, false, 'POST');
 			}
 		}
-		else if($this.text() == CONSTANTS.status[1]) {
-			if(confirm("Eteindre la stack ?")) {
+		else if($this.text() == "Off") {
+			if(confirm("Eteindre tous les rasps de la stack ?")) {
 				addAjaxHandler('/stack/'+$this.attr('stackId')+'/shutdown', function() {
-					$this.text(CONSTANTS.status[0]).btnColor(false);
+					console.log("Command Sent : Shutdown every Rasp from Stack "+$this.attr('stackId'));
 				}, false, 'POST');
 			}
 		}
