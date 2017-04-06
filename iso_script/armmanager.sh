@@ -2,7 +2,40 @@
 
 #Usage function to print how to use
 usage() {
-	echo "armmanager [-m=<file>] [-u[=<destination>]] [-o=<destination>]"
+	echo "Usage : armmanager [OPTIONS] ... [FILE]"
+	echo "Mount, modify and chroot into an ISO image of a Raspberry pi"
+	echo ""
+	echo -e "Best use example : \e[1m./armmanager -m -r -c /path/to/image\e[0m"
+	echo ""
+	echo "Available options are :"
+	echo "	-m, --mountfile		Option to mount a given ISO file. Be sure to give a raspberry system file."
+	echo "	-mo, --mount-only	Option to specify, when mounting, that we only want to mount."
+	echo "				If not given, it will proceed everything to prepare chroot with qemu (copying qemu files...)."
+	echo "	-u, --umount"
+	echo "	-u=[DEST], --umount=[DEST]"
+	echo "				Option to umount a mounted Raspberry pi filesystem. If no directory is precised,"
+	echo "				it will automatically umount last mounted one. Prefer using this script to unmount filesystems mounted"
+	echo "				with this script."
+	echo "	-o=[DEST], --output=[DEST]	"
+	echo "				If precised it will output the image filesystem to this destination. If not, image will be mounted"
+	echo "				to ./.armmanager directory in the same directory as the script."
+	echo "	-c, --chroot"
+	echo "	-c=[DEST], --chroot=[DEST]"
+	echo "				Permits to chroot in a Raspberry filesystem. If no destination is given, it will chroot into the last"
+	echo "				mounted filesystem."
+	echo "	-co=[OPTIONS], --chroot-options=[OPTIONS]"
+	echo "				When chrooting into a filesystem, the script launches a second script which aims to prepare to raspberry"
+	echo "				system. You can pass options to this script through this option"
+	echo "				Options are : chroot-only, install-only, upgrade-clean, no-update, no-daemon, no-kernel-recompile"
+	echo "	-r, --resize-image"
+	echo -e "	-r=[SIZE], --resize-image=[SIZE] \e[1m[DO NOT USE (not tested)]\e[0m"
+	echo "				Option to extend the partition of an image. By default adds 1Go to the main partition."
+	echo "	-h, --help		Print this help menu."
+	echo -e " --pidora			Option to precise that the Raspberry image is a PIDORA system. \e[1m/!\ Not fully tested /!\\e[0m"
+	echo ""
+	echo "Do not hesitate to report bugs to <paul.breton@enseirb-matmeca.fr>"
+	echo "Full project available on GitHub at <https://github.com/Pravez/GrapeCluster>"
+	echo "Thank you for using this script !"
 }
 
 realpath() {
@@ -60,7 +93,7 @@ resize_image() {
 		part=$(fdisk -l -o Start $FILE | cut -d' ' -f1,3 | tail -n1)
 		offset=$((512 * $part))
 
-		truncate -s +1G $FILE
+		truncate -s +$RESIZE_VALUE $FILE
 		rootasked "Losetup"
 		sudo losetup /dev/loop0 $FILE
 
