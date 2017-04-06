@@ -43,12 +43,16 @@ void slice_args(char** args, char* msg, ssize_t msg_len, int arg_num) {
 
     for (int i = 0; i < msg_len; ++i) {//msg contains first order char, so start at 1
         if (msg[i] == ';') {
-            int length = i - start;
- 		args[j] = malloc(sizeof(char) * length);
-            strncpy(args[j], msg + start, (size_t) length);
-            args[j][length] = 0;
-            start = i + 1;
-            j++;
+		msg[i] = 0;
+
+          
+ 		args[j] = msg+start;//malloc()
+
+
+
+	
+            start = i;
+		j++;
         }
     }
 }
@@ -90,7 +94,7 @@ int order_str_to_code(char* str) {
 }
 
 
-char** load_orders() {
+void load_orders(char** orders) {
     FILE* orders_file = fopen(ORDERS_PATH, "r");
     fseek(orders_file, 0, SEEK_END);
     long fsize = ftell(orders_file);
@@ -105,11 +109,11 @@ char** load_orders() {
 
     orders_num = count_args(orders_file_str, oflen);
 
-    return slice_args(orders, orders_file_str, oflen, orders_num);
+    slice_args(orders, orders_file_str, oflen, orders_num);
 }
 
 int main(int argc, char *argv[]) {
-    orders = load_orders();
+    load_orders(orders);
     struct daemon daemon;
 
     daemon.curr_status = ACTIVE;
@@ -156,12 +160,13 @@ int main(int argc, char *argv[]) {
 
                 CHKERR(fd_modified_count);
 
-                /*if (fd_modified_count == 0) {
-                    continue;
-                }*/
+
+
+             
 
                 if(FD_ISSET(sock, &rfds)) {
                     printf("received data over udp\n");
+			
                     udp_handle(sock, &daemon, &master_info, master_info_len, &slave_info);
                 }
                 else if(FD_ISSET(i2c_fd, &rfds)) {
@@ -178,5 +183,5 @@ int main(int argc, char *argv[]) {
         //sleep(1);
     }
 
-    free(orders);
+
 }

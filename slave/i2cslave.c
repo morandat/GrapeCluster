@@ -5,6 +5,9 @@
 #include <curses.h>
 #include <string.h>
 
+
+
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -105,11 +108,13 @@ int i2c_init(int* mode, int argc, char* argv[], char **ord) {
     return fd;
 }
 
+
 void i2c_handle(int i2c_fd, char tx_buffer[], int mode) {
+	printf("ifjozefsf\n");
     int test;
     for (test = 0 ; test < TX_BUF_SIZE; test++)
 	tx_buffer[test]=-1 ; 
- 
+
     size_t length = read(i2c_fd, tx_buffer, TX_BUF_SIZE); 
 
     printf("Début test\n");
@@ -164,7 +169,8 @@ void i2c_handle(int i2c_fd, char tx_buffer[], int mode) {
             	write(i2c_fd, tx_answer, 4);
 	is_addr=0;	
     }
-    else
+
 	is_addr=1;*/
     write(i2c_fd, "x", 1);   
 }
+
