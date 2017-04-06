@@ -307,6 +307,9 @@ def raspRestart(id):
 @app.route("/rasp/<int:id>/enable_i2c", methods=['POST'])
 def enableI2C(id):
     rasp = daemon.get_master().get_slave_by_id(id)
+    for device in daemon.get_master().get_stacks():
+        for rasp in device.get_pi_devices():
+            print(rasp.get_id())
 
     if rasp is not None:
         print("Telling slave to enable i2c")
