@@ -121,6 +121,7 @@ def getStack(id=None):
             return stack
         else:
             rasps = stack.get_pi_devices()
+            #master = daemon.get_master()
 
             stackJSON = {
                 'heat': 80,
