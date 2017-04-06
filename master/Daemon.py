@@ -35,7 +35,6 @@ class Daemon(Thread):
             
             data, addr = self.__udp_comm.receive(1024)    
             print("received message: {} from {}".format(data, addr))
-<<<<<<< HEAD
                 
             
             if data == b"configure":#To-Do: check why data is bstr
@@ -51,6 +50,7 @@ class Daemon(Thread):
                     nb_stack = nb_stack + 1
                     new_stack = Stack(nb_stack, nb_stack)
                     self.__master.add_stack(new_stack)
+                    nb_slave = 0
 
 
 
