@@ -69,7 +69,8 @@ void udp_handle(int sock, struct daemon* daemon, struct sockaddr_in* master_info
             printf("Sending cpu usage to master\n");
         }
         else if(strcmp(args[0], "8") == 0) {
-            FD_SET(i2c_fd, rdfds);
+	printf("Enabling I2C\n");
+            FD_SET(i2c_fd, rdfs);
         }
         else {
             printf("Order code : %s", args[0]);

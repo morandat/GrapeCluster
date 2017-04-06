@@ -12,9 +12,11 @@ addAjaxHandler("/stack", function(stacks) {
 		$('#stackId'+stackCount)
 			.attr('href', '/view/stack/'+stackId)
 			.text('Stack #'+stackId);
+		$('#stackStart'+stackCount)
+			.btnColor(true)
+			.attr('stackId', stackId);
 		$('#stackShutdown'+stackCount)
-			.btnColor(stack.status)
-			.text(CONSTANTS.status[stack.status])
+			.btnColor(false)
 			.attr('stackId', stackId);
 		$('#stackTemp'+stackCount)
 			.btnColor(stack.heat<CONSTANTS.stackHeatLimit)
@@ -24,25 +26,19 @@ addAjaxHandler("/stack", function(stacks) {
 			var position = stackCount+'_'+raspSlot;
 
 			if(raspData !== undefined) {
-				$('#raspName'+position).html('<a href="/view/rasp/'+raspData.address+'" class="card-link">'+raspData.name+' ('+raspData.address+')</a>');
+				$('#raspName'+position).html('<a href="/view/rasp/'+raspData.address+'" class="card-link">'+raspData.name+' (0x'+raspData.address.toString(16)+')</a>');
 				$('#raspStatus'+position)
-					.btnColor(raspData.status)
-					.text(CONSTANTS.status[raspData.status])
+					.btnColor(false)
 					.attr('raspId', raspData.address)
 					.show();
-				$('#raspRestart'+position).attr('raspId', raspData.address);
-				if(raspData.status)
-					$('#raspRestart'+position).show();
-				else
-					$('#raspRestart'+position).hide();
-
-				//console.log(position+' : '+JSON.stringify(raspData))
+				$('#raspRestart'+position)
+					.attr('raspId', raspData.address)
+					.show();
 			}
 			else {
 				$('#raspName'+position).html('---');
 				$('#raspStatus'+position).hide();
-
-				//console.log(position+' : Empty')
+				$('#raspRestart'+position).hide();
 			}
 		}
 

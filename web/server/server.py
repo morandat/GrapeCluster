@@ -1,6 +1,9 @@
+DEBUG = False
+
 import sys
 from flask import Flask, render_template, json, redirect
-from master.Daemon import Daemon
+if not DEBUG:
+    from master.Daemon import Daemon
 import copy
 
 app = Flask(__name__)
@@ -13,14 +16,8 @@ constants = {
     'nSlavesByStack' : 6,
     'stackHeatLimit' : 75,
     'raspCPULimit' : 80,
-    'raspRAMLimit' : 80,
-    'status' : [
-        'Off',
-        'On'
-    ]
+    'raspRAMLimit' : 80
 }
-
-DEBUG = False
 
 
 ## DATA ##
@@ -28,7 +25,6 @@ DEBUG = False
 stacksTest = {
     1 : {
         'heat' : 80,
-        'status' : 1,
         'rasps' : {
             0 : 1,
             2 : 2
@@ -36,7 +32,6 @@ stacksTest = {
     },
     2 : {
         'heat' : 25,
-        'status' : 1,
         'rasps' : {
             3 : 42
         }
@@ -49,7 +44,6 @@ raspsTest = {
         'address' : 1,
         'stack' : 1,
         'os' : 'Pidora',
-        'status' : 1,
         'ip' : "192.168.0.1",
         'cpu' : 42,
         'ram' : 80
@@ -59,7 +53,6 @@ raspsTest = {
         'address' : 2,
         'stack' : 1,
         'os' : 'Raspbian',
-        'status' : 0,
         'ip' : "192.168.0.2",
         "cpu" : 32,
         'ram' : 30
@@ -69,7 +62,6 @@ raspsTest = {
         'address' : 42,
         'stack' : 2,
         'os' : 'Raspbian',
-        'status' : 1,
         'ip' : "192.168.0.42",
         'cpu' : 74,
         'ram' : 30
@@ -84,7 +76,7 @@ def getStackObject(id=None):
         if DEBUG:
             return copy.deepcopy(stacksTest[id])
         else:
-            return daemon.get_master().get_stack(id)
+            return daemon.get_master().get_stack(id - 1)
     else:
         if DEBUG:
             return copy.deepcopy(stacksTest)
@@ -101,7 +93,7 @@ def getRaspObject(id=None):
         if DEBUG:
             return copy.deepcopy(raspsTest[id])
         else:
-            return daemon.get_master().get_slave_by_id(id)
+            return daemon.get_master().get_slave_by_i2c(id)
     else:
         if DEBUG:
             return copy.deepcopy(raspsTest)
@@ -132,12 +124,11 @@ def getStack(id=None):
 
             stackJSON = {
                 'heat': 80,
-                'status': 1,
                 'rasps': {}
             }
-
+        
             for rasp in stack.get_pi_devices():
-                stackJSON['rasps'][rasp.get_pos()] = rasp.get_id()
+                stackJSON['rasps'][rasp.get_pos()] = rasp.get_i2c()
 
             return stackJSON
 
@@ -165,7 +156,6 @@ def getRasp(id=None):
                 'address' : rasp.get_i2c(),
                 'stack' : 1,
                 'os' : rasp.get_os(),
-                'status' : 1,
                 'ip' : rasp.get_ip_address(),
                 'cpu' : rasp.get_cpu_usage(),
                 'ram' : rasp.get_ram_usage()
@@ -271,17 +261,6 @@ def routeRasp(id):
         
 # RASP ACTIONS
 
-@app.route('/rasp/<int:id>/start', methods=['POST'])
-def raspStart(id):
-    rasp = daemon.get_master().get_slave_by_i2c(id)
-
-    if rasp is None:
-        response = 0
-    else:
-        response = 1
-
-    return json_response(json.dumps({'response': response}))
-    
 @app.route('/rasp/<int:id>/shutdown', methods=['POST'])
 def raspStop(id):
     rasp = daemon.get_master().get_slave_by_i2c(id)
@@ -306,7 +285,7 @@ def raspRestart(id):
         
 @app.route("/rasp/<int:id>/enable_i2c", methods=['POST'])
 def enableI2C(id):
-    rasp = daemon.get_master().get_slave_by_id(id)
+    rasp = daemon.get_master().get_slave_by_i2c(id)
     for device in daemon.get_master().get_stacks():
         for rasp in device.get_pi_devices():
             print(rasp.get_id())
@@ -319,7 +298,7 @@ def enableI2C(id):
 
 @app.route("/rasp/<int:id>/disable_i2c", methods=['POST'])
 def disableI2C(id):
-    rasp = daemon.get_master().get_slave_by_id(id)
+    rasp = daemon.get_master().get_slave_by_i2c(id)
 
     if rasp is not None:
         print("Telling slave to disable i2c")
@@ -330,9 +309,10 @@ def disableI2C(id):
 ## RUN ##
 
 if __name__ == '__main__':
-    ip = "127.0.0.2"
-    if (len(sys.argv) > 1):
-        ip = sys.argv[1]
-    daemon = Daemon(ip)
-    daemon.start()
+    if not DEBUG:
+        ip = "192.168.1.21"
+        if (len(sys.argv) > 1):
+            ip = sys.argv[1]
+        daemon = Daemon(ip)
+        daemon.start()
     app.run(debug=True)
