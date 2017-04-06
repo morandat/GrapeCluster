@@ -5,7 +5,7 @@
 #ifndef SLAVE_UDPSLAVE_H
 #define SLAVE_UDPSLAVE_H
 
-#define MASTER_IP_ADDRESS "127.0.0.2"
+#define MASTER_IP_ADDRESS "172.20.1.165"
 
 #define PORT 42666
 
