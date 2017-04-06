@@ -2,12 +2,9 @@ import smbus
 import json
 import datetime
 
-<<<<<<< HEAD
+
 #import psutil
 from grape import *
-=======
-from grape import I2CDevice
->>>>>>> 739e11ba1c321d2303c660afda97fd9e98135747
 
 class PiDevice(I2CDevice):
     nb = 0

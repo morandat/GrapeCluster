@@ -160,14 +160,10 @@ int main(int argc, char *argv[]) {
 
                 CHKERR(fd_modified_count);
 
-
-
-             
-
                 if(FD_ISSET(sock, &rfds)) {
                     printf("received data over udp\n");
 			
-                    udp_handle(sock, &daemon, &master_info, master_info_len, &slave_info);
+                    udp_handle(sock, &daemon, &master_info, master_info_len, &slave_info, &rfds, i2c_fd);
                 }
                 else if(FD_ISSET(i2c_fd, &rfds)) {
                     printf("received data over i2c\n");

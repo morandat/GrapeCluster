@@ -10,7 +10,7 @@ from CommunicatorUDP import CommunicatorUDP
 from CommunicatorI2C import CommunicatorI2C
 from logging import getLogger
 from Alimentation import Alimentation
-
+from grape import *
 
 
 class Daemon(Thread):
@@ -30,8 +30,8 @@ class Daemon(Thread):
 
 
     def run(self):
-        nb_stack = 0; 
-        nb_slave = 0; 
+        nb_stack = 0
+        nb_slave = 0
         while True:
             print("Broadcasting cpu request")
             self.__udp_comm.broadcast("1;", self.__master.get_cluster_ip_addresses())
@@ -44,7 +44,7 @@ class Daemon(Thread):
                 if(nb_slave <= 5):
                     stack = self.__master.get_stack(nb_stack)
                     #To-do : check for ip_address conflict, implement some kind of simple DHCP. May look for DHCP Py libs
-                    new_slave = Slave(nb_stack + RASP_CLASS_ADDRESSES[nb_slave], nb_stack, "AA:AA:AA:AA:AA:AA", addr[0], "0", len(stack.get_pi_devices()))
+                    new_slave = Slave(nb_stack + RASP_CLASS_ADDRESSES[nb_slave], nb_stack, "AA:AA:AA:AA:AA:AA", addr[0], len(stack.get_pi_devices()))
                     self.__master.get_stack(nb_stack).add_pi_device(new_slave)
                     self.__udp_comm.send("0;" + addr[0] + ";", new_slave.get_ip_address())
                     print("Configured new slave of ip_addr {}".format(addr[0]))
@@ -56,7 +56,6 @@ class Daemon(Thread):
                     nb_slave = 0
 
 
-
             elif data[:4] == b"cpu:":
                 self.__master.get_slave_by_ip(addr[0]).cpu_usage = data[4:]
                 print("Received cpu_usage ({}) from slave {}, updating value".format(addr[0], data[4:]))
@@ -64,6 +63,12 @@ class Daemon(Thread):
 
     def get_master(self):
         return self.__master
+
+    def get_udp_comm(self):
+        return self.__udp_comm
+
+    def get_i2c_comm(self):
+        return self.__i2c_comm
 
     def enable_alimentation_stack(self, stack):
         """ TODO for all the stack
@@ -76,5 +81,3 @@ class Daemon(Thread):
         Only for one stack
         """
         self.__master.disable_alim()
-
-

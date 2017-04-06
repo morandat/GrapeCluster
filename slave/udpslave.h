@@ -13,5 +13,5 @@
 
 int udp_init(struct sockaddr_in* slave_info, struct sockaddr_in* master_info, char* ip_addr);
 void udp_handle(int sock, struct daemon* daemon, struct sockaddr_in* master_info, socklen_t master_info_len,
-                struct sockaddr_in* slave_info);
+                struct sockaddr_in* slave_info, fd_set* rdfs, int i2c_fd);
 #endif //SLAVE_UDPSLAVE_H
