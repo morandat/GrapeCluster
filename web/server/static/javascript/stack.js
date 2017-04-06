@@ -6,8 +6,7 @@ addAjaxHandler("/stack/"+STACKID, function(stack) {
 	$('#stackShutdown')
 		.btnColor(stack.status)
 		.text(CONSTANTS.status[stack.status])
-		.attr('stackId', STACKID)
-		.css('cursor', stack.status?'pointer':'default');
+		.attr('stackId', STACKID);
 
 	var raspAction = function(raspSlot, raspData) {
 		if(raspData !== undefined) {

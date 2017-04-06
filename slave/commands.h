@@ -57,6 +57,12 @@ int shutdown_slave();
  */
 int restart_slave();
 
+/**
+ * Return a percentage of the cpu usage
+ *
+ */
+int get_cpu_usage();
+
 #endif //SLAVE_COMMANDS_H
 
 
