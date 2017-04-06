@@ -50,7 +50,6 @@ char** slice_args(char* msg, ssize_t msg_len, int arg_num) {
             strncpy(args[j], msg + start, (size_t) length);
             args[j][length] = 0;
             start = i + 1;
-            //sprintf("Sliced : args[%i] = %s\n", j, args[j]);
             j++;
         }
     }
@@ -144,9 +143,7 @@ int main(int argc, char *argv[]) {
 
     FD_ZERO(&rfds);
 
-    FD_SET(i2c_fd, &rfds);
-
-
+    //FD_SET(i2c_fd, &rfds);
     FD_SET(sock, &rfds);
 
     printf("Sending configure message to master \n");
@@ -154,8 +151,6 @@ int main(int argc, char *argv[]) {
 
     int max_fd = (sock > i2c_fd) ? sock : i2c_fd;
 
-
-    ssize_t recv_len;
     char buffer[BUFF_LEN];
     while (daemon.curr_status != STOPPED) {
         switch (daemon.curr_status) {
