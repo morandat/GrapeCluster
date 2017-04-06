@@ -136,6 +136,10 @@ class Temperature(I2CDevice):
         else:
             return (data & 0xff) + (0.5 if 0x8000 else 0.0)
 
+class PowerMeter():  # Interface PowerMeter
+    def get_power(self):
+        raise NotImplementedError("Not implemented in interface")
+
 class PowerMeter(I2CDevice):
     CLASS_ADDRESS = 0x40
 
