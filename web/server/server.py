@@ -184,7 +184,7 @@ def viewDefault():
 @app.route('/view/stack/<int:id>') # = route options
 def viewStack(id):
     if getStack(id) is not None:
-        return render_template('stack.html', constants=constants, stackId=id)
+       return render_template('stack.html', constants=constants, stackId=id)
     else:
         return routeDefault()#would be better to say there's an error... To-Do
 
@@ -222,12 +222,12 @@ def routeStack(id):
         else:
             nestRaspsInStack(stack)
 
-    return json_response()
+    return json_response(json.dumps(stack))
 
 # STACK ACTIONS
 
 @app.route('/stack/<int:id>/start', methods=['POST'])
-def routeShutdown(id):
+def stackStart(id):
     stack = daemon.get_master().get_stack(id).enable_alimentation()
 
     if stack is None:
@@ -235,10 +235,10 @@ def routeShutdown(id):
     else:
         response = 1
     
-    return json_response(response)
+    return json_response(json.dumps({'response': response}))
 
 @app.route('/stack/<int:id>/shutdown', methods=['POST'])
-def routeShutdown(id):
+def stackShutdown(id):
     stack = daemon.get_master().get_stack(id).disable_alimentation()
 
     if stack is None:
@@ -246,7 +246,7 @@ def routeShutdown(id):
     else:
         response = 1
     
-    return json_response(response)
+    return json_response(json.dumps({'response': response}))
 
 # RASP GET
 
@@ -261,7 +261,7 @@ def routeRasp(id):
 # RASP ACTIONS
 
 @app.route('/rasp/<int:id>/start', methods=['POST'])
-def routeStart(id):
+def raspStart(id):
     rasp = daemon.get_master().get_slave_by_i2c(id)
 
     if rasp is None:
@@ -272,7 +272,7 @@ def routeStart(id):
     return json_response(json.dumps({'response': response}))
     
 @app.route('/rasp/<int:id>/stop', methods=['POST'])
-def routeStop(id):
+def raspStop(id):
     rasp = daemon.get_master().get_slave_by_i2c(id)
 
     if rasp is None:
@@ -283,7 +283,7 @@ def routeStop(id):
     return json_response(json.dumps({'response': response}))
      
 @app.route('/rasp/<int:id>/restart', methods=['POST'])
-def routeRestart(id):
+def raspRestart(id):
     rasp = daemon.get_master().get_slave_by_i2c(id)
 
     if rasp is None:
