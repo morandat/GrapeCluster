@@ -7,12 +7,14 @@
 
 #define BUFF_LEN 1024
 
+#define MAX_ARG_SIZE 16
+
 enum status {
     ACTIVE,
     STOPPED
 };
 
-char ** orders;
+char * orders[MAX_ARG_SIZE];
 
 struct daemon {
     enum status curr_status;
