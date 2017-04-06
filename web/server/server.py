@@ -1,3 +1,4 @@
+import sys
 from flask import Flask, render_template, json, redirect
 from master.Daemon import Daemon
 import copy
@@ -297,6 +298,9 @@ def raspRestart(id):
 ## RUN ##
 
 if __name__ == '__main__':
-    daemon = Daemon("127.0.0.2")
+    ip = "127.0.0.2"
+    if (len(sys.argv) > 1):
+        ip = sys.argv[1]
+    daemon = Daemon(ip)
     daemon.start()
     app.run(debug=True)
