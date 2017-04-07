@@ -9,19 +9,21 @@
 #include <unistd.h>
 
 
-int encode_ip(char *out, char ** in){
+int encode_ip(char *out, char * i1, char *i2, char *i3, char *i4){
 	int i = 0;
-	for (i = 0 ; i < 4 ; i++){
-		out[i] = atoi(in[i]);
-	}	
+	
+	out[0] = atoi(i1);	
+	out[1] = atoi(i2);
+	out[2] = atoi(i3);
+	out[3] = atoi(i4);
 	return 0;
 }
 
-int get_ip(char ** array){
+int get_ip(char *i1, char *i2, char *i3, char *i4){
 	FILE *fp;
 	char path[1035];
 
-	fp = popen("/bin/ifconfig", "r");
+	fp = popen("/sbin/ifconfig", "r");
 	if (fp == NULL){
 		printf("Failed to run ifconfig");
 		exit(1);
@@ -46,30 +48,30 @@ int get_ip(char ** array){
 			while (word != NULL) {
 				if(nb == 0){
 					for(i = 0; i < 4 ; i++)
-						array[0][i] = 0;
+						i1[i] = 0;
 					for(i = 0; i < 4 ; i++)
-						array[1][i] = 0;
+						i2[i] = 0;
 					for(i = 0; i < 4 ; i++)
-						array[2][i] = 0;
+						i3[i] = 0;
 					for(i = 0; i < 4 ; i++)
-						array[3][i] = 0;
+						i4[i] = 0;
 
 				}
     			else if(nb == 2)
-    				strcpy(array[0], word);
+    				strcpy(i1, word);
     			else if (nb == 3)
-    				strcpy(array[1], word);
+    				strcpy(i2, word);
     			else if (nb == 4)
-    				strcpy(array[2], word);
+    				strcpy(i3, word);
     			else if (nb == 5)
-    				strcpy(array[3], word);
+    				strcpy(i4, word);
     			else if (nb == 6){
-    				printf("%s : %s : %s : %s\n",array[0], array[1], array[2], array[3]);
-    				if (strcmp(array[0], "127") == 0 && strcmp(array[1], "0") == 0 && strcmp(array[2], "0") == 0){
-    					printf("No\n");
+    			//	printf("%s : %s : %s : %s\n",i1, i2, i3, i4);
+    				if (strcmp(i1, "127") == 0 && strcmp(i2, "0") == 0 && strcmp(i3, "0") == 0){
+    			//		printf("No\n");
     				}
     				else{
-    					printf("C'est fini\n");
+    			//		printf("C'est fini\n");
     					return 1;
     				}
 

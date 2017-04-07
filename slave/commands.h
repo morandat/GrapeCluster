@@ -47,14 +47,14 @@ int get_cpu_usage();
  * Given an array of 4 string in, this function return an array of 4 char
  * which is the translation of string into char
  */
-int encode_ip(char *out, char ** in);
+int encode_ip(char *out, char * i1, char * i2, char *i3, char *i4);
 
 /**
 * Parse the ifconfig function to return an array of 4 strings
 * which contains the ip address
 *
 */
-int get_ip(char ** array);
+int get_ip(char *i1, char *i2, char *i3, char *i4);
 
 /**
  * Test with ping if the network is avalaible
@@ -102,6 +102,7 @@ int get_command_index(char* str);
  */
 void command_dispatcher(char* command_str, char** ip);
 
+char get_i2c();
 #endif //SLAVE_COMMANDS_H
 
 

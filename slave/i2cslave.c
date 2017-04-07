@@ -24,6 +24,8 @@ int is_addr;
 
 void get_order(int order_code, char **order) {
     *order = orders[order_code];
+	printf("order1 : %s\n",orders[order_code]);
+	printf("order :%s\n", *order);
 }
 
 void action(int call, char *out){
@@ -37,7 +39,7 @@ void action(int call, char *out){
         printf("order %d %s\n", call, order);
 
         if (strcmp("test", order) == 0) {
-            test_communication();
+ 	    test_communication();
             
             out[0] = 'a';
             out[1] = 'b';
@@ -45,10 +47,11 @@ void action(int call, char *out){
             out[3] = 'd';
         }
         else if(strcmp("cpu", order) == 0){
-            int cpu = get_cpu_usage();
+         		 
+	    int cpu = get_cpu_usage();
             out[0] = '0';
             out[1] = '0';
-            out[2] = '0';
+            out[2] = '0';	 	
             out[3] = cpu;
 
         }
@@ -59,35 +62,45 @@ void action(int call, char *out){
             restart_slave();
         }
         else if(strcmp("get_ip", order) == 0){
-            char tmp[4];
-            char* in[4];
-            get_ip(in);
-            encode_ip(&tmp, in);
+
+	    char tmp[4];
+	    char i1[4];
+	    char i2[4];
+	    char i3[4];
+	    char i4[4];
+	
+            get_ip(i1, i2, i3, i4);
+            encode_ip(tmp, i1, i2, i3, i4);
+
             int i;
             for(i = 0; i < 4 ; i++)
                 out[i] = tmp[4];
 
         }
         else if(strcmp("get_i2c", order) == 0){
-            char pos = get_i2c();
+   	    printf("Je suis al\n");
+	    char pos = get_i2c();
             out[0] = '0';
             out[1] = '0';
             out[2] = '0';
             out[3] = pos;
         }
         else if(strcmp("is_network", order) == 0){
-            char* test = test_network();
+
+            int test;
+	    test = test_network();
+
             if(test == 1){
-                out[0] = 1;
-                out[1] = 1;
-                out[2] = 1;
-                out[3] = 1;
+                out[0] = '1';
+                out[1] = '1';
+                out[2] = '1';
+                out[3] = '1';
             }
             else{
-                out[0] = 0;
-                out[1] = 0;
-                out[2] = 0;
-                out[3] = 0;
+                out[0] = '0';
+                out[1] = '0';
+                out[2] = '0';
+                out[3] = '0';
             }
         }
     }
@@ -98,6 +111,9 @@ int i2c_init(int* mode, int argc, char* argv[], char **ord) {
     *mode = 0;
 
     orders = ord;
+
+
+		
 
     FILE *usage_file = stderr;
     const char *input = DEFAULT_DEVICE;
@@ -133,7 +149,8 @@ int i2c_init(int* mode, int argc, char* argv[], char **ord) {
 
 void i2c_handle(int i2c_fd, char tx_buffer[], int mode, fd_set* rdfs) {
     int test;
-    for (test = 0 ; test < TX_BUF_SIZE; test++)
+    char tx_answer[4];
+    /*for (test = 0 ; test < TX_BUF_SIZE; test++)
 	tx_buffer[test]=-1 ; 
 
     size_t length = read(i2c_fd, tx_buffer, TX_BUF_SIZE); 
@@ -142,9 +159,7 @@ void i2c_handle(int i2c_fd, char tx_buffer[], int mode, fd_set* rdfs) {
         FD_CLR(i2c_fd, rdfs);
     }
 
-    printf("Début test\n");
-
-    char tx_answer[4];
+    //char tx_answer[4];
     char endstring[]={ENDSYMB};
 
     
@@ -171,7 +186,10 @@ void i2c_handle(int i2c_fd, char tx_buffer[], int mode, fd_set* rdfs) {
         			write(i2c_fd, tx_answer, 4);
         	break;
     	}
-   	}
+   	}*/
+	action(6, tx_answer);
+	printf("Reponse : %s", tx_answer);
+    	
  	  
 }
 
