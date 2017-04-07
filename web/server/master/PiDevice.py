@@ -13,7 +13,7 @@ class PiDevice(I2CDevice):
     nb = 0
 
     def __init__(self, stack_nb, mac_add, ip_address, i2c_add, pos):
-        super(PiDevice, self).__init__(smbus.SMBus(1), 0)
+        super(PiDevice, self).__init__(0,0)#(smbus.SMBus(1), 0)
 
         self.__id = PiDevice.nb
         PiDevice.nb+=1

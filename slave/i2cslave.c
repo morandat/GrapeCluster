@@ -60,6 +60,7 @@ void action(int call, char *out){
         }
         else if(strcmp("get_ip", order) == 0){
             char tmp[4];
+            char* in[4];
             get_ip(in);
             encode_ip(&tmp, in);
             int i;
@@ -75,7 +76,7 @@ void action(int call, char *out){
             out[3] = pos;
         }
         else if(strcmp("is_network", order) == 0){
-            test = test_network();
+            char* test = test_network();
             if(test == 1){
                 out[0] = 1;
                 out[1] = 1;
@@ -153,20 +154,20 @@ void i2c_handle(int i2c_fd, char tx_buffer[], int mode, fd_set* rdfs) {
     	case 1:
         		printf("1: Data received : %c\n", tx_buffer[i]);
         		action(tx_buffer[i], tx_answer);
-                if(tx_buffer[i] != 255 && tx_buffer[i] != '2' tx_buffer[i] != '3')
+                if(tx_buffer[i] != 255 && tx_buffer[i] != '2' && tx_buffer[i] != '3')
                     write(i2c_fd, tx_answer, 4);
         	break;
     	case 2:
         		printf("2 :Data received : %02x\n ", tx_buffer[i]);
         		action(tx_buffer[i], tx_answer);
-                if(tx_buffer[i] != 255 && tx_buffer[i] != '2' tx_buffer[i] != '3')
+                if(tx_buffer[i] != 255 && tx_buffer[i] != '2' && tx_buffer[i] != '3')
                     write(i2c_fd, tx_answer, 4);
         	break;
     	default:
 	   	
        		printf("3 :Data received : %d \n", tx_buffer[i]);
         		action(tx_buffer[i], tx_answer);
-    		if(tx_buffer[i] != 255 && tx_buffer[i] != '2' tx_buffer[i] != '3')
+    		if(tx_buffer[i] != 255 && tx_buffer[i] != '2' && tx_buffer[i] != '3')
         			write(i2c_fd, tx_answer, 4);
         	break;
     	}

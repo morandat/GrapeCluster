@@ -9,6 +9,11 @@
 
 #define MAX_ARG_SIZE 16
 
+#define PLACE_FILE_PATH "/home/pi/place.txt"
+
+#define ORDERS_PATH "../orders.txt"
+
+
 enum status {
     ACTIVE,
     STOPPED
