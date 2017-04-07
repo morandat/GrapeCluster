@@ -148,15 +148,15 @@ int main(int argc, char *argv[]) {
 
     FILE* place_file = fopen("/home/pi/place.txt", "r");
     fseek(place_file, 0, SEEK_END);
-    long fsize = ftell(orders_file);
+    long fsize = ftell(place_file);
     fseek(place_file, 0, SEEK_SET);
 
     char* place_file_str = malloc(fsize+1);
-    fread(place_file_str, fsize, 1, orders_file);
+    fread(place_file_str, fsize, 1, place_file);
     fclose(place_file);
     place_file_str[fsize] = 0;
 
-    char conf_msg = "configure; ";
+    char *conf_msg = "configure; ";
     sprintf(conf_msg, "configure;%s", place_file_str);
 
     CHKERR(sendto(sock, conf_msg, strlen(conf_msg), 0, (struct sockaddr *) &master_info, master_info_len));
