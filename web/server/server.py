@@ -100,7 +100,7 @@ def getRaspObject(id=None):
         else:
             rasps = {}
             for stack in daemon.get_master().get_stacks():
-                for rasp in stack.get_pi_devices():
+                for rasp in stack.get_pi_enable():
                     rasps[rasp.get_i2c()] = rasp
             return rasps
 
@@ -120,7 +120,7 @@ def getStack(id=None):
         if DEBUG:
             return stack
         else:
-            rasps = stack.get_pi_devices()
+            #rasps = stack.get_pi_enable()
             #master = daemon.get_master()
 
             stackJSON = {
@@ -128,7 +128,7 @@ def getStack(id=None):
                 'rasps': {}
             }
         
-            for rasp in stack.get_pi_devices():
+            for rasp in stack.get_pi_enable():
                 stackJSON['rasps'][rasp.get_pos()] = rasp.get_i2c()
 
             return stackJSON
