@@ -53,3 +53,6 @@ Une fois ceci fait vous pouvez finalement `sudo reboot`.
 Vous devriez maintenant pouvoir voir un device du nom de `i2c_slave` dans /dev. En lançant la commande `daemon` en sudo, vous devriez
 également pouvoir maintenant lancer le daemon i2c slave en lui donnant l'adresse IP adéquate. 
 
+
+Vous pourrez donc par la suite manipuler manuellement les deux différents daemons puisque placés dans le /usr/local/bin.
+Ils sont sous les noms de daemon_i2c et daemon_udp, et vont chercher leurs informations dans le /etc/daemon.d/

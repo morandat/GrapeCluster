@@ -1,13 +1,13 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides:          mockdaemon
+# Provides:          daemon_i2c
 # Required-Start:    $remote_fs $syslog
 # Required-Stop:     $remote_fs $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # X-Interactive:     false
-# Short-Description: Example init script
-# Description:       Start/stop an example script
+# Short-Description: daemon i2c init script
+# Description:       Start/stop and restart
 ### END INIT INFO
 
 DESC="Daemon script"
