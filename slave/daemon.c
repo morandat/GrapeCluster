@@ -40,11 +40,12 @@ int count_args(char* msg, ssize_t msg_len) {
 void slice_args(char** args, char* msg, ssize_t msg_len, int arg_num) {
     int start = 0;
     int j = 0;
-
+    
     for (int i = 0; i < msg_len; ++i) {//msg contains first order char, so start at 1
         if (msg[i] == ';') {
+		
 		msg[i] = 0;
-
+		
           
  		args[j] = msg+start;//malloc()
 
@@ -106,10 +107,11 @@ void load_orders(char** orders) {
     orders_file_str[fsize] = 0;
 
     int oflen = strlen(orders_file_str);
-
+	
     orders_num = count_args(orders_file_str, oflen);
 
     slice_args(orders, orders_file_str, oflen, orders_num);
+
 }
 
 int main(int argc, char *argv[]) {
@@ -141,7 +143,7 @@ int main(int argc, char *argv[]) {
 
     FD_ZERO(&rfds);
 
-    //FD_SET(i2c_fd, &rfds);
+    FD_SET(i2c_fd, &rfds);
     FD_SET(sock, &rfds);
 
     printf("Sending configure message to master \n");
