@@ -314,9 +314,10 @@ def disableI2C(id):
 
 if __name__ == '__main__':
     if not DEBUG:
-        ip = "192.168.1.21"
-        if (len(sys.argv) > 1):
+        if (len(sys.argv) < 3):
+            print("Please provide ip address as first parameter and orders file path as second")
             ip = sys.argv[1]
-        daemon = Daemon(ip)
-        daemon.start()
-    app.run(debug=True)
+        else:
+            daemon = Daemon(sys.argv[1], sys.argv[2])
+            daemon.start()
+            app.run(debug=True)

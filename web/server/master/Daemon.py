@@ -17,10 +17,10 @@ from grape import *
 
 
 class Daemon(Thread):
-    def __init__(self, ip_address):
+    def __init__(self, ip_address, orders_file_path):
         super(Daemon, self).__init__()
 
-        self.__commands = Commands()
+        self.__commands = Commands(orders_file_path)
 
         self.__master = Master(0, "00:00:00:00:00:00", ip_address, "0", 0)
 
@@ -42,7 +42,7 @@ class Daemon(Thread):
         while True:
 
             print("Broadcasting cpu request")
-            self.__udp_comm.broadcast(self.__commands.get_index("cpu"), self.__master.get_cluster_ip_addresses())
+            self.__udp_comm.broadcast(self.__commands.get_index("cpu")+";", self.__master.get_cluster_ip_addresses())
             
             data, addr = self.__udp_comm.receive(1024)    
             print("received message: {} from {}".format(data, addr))
@@ -52,11 +52,10 @@ class Daemon(Thread):
                 if(nb_slave <= 5):
                     stack = self.__master.get_stack(nb_stack)
                     #To-do : check for ip_address conflict, implement some kind of simple DHCP. May look for DHCP Py libs
-                    print(data[10:])
-                    new_slave = Slave(nb_stack + RASP_CLASS_ADDRESSES[int(data[10:])-1], nb_stack, "AA:AA:AA:AA:AA:AA", addr[0], int(data[10:]))
+                    new_slave = Slave(nb_stack + RASP_CLASS_ADDRESSES[int(data[10:])-1], nb_stack, "AA:AA:AA:AA:AA:AA", addr[0], int(data.decode().split(";")[1]))
                     self.__master.get_stack(nb_stack).add_pi_device(new_slave)
                     value = value + 1
-                    self.__udp_comm.send("0;" + addr[0] + ";", new_slave.get_ip_address())
+                    self.__udp_comm.send(self.__commands.get_index("configure") + ";" + addr[0] + ";", new_slave.get_ip_address())
                     print("Configured new slave of ip_addr {}".format(addr[0]))
                     nb_slave = nb_slave + 1
                 else:
