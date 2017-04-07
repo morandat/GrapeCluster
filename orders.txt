@@ -1,1 +1,1 @@
-test;cpu;shutdown;reboot;get_ip;get_i2c;is_network
+test;cpu;shutdown;reboot;get_ip;get_i2c;is_network;
