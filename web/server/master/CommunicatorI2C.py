@@ -7,7 +7,7 @@ class CommunicatorI2C(Communicator):  # Communicator for I2C
     def open_communication(self):
         pass #send something directly, open communication is not needed
 
-    def send_instruction(self, slave, num_instr, name_instruction,):
+    def send_instruction(self, slave, num_instr, name_instruction):
         while True:
             try:
                 slave.write_byte(num_instr)
