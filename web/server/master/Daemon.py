@@ -45,7 +45,8 @@ class Daemon(Thread):
                 if(nb_slave <= 5):
                     stack = self.__master.get_stack(nb_stack)
                     #To-do : check for ip_address conflict, implement some kind of simple DHCP. May look for DHCP Py libs
-                    new_slave = Slave(nb_stack + RASP_CLASS_ADDRESSES[nb_slave], nb_stack, "AA:AA:AA:AA:AA:AA", addr[0], len(stack.get_pi_devices()))
+                    print(data[10:])
+                    new_slave = Slave(nb_stack + RASP_CLASS_ADDRESSES[nb_slave], nb_stack, "AA:AA:AA:AA:AA:AA", addr[0], data[10:])
                     self.__master.get_stack(nb_stack).add_pi_device(new_slave)
                     self.__master.get_stack(nb_stack).update_pi_enable(new_slave, value)
                     value = value + 1

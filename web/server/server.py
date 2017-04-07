@@ -121,14 +121,15 @@ def getStack(id=None):
             return stack
         else:
             rasps = stack.get_pi_devices()
+            #master = daemon.get_master()
 
             stackJSON = {
                 'heat': 80,
                 'rasps': {}
             }
-
+        
             for rasp in stack.get_pi_devices():
-                stackJSON['rasps'][rasp.get_pos()] = rasp.get_id()
+                stackJSON['rasps'][rasp.get_pos()] = rasp.get_i2c()
 
             return stackJSON
 
