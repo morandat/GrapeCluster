@@ -50,8 +50,8 @@ class Master(PiDevice):
         return True
 
     def enable_alim(self):
-        __alim.enable_alimentation()
+        self.__alim.enable_alimentation()
 
     def disable_alim(self):
-        __alim.disable_alimentation()
+        self.__alim.disable_alimentation()
 
