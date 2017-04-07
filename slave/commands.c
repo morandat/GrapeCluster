@@ -155,7 +155,7 @@ int get_cpu_usage() {
     return (int)loadavg*100;
 }
 
-char get_i2c(){
+int get_i2c(){
 	FILE* place_file = fopen("/home/pi/place.txt", "r");
     fseek(place_file, 0, SEEK_END);
     long fsize = ftell(place_file);
@@ -168,4 +168,77 @@ char get_i2c(){
     place_file_str[fsize] = '\0';
 
     return place_file_str[0];
+}
+
+int count_args(char *msg, int msg_len) {
+    int arg_num = 0;
+    for (int i = 0; i < msg_len; ++i) {
+        if (msg[i] == ';')
+            arg_num++;
+    }
+
+    return arg_num;
+}
+
+void slice_args(char **args, char *msg, int msg_len, int arg_num) {
+    int start = 0;
+    int j = 0;
+
+    for (int i = 0; i < msg_len; ++i) {//msg contains first order char, so start at 1
+        if (msg[i] == ';') {
+            msg[i] = 0;
+            args[j] = msg + start;
+            printf("args[%d]=%s", j, args[j]);
+
+            start = i+1;
+            j++;
+        }
+    }
+}
+
+void load_orders(char **orders) {
+    FILE *orders_file = fopen(ORDERS_PATH, "r");
+    fseek(orders_file, 0, SEEK_END);
+    long fsize = ftell(orders_file);
+    fseek(orders_file, 0, SEEK_SET);
+
+    char *orders_file_str = malloc(fsize + 1);
+    fread(orders_file_str, fsize, 1, orders_file);
+    fclose(orders_file);
+    orders_file_str[fsize] = 0;
+
+    int oflen = strlen(orders_file_str);
+
+    orders_len = count_args(orders_file_str, oflen);
+
+    slice_args(orders, orders_file_str, oflen, orders_len);
+}
+
+int get_command_index(char* str) {
+    for (int i = 0; i < orders_len; i++) {
+        if (strcmp(orders[i], str) == 0)
+            return i;
+    }
+    return -1;
+}
+
+int command_dispatcher(char* command_str, char** ip) {
+	if (strcmp("cpu", command_str) == 0) {
+		return get_cpu_usage();
+	}
+    else if (strcmp("test", command_str) == 0) {
+        return test_communication();
+    }
+    else if (strcmp("shutdown", command_str) == 0) {
+        return restart_slave();
+    }
+    else if (strcmp("get_ip", command_str) == 0) {
+        return get_ip(ip);
+    }
+    else if (strcmp("get_i2c", command_str) == 0) {
+        return get_i2c();
+    }
+    else if (strcmp("is_network", command_str) == 0) {
+        return test_network();
+    }
 }
