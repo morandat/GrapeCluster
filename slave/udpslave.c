@@ -36,7 +36,7 @@ int udp_init(struct sockaddr_in* slave_info, struct sockaddr_in* master_info, ch
 }
 
 void udp_handle(int sock, struct daemon* daemon, struct sockaddr_in* master_info, socklen_t master_info_len,
-                struct sockaddr_in* slave_info, fd_set* rdfs, int i2c_fd) {
+                struct sockaddr_in* slave_info) {
     ssize_t recv_len = 0;
     char buffer[BUFF_LEN];
     CHKERR((recv_len = recvfrom(sock, buffer, BUFF_LEN, 0,
@@ -56,21 +56,17 @@ void udp_handle(int sock, struct daemon* daemon, struct sockaddr_in* master_info
             daemon->curr_status = STOPPED;
             close(sock);
         }
-        else if (strcmp(args[0], "0") == 0) {
+        else if (strcmp(args[0], get_command_index("configure")) == 0) {
             printf("Received master configuration\n");
             slave_info->sin_addr.s_addr = inet_addr(args[1]);
 
         }
-        else if (strcmp(args[0], "1") == 0) {
+        else if (strcmp(args[0], get_command_index("cpu")) == 0) {
             char cpu_usage[20];
             sprintf(cpu_usage, "cpu:%d", get_cpu_usage());
 	printf("%d %s\n", cpu_usage, inet_ntoa(master_info->sin_addr));
             sendto(sock, cpu_usage, strlen(cpu_usage), 0, (struct sockaddr *) master_info, master_info_len);
             printf("Sending cpu usage to master\n");
-        }
-        else if(strcmp(args[0], "8") == 0) {
-	printf("Enabling I2C\n");
-            FD_SET(i2c_fd, rdfs);
         }
         else {
             printf("Order code : %s", args[0]);
