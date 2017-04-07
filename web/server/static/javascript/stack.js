@@ -6,8 +6,8 @@ addAjaxHandler("/stack/"+STACKID, function(stack) {
 
 	var raspAction = function(raspSlot, raspData) {
 		if(raspData !== undefined) {
-			$('#raspName'+raspSlot).html('<a href="/view/rasp/'+raspData.address+'" class="card-link">'+raspData.name+')</a>');
-			$('#raspI2C'+raspSlot).text(' (0x'+raspData.address.toString(16));
+			$('#raspName'+raspSlot).html('<a href="/view/rasp/'+raspData.address+'" class="card-link">'+raspData.name+'</a>');
+			$('#raspI2C'+raspSlot).text('0x'+raspData.address.toString(16));
 			$('#raspOS'+raspSlot).text(raspData.os);
 			$('#raspIP'+raspSlot).text(raspData.ip);
 			$('#raspCPU'+raspSlot)
@@ -32,8 +32,9 @@ addAjaxHandler("/stack/"+STACKID, function(stack) {
 			$('#raspOS'+raspSlot).text('');
 			$('#raspIP'+raspSlot).text('');
 			$('#raspCPU'+raspSlot).hide();
-			$('#raspRAM'+raspSlot).text('');
+			$('#raspRAM'+raspSlot).hide();
 			$('#raspStatus'+raspSlot).hide();
+			$('#raspRestart'+raspSlot).hide();
 		}
 	}
 
