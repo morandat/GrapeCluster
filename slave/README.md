@@ -1,20 +1,23 @@
 Slave deamon 
 ===
 
-Lancer le démon
+Lancer le daemon
 ---
 
-make 
-sudo ./deamon @ip_slave
+make i2c
+sudo ./daemon_i2c
 
-@ip_slave : adresse ip du slave
-sudo : obligatoire pour l'i2c
+sudo : obligatoire pour l'i2c qui ouvre un device dans /dev
+
+make udp
+sudo ./daemon_udp ip_address
+ip_address = l'adresse IP du slave (utiliser ipconfig)
 
 i2cslave.c
 ---
 Permet de lire le bus i2c et de récupérer les 4 octets de réponses
 
-udpslave
+udpslave.c
 ---
 Permet de communiquer en UDP avec le slave
 
@@ -22,6 +25,7 @@ commands
 ---
 Fonction implémentant les demandes du master
 
-daemon
+daemon_udp et daemon_i2c
 ---
-Permet de faire le lien entre UDP et i2c
+Mains respectifs de l'udp et de l'i2c
+Il est nécessaire d'avoir deux éxécutables différents car l'i2c est bloquant malgré un select avec timeout. 

@@ -10,7 +10,6 @@
 
 
 int encode_ip(char *out, char * i1, char *i2, char *i3, char *i4){
-	int i = 0;
 	
 	out[0] = atoi(i1);	
 	out[1] = atoi(i2);
@@ -190,8 +189,6 @@ void slice_args(char **args, char *msg, int msg_len, int arg_num) {
         if (msg[i] == ';') {
             msg[i] = 0;
             args[j] = msg + start;
-            printf("args[%d]=%s", j, args[j]);
-
             start = i+1;
             j++;
         }
@@ -222,25 +219,4 @@ int get_command_index(char* str) {
             return i;
     }
     return -1;
-}
-
-int command_dispatcher(char* command_str, char** ip) {
-	if (strcmp("cpu", command_str) == 0) {
-		return get_cpu_usage();
-	}
-    else if (strcmp("test", command_str) == 0) {
-        return test_communication();
-    }
-    else if (strcmp("shutdown", command_str) == 0) {
-        return restart_slave();
-    }
-    else if (strcmp("get_ip", command_str) == 0) {
-        return get_ip(ip);
-    }
-    else if (strcmp("get_i2c", command_str) == 0) {
-        return get_i2c();
-    }
-    else if (strcmp("is_network", command_str) == 0) {
-        return test_network();
-    }
 }

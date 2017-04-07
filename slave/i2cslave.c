@@ -14,12 +14,12 @@
 
 #include "i2cslave.h"
 #include "utils.h"
+#include "commands.h"
 
 #define ENDSYMB		  240
 #define DEFAULT_DEVICE "/dev/i2c_slave"
 
 
-char **orders;
 int is_addr;
 
 void get_order(int order_code, char **order) {
@@ -106,11 +106,9 @@ void action(int call, char *out){
     }
 }
 
-int i2c_init(int* mode, int argc, char* argv[], char **ord) {
+int i2c_init(int* mode, int argc, char* argv[]) {
     int opt;
     *mode = 0;
-
-    orders = ord;
 
 
 		

@@ -31,6 +31,12 @@ int count_args(char* msg, int msg_len);
 void slice_args(char** args, char* msg, int msg_len, int arg_num);
 
 /**
+ *
+ * @param orders array of strings to load orders file into
+ */
+void load_orders(char **orders);
+
+/**
  *Return the cpu usage of a rasp in percentage
  *
  */
@@ -95,14 +101,7 @@ int get_cpu_usage();
  */
 int get_command_index(char* str);
 
-/**
- *
- * @param command_str name of the command to translate into a function call
- * @param ip needed to call get_ip() function
- */
-void command_dispatcher(char* command_str, char** ip);
-
-char get_i2c();
+int get_i2c();
 #endif //SLAVE_COMMANDS_H
 
 

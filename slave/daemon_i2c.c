@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -27,7 +28,7 @@ int main(int argc, char *argv[]) {
     char tx_buffer[TX_BUF_SIZE];
     int mode;
 
-    int i2c_fd = i2c_init(&mode, argc, argv, orders);
+    int i2c_fd = i2c_init(&mode, argc, argv);
 
     if (argc < 2) {
         printf("Please provide ip address as first parameter\n");
@@ -59,14 +60,16 @@ int main(int argc, char *argv[]) {
 
     sprintf(conf_msg, "configure;%c", place_file_str[0]);
 
+    struct timeval timeval;
+    timeval.tv_sec = 1;
+    timeval.tv_usec = 0;
+    int fd_modified_count = 0;
+
     while (daemon.curr_status != STOPPED) {
         switch (daemon.curr_status) {
             case ACTIVE:
 
-                struct timeval timeval;
-                timeval.tv_sec = 1;
-                timeval.tv_usec = 0;
-                int fd_modified_count = select(i2c_fd + 1, &rfds, NULL, NULL, &timeval);
+                fd_modified_count = select(i2c_fd + 1, &rfds, NULL, NULL, &timeval);
 
                 CHKERR(fd_modified_count);
 
