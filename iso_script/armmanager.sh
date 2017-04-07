@@ -76,6 +76,7 @@ CHROOTOPTIONS=""
 POSSIBLEOPTIONS=("chroot-only" "install-only" "upgrade-clean" "no-update" "no-daemon" "no-kernel-recompile")
 FINALOPTIONS=""
 RESIZE_VALUE=-1
+KERNEL_COMP=false
 
 resize_image() {
 	main_action "Resizing the image"
@@ -214,6 +215,54 @@ copy_qemu() {
 	fi
 }
 
+kernel_compilation(){
+	main_action "Kernel cross-compiling"
+	second_action "this action is not fully tested, please be careful (do not hesitate to Ctrl+C)"
+	cd $WORKING_PATH/../
+	simple_action "Cloning tools to cross-compile"
+	if [ ! -e ./tools ]; then
+		git clone https://github.com/raspberrypi/tools
+	else
+		cd tools
+		git pull
+		cd ../
+	fi
+
+	POSITION=`pwd`
+	REAL=$(realpath $WORKING_PATH)
+	CUSTOM_GCC=$POSITION/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin
+	simple_action "Cloning raspberry linux kernel repository ..."
+	if [ ! -e ./linux ]; then
+		git clone --depth=1 https://github.com/raspberrypi/linux
+	else
+		cd linux
+		git pull
+		cd ../
+	fi
+
+	if [ ! -e ./linux/.config ]; then
+		cd linux
+		KERNEL=kernel7
+		simple_action "Making config file"
+		make -j4 ARCH=arm CROSS_COMPILE=$CUSTOM_GCC/arm-linux-gnueabihf- bcm2709_defconfig
+		simple_action "Recompiling kernel and modules ..."
+		make -j4 ARCH=arm CROSS_COMPILE=$CUSTOM_GCC/arm-linux-gnueabihf- zImage modules dtbs
+		#sudo make -j4 ARCH=arm CROSS_COMPILE=$CUSTOM_GCC/arm-linux-gnueabihf- INSTALL_MOD_PATH=$REAL modules_install
+		cd ../
+	fi
+
+
+	#sudo cp $REAL/boot/$KERNEL.img $REAL/boot/$KERNEL-backup.img
+	#sudo cp arch/arm/boot/zImage $REAL/boot/$KERNEL.img
+	#sudo cp arch/arm/boot/dts/*.dtb $REAL/boot/
+	#sudo cp arch/arm/boot/dts/overlays/*.dtb* $REAL/boot/overlays/
+	#sudo cp arch/arm/boot/dts/overlays/README $REAL/boot/overlays/
+	simple_action "Copying compiled kernel to raspberry for future installation"
+	cp -r --remove-destination -T linux/ $WORKING_PATH/home/pi/armmanager
+
+	cd ../
+}
+
 unmount_image() {
 	main_action "Unmounting the image"
 	if [ -d $WORKING_PATH ]; then
@@ -271,15 +320,16 @@ chroot_image() {
 					mkdir -p $WORKING_PATH/home/pi/armmanager
 					sudo cp --remove-destination rasparchitect.sh $WORKING_PATH/home/pi/armmanager
 					sudo cp --remove-destination bcm_slave_mod_install.sh $WORKING_PATH/home/pi/armmanager
+					sudo cp --remove-destination modules $WORKING_PATH/home/pi/armmanager
 					if [ ! -e ../slave ]; then
 						second_action "Impossible to copy sources of the slave daemon"
 					else
-						sudo cp -r --remove-destination ../slave/ $WORKING_PATH/home/pi/armmanager/slave
+						sudo cp -r -T --remove-destination ../slave/ $WORKING_PATH/home/pi/armmanager/slave
 					fi
 					if [ ! -e ../overlay_rasp ]; then
 						simple_action "overlay_rasp directory not found, going to clone repo once in chroot"
 					else
-						sudo cp -r --remove-destination ../overlay_rasp $WORKING_PATH/home/pi/armmanager/raspberry_slave_i2c
+						sudo cp -r -T --remove-destination ../overlay_rasp $WORKING_PATH/home/pi/armmanager/raspberry_slave_i2c
 					fi
 					if [ ! -e ../orders.txt ]; then
 						if [ ! -e orders.txt ]; then
@@ -424,6 +474,17 @@ for i in "$@"; do
 			fi
 			shift
 			;;
+		-k | --kernel-compilation)
+			if [ -f ".wpath" ]; then
+				FILE=$(cat .wpath)
+			else
+				second_action "chroot option needs a directory path or at least needs to be used after having mounted a filesystem"
+				exit 1
+			fi
+			WORKING_PATH=$FILE
+			KERNEL_COMP=true
+			shift
+			;;
 		-*)
 			simple_action "Unkown option : $i" # unknown option
 			;;
@@ -452,8 +513,16 @@ if [ $MOUNTOPT -eq 1 ]; then
 	mount_image
 fi
 
+if [ $KERNEL_COMP == true ]; then
+	kernel_compilation
+fi
+
 if [ $CHROOT == true ]; then
 	chroot_image
+	if [ ! -e $WORKING_PATH/boot/ssh ]; then
+		simple_action "Activating ssh ..."
+		sudo touch $WORKING_PATH/boot/ssh
+	fi
 fi
 
 if [ $UMOUNTOPT -eq 1 ]; then

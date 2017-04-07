@@ -1,5 +1,31 @@
 #!/bin/bash
 
+usage() {
+	echo "Usage : rasparchitect [OPTIONS] ..."
+	echo "Modify the filesystem of a Raspberry pi from the inside."
+	echo ""
+	echo "Available options are :"
+	echo "	--chroot-only		Executes only a chroot. Useless if you try to execute this script from the inside of the Raspberry."
+	echo ""
+	echo "	--install-only		Will only execute actions to install. No Bash will be launched."
+	echo ""
+	echo "	-uc, --upgrade-clean"
+	echo "				At the end of installation, will execute a system upgrade and clean of packages."
+	echo ""
+	echo "	-nu, --no-update	No package repository will be updated."
+	echo ""
+	echo "	-nd, --no-daemon	No daemon will be compiled (and set as service) using this option."
+	echo ""
+	echo "	-nk, --no-kernel-recompile"
+	echo "				The rasbperry pi kernel will not be recompiled if you use this fonction."
+	echo ""
+	echo "	-h, --help			Print this menu and exit"
+	echo ""
+	echo "Do not hesitate to report bugs to <paul.breton@enseirb-matmeca.fr>"
+	echo "Full project available on GitHub at <https://github.com/Pravez/GrapeCluster>"
+	echo "Thank you for using this script !"
+}
+
 command_exists() {
 	type "$1" &>/dev/null
 }
@@ -90,6 +116,9 @@ for i in "$@"; do
 			;;
 		-nrk | --no-kernel-recompile)
 			RECOMPILE_KERNEL=false
+			;;
+		-h | --help)
+			usage
 			;;
 		*)
 			simple_action "Unkown option : $i" # unknown option
@@ -212,9 +241,4 @@ if [ $CHROOT_ONLY == false ]; then
 
 else
 	launch_bash
-fi
-
-if [ ! -e /boot/ssh ]; then
-	simple_action "Activating ssh ..."
-	touch /boot/ssh
 fi
