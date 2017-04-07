@@ -12,26 +12,27 @@
 
 DESC="Daemon script"
 NAME=daemon
-DAEMON=/usr/local/bin/daemon
+DAEMON=/usr/local/bin/daemon_udp
+IP_ADDR=`cat /etc/daemon.d/ip_addr.conf`
 
 do_start() {
-	logger "[ Info ] Starting daemon ..."
-	nohup $DAEMON
+	logger "[ Info ] Starting UDP daemon ..."
+	nohup $DAEMON $IP_ADDR
   if [ $? -ne 0 ]; then
-    logger "[ Warning ] An error occured when trying to start daemon"
+    logger "[ Warning ] An error occured when trying to start  UDP daemon"
   else
-	  logger "[ Info ] daemon started !"
+	  logger "[ Info ] UDP daemon started !"
   fi
 }
 
 do_stop() {
-	logger "[ Info ] Stopping daemon"
+	logger "[ Info ] Stopping UDP daemon"
 	pkill $DAEMON
-	logger "[ Info ] daemon stopped !"
+	logger "[ Info ] UDP daemon stopped !"
 }
 
 do_restart() {
-  logger "[ Info ] Going to restart daemon ..."
+  logger "[ Info ] Going to restart UDP daemon ..."
   do_stop
   do_start
 }

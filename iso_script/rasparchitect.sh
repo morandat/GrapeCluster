@@ -68,12 +68,29 @@ check_and_install() {
 	echo ""
 }
 
+install_as_service(){
+	if [ -e $1 ]; then
+		simple_action "Copying executable and launching script for $1 ..."
+		cp ./$1 /usr/local/bin/$1
+		chmod a+x ./$1.sh
+		cp ./$1.sh /etc/init.d/$1
+		simple_action "Adding program to init.d services ..."
+		update-rc.d $1 defaults >/home/pi/armmanager.log
+		simple_action "Enabling $1 ..."
+		update-rc.d $1 enable >>/home/pi/armmanager.log
+
+	else
+		second_action "Impossible to proceed service creator, executable does not exist."
+	fi
+}
+
 #we just modify the PATH ...
 main_action "In-chroot script ISO conjurer"
 second_action "Modifying path ..."
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 FILES=""
-EXEC_NAME=daemon
+EXEC_NAME_UDP=daemon_udp
+EXEC_NAME_I2C=daemon_i2c
 CHROOT_ONLY=false
 INSTALL_ONLY=false
 PACKAGEMANAGER="apt-get install -qq -o=Dpkg::Use-Pty=0"
@@ -208,24 +225,15 @@ if [ $CHROOT_ONLY == false ]; then
 		if [ -e slave ]; then
 			cd slave
 			simple_action "Building daemon ..."
-			gcc -DORDERS_PATH=\"/etc/daemon.d/orders.txt\" -o $EXEC_NAME -std=gnu99 i2cslave.c udpslave.c daemon.c commands.c
+			make udp
+			make i2c
 		else
 			second_action "Unable to find Daemon sources"
 		fi
 
-		if [ -e $EXEC_NAME ]; then
-			simple_action "Copying executable and launching script ..."
-			cp ./$EXEC_NAME /usr/local/bin/$EXEC_NAME
-			chmod a+x ./$EXEC_NAME.sh
-			cp ./$EXEC_NAME.sh /etc/init.d/$EXEC_NAME
-			simple_action "Adding program to init.d services ..."
-			update-rc.d $EXEC_NAME defaults >/home/pi/armmanager.log
-			simple_action "Enabling daemon ..."
-			update-rc.d $EXEC_NAME enable >>/home/pi/armmanager.log
-
-		else
-			second_action "Impossible to proceed service creator, executable does not exist."
-		fi
+		install_as_service $EXEC_NAME_I2C
+		install_as_service $EXEC_NAME_UDP
+		
 	fi
 
 	if [ $UPGRADE_CLEAN == true ]; then

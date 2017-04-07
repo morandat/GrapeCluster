@@ -1,10 +1,10 @@
 default: udp
 	
 udp:
-	gcc -Wall daemon_udp.c commands.c udpslave.c -o daemon_udp
+	gcc $(CFLAGS) -Wall daemon_udp.c commands.c udpslave.c -o daemon_udp -std=c99
 
 i2c:
-	gcc -Wall daemon_i2c.c commands.c i2cslave.c -o daemon_i2c
+	gcc $(CFLAGS) -Wall daemon_i2c.c commands.c i2cslave.c -o daemon_i2c -std=c99
 
 
 clean:

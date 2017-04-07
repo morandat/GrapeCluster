@@ -3,7 +3,7 @@
 CLASS_ADDRESSES=(0x50 0x58 0x60 0x68 0x70 0x78)
 
 usage(){
-    "Usage : bcm_slave_mod_install [stack address] [pi position]"
+    "Usage : bcm_slave_mod_install [stack address] [pi position] [address of the raspi]"
 }
 
 find_address(){
@@ -30,10 +30,17 @@ else
         echo "Exitting ..."
         exit 1
     fi
+    if [ -z $3 ]; then
+        echo "You have to give the IP address of your slave"
+        echo "Exitting ..."
+        exit 1
+    else
+        echo "Saving ip address of the raspberry"
+        echo "$3" > /etc/daemon.d/ip_addr.conf
+    fi
     find_address $1 $2
-    echo $address > /etc/modprobe.d/i2c.conf
     echo $2 > /home/pi/place.txt
-    echo "bcm2835_slave_mod slave_add=$address" >> /etc/modules
+    echo "bcm2835_slave_mod slave_add=$address" >> /etc/modprobe.d/i2c.conf
 fi
 
 echo "Moving to raspberry_slave_i2c repo ..."

@@ -7,7 +7,9 @@
 
 #define MAX_ARG_SIZE 16
 
-#define ORDERS_PATH "../orders.txt"
+#ifndef ORDERS_PATH
+#define ORDERS_PATH "/etc/daemon.d/orders.txt"
+#endif
 
 char * orders[MAX_ARG_SIZE];
 
