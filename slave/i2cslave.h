@@ -6,6 +6,8 @@
 #define SLAVE_I2CSLAVE_H
 
 #include "commands.h"
+#include <sys/select.h>
+#include <sys/types.h>
 
 #define TX_BUF_SIZE  10 
 

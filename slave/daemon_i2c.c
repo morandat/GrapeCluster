@@ -10,9 +10,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
-#include <sys/select.h>
-#include <sys/types.h>
-
 
 #include "daemon.h"
 #include "i2cslave.h"
