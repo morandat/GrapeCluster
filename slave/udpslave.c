@@ -53,7 +53,8 @@ void udp_handle(int sock, struct daemon* daemon, struct sockaddr_in* master_info
         }
         else if (atoi(args[0]) == get_command_index("cpu")) {
             char cpu_usage[20];
-            sprintf(cpu_usage, "cpu:%d", get_cpu_usage());
+            sprintf(cpu_usage, "cpu;%d", get_cpu_usage());
+            printf(cpu_usage);
             sendto(sock, cpu_usage, strlen(cpu_usage), 0, (struct sockaddr *) master_info, master_info_len);
             printf("Sending cpu usage to master\n");
         }

@@ -124,7 +124,7 @@ def getStack(id=None):
             #master = daemon.get_master()
             
             stackJSON = {
-                'heat': 0,#stack.get_heat(),
+                'heat': stack.get_heat(),
                 'rasps': {}
             }
         

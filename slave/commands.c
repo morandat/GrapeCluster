@@ -153,7 +153,7 @@ int get_cpu_usage() {
             ((b[0] + b[1] + b[2]) - (a[0] + a[1] + a[2])) / ((b[0] + b[1] + b[2] + b[3]) - (a[0] + a[1] + a[2] + a[3]));
     printf("Current CPU utilization is : %d\n", (int)(loadavg*100));
 
-    return (int)loadavg*100;
+    return (int)(loadavg*100);
 }
 
 int get_i2c(){
