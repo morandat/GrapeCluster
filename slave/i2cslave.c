@@ -24,6 +24,7 @@ int is_addr;
 
 void get_order(int order_code, char **order) {
     *order = orders[order_code];
+	printf("order1 : %s\n",orders[order_code]);
 	printf("order :%s\n", *order);
 }
 
@@ -34,7 +35,7 @@ void action(int call, char *out){
         printf("Received 66\n");
     }
     else {
-        //get_order(call, &order);
+        get_order(call, &order);
         printf("order %d %s\n", call, order);
 
         if (strcmp("test", order) == 0) {
@@ -61,7 +62,7 @@ void action(int call, char *out){
             restart_slave();
         }
         else if(strcmp("get_ip", order) == 0){
-<<<<<<< HEAD
+
 	    char tmp[4];
 	    char i1[4];
 	    char i2[4];
@@ -70,12 +71,7 @@ void action(int call, char *out){
 	
             get_ip(i1, i2, i3, i4);
             encode_ip(tmp, i1, i2, i3, i4);
-=======
-            char tmp[4];
-            char* in[4];
-            get_ip(in);
-            encode_ip(&tmp, in);
->>>>>>> 73240dcbee4e370c4d955be10ee7ea095f9b1d8d
+
             int i;
             for(i = 0; i < 4 ; i++)
                 out[i] = tmp[4];
@@ -90,12 +86,10 @@ void action(int call, char *out){
             out[3] = pos;
         }
         else if(strcmp("is_network", order) == 0){
-<<<<<<< HEAD
+
             int test;
 	    test = test_network();
-=======
-            char* test = test_network();
->>>>>>> 73240dcbee4e370c4d955be10ee7ea095f9b1d8d
+
             if(test == 1){
                 out[0] = '1';
                 out[1] = '1';
@@ -117,6 +111,9 @@ int i2c_init(int* mode, int argc, char* argv[], char **ord) {
     *mode = 0;
 
     orders = ord;
+
+
+		
 
     FILE *usage_file = stderr;
     const char *input = DEFAULT_DEVICE;

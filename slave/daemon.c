@@ -106,13 +106,12 @@ void load_orders(char **orders) {
 int main(int argc, char *argv[]) {
     load_orders(orders);
     struct daemon daemon;
-
     daemon.curr_status = ACTIVE;
 
     char tx_buffer[TX_BUF_SIZE];
     int mode;
 
-    int i2c_fd = -42;//i2c_init(&mode, argc, argv, orders);
+    int i2c_fd = i2c_init(&mode, argc, argv, orders);
 
     struct sockaddr_in master_info;
     struct sockaddr_in slave_info;
