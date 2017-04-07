@@ -40,8 +40,8 @@ class Daemon(Thread):
             data, addr = self.__udp_comm.receive(1024)    
             print("received message: {} from {}".format(data, addr))
                 
-            
-            if data == b"configure":#To-Do: check why data is bstr
+            print(data[:-1])
+            if data[:-1] == b"configure;":#To-Do: check why data is bstr
                 if(nb_slave <= 5):
                     stack = self.__master.get_stack(nb_stack)
                     #To-do : check for ip_address conflict, implement some kind of simple DHCP. May look for DHCP Py libs
