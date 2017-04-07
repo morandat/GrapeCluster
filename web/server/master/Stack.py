@@ -49,7 +49,7 @@ class Stack(IStack):
 
     def reset_pi_enable(self, value):
         for rasp in self.__pi_enable:
-            if (rasp[1] >= 1)
+            if rasp[1] >= 1:
                 rasp[1] = value
 
 
