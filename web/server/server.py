@@ -295,7 +295,7 @@ def enableI2C(id):
 
     if rasp is not None:
         print("Telling slave to enable i2c")
-        daemon.get_udp_comm().send("8", rasp.get_ip_address())
+        #daemon.get_udp_comm().send(daemon.get_commands().get_index("enable_i2c", rasp.get_ip_address())
 
     return json_response(json.dumps({'response': 1}))
 
@@ -305,7 +305,8 @@ def disableI2C(id):
 
     if rasp is not None:
         print("Telling slave to disable i2c")
-        daemon.get_i2c_comm().send_custom_instruction(rasp, 8, "8")
+        #index = daemon.get_commands().get_index("disable_i2c")
+        #daemon.get_i2c_comm().send_custom_instruction(rasp, index, str(index))
 
     return json_response(json.dumps({'response': 1}))
 

@@ -6,8 +6,11 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from Stack import Stack
 from Master import Master
 from Slave import Slave
+
+from Commands import Commands
 from CommunicatorUDP import CommunicatorUDP
 from CommunicatorI2C import CommunicatorI2C
+
 from logging import getLogger
 from Alimentation import Alimentation
 from grape import *
@@ -16,6 +19,8 @@ from grape import *
 class Daemon(Thread):
     def __init__(self, ip_address):
         super(Daemon, self).__init__()
+
+        self.__commands = Commands()
 
         self.__master = Master(0, "00:00:00:00:00:00", ip_address, "0", 0)
 
@@ -37,7 +42,7 @@ class Daemon(Thread):
         while True:
 
             print("Broadcasting cpu request")
-            self.__udp_comm.broadcast("1;", self.__master.get_cluster_ip_addresses())
+            self.__udp_comm.broadcast(self.__commands.get_index("cpu"), self.__master.get_cluster_ip_addresses())
             
             data, addr = self.__udp_comm.receive(1024)    
             print("received message: {} from {}".format(data, addr))
@@ -76,6 +81,9 @@ class Daemon(Thread):
 
     def get_i2c_comm(self):
         return self.__i2c_comm
+
+    def get_commands(self):
+        return self.__commands
 
     def enable_alimentation_stack(self, stack):
         """ TODO for all the stack
