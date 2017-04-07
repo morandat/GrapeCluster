@@ -19,15 +19,11 @@
 
 #include "utils.h"
 
-#ifndef ORDERS_PATH
-#define ORDERS_PATH "../orders.txt"
-#endif
-
 enum status curr_status = ACTIVE;
 
 int orders_num;
 
-int count_args(char* msg, ssize_t msg_len) {
+int count_args(char *msg, ssize_t msg_len) {
     int arg_num = 0;
     for (int i = 0; i < msg_len; ++i) {
         if (msg[i] == ';')
@@ -37,40 +33,32 @@ int count_args(char* msg, ssize_t msg_len) {
     return arg_num;
 }
 
-void slice_args(char** args, char* msg, ssize_t msg_len, int arg_num) {
+void slice_args(char **args, char *msg, ssize_t msg_len, int arg_num) {
     int start = 0;
     int j = 0;
     
     for (int i = 0; i < msg_len; ++i) {//msg contains first order char, so start at 1
         if (msg[i] == ';') {
+
 		
-		msg[i] = 0;
-		
-          
- 		args[j] = msg+start;//malloc()
 
+            msg[i] = 0;
+            args[j] = msg + start;
+            printf("args[%d]=%s", j, args[j]);
 
-
-	
-            start = i;
-		j++;
+            start = i+1;
+            j++;
         }
     }
 }
 
-void free_args(char** args, int arg_num) {
-	for (int i = 0; i < arg_num; i++) {
-		free(args[i]);
-	}
-}
-
-void exec_order(int order_code, struct daemon* daemon) {//, char** args, int arg_num) {
-    char* order = orders[order_code];
+void exec_order(int order_code, struct daemon *daemon) {//, char** args, int arg_num) {
+    char *order = orders[order_code];
     printf("executing order %i : %s\n", order_code, order);
 
     fflush(stdin);
     fflush(stdout);
-    FILE* pipe = popen(order, "r");
+    FILE *pipe = popen(order, "r");
     if (pipe == NULL) {
         perror("popen failed");
         exit(EXIT_FAILURE);
@@ -87,21 +75,22 @@ void exec_order(int order_code, struct daemon* daemon) {//, char** args, int arg
     pclose(pipe);
 }
 
-int order_str_to_code(char* str) {
+int order_str_to_code(char *str) {
     for (int i = 0; i < orders_num; i++) {
-        if(strcmp(orders[i], str) == 0)
+        if (strcmp(orders[i], str) == 0)
             return i;
     }
+    return -1;
 }
 
 
-void load_orders(char** orders) {
-    FILE* orders_file = fopen(ORDERS_PATH, "r");
+void load_orders(char **orders) {
+    FILE *orders_file = fopen(ORDERS_PATH, "r");
     fseek(orders_file, 0, SEEK_END);
     long fsize = ftell(orders_file);
     fseek(orders_file, 0, SEEK_SET);
 
-    char* orders_file_str = malloc(fsize+1);
+    char *orders_file_str = malloc(fsize + 1);
     fread(orders_file_str, fsize, 1, orders_file);
     fclose(orders_file);
     orders_file_str[fsize] = 0;
@@ -123,7 +112,7 @@ int main(int argc, char *argv[]) {
     char tx_buffer[TX_BUF_SIZE];
     int mode;
 
-    int i2c_fd = i2c_init(&mode, argc, argv, orders);
+    int i2c_fd = -42;//i2c_init(&mode, argc, argv, orders);
 
     struct sockaddr_in master_info;
     struct sockaddr_in slave_info;
@@ -147,22 +136,22 @@ int main(int argc, char *argv[]) {
     FD_SET(sock, &rfds);
 
     printf("Sending configure message to master \n");
-	
-    FILE* place_file = fopen("/home/pi/place.txt", "r");
+
+    FILE *place_file = fopen(PLACE_FILE_PATH, "r");
     fseek(place_file, 0, SEEK_END);
     long fsize = ftell(place_file);
     fseek(place_file, 0, SEEK_SET);
-	
 
-    char* place_file_str = malloc(fsize+1);
+
+    char *place_file_str = malloc(fsize + 1);
 
     fread(place_file_str, fsize, 1, place_file);
-	
+
     fclose(place_file);
     place_file_str[fsize] = '\0';
-	
+
     char conf_msg[12];
-	
+
     sprintf(conf_msg, "configure;%c", place_file_str[0]);
 
 
@@ -176,16 +165,15 @@ int main(int argc, char *argv[]) {
                 struct timeval timeval;
                 timeval.tv_sec = 1;
                 timeval.tv_usec = 0;
-                int fd_modified_count = select(max_fd+1, &rfds, NULL, NULL, &timeval);
+                int fd_modified_count = select(max_fd + 1, &rfds, NULL, NULL, &timeval);
 
                 CHKERR(fd_modified_count);
 
-                if(FD_ISSET(sock, &rfds)) {
+                if (FD_ISSET(sock, &rfds)) {
                     printf("received data over udp\n");
-			
+
                     udp_handle(sock, &daemon, &master_info, master_info_len, &slave_info, &rfds, i2c_fd);
-                }
-                else if(FD_ISSET(i2c_fd, &rfds)) {
+                } else if (FD_ISSET(i2c_fd, &rfds)) {
                     printf("received data over i2c\n");
                     i2c_handle(i2c_fd, tx_buffer, mode, &rfds);
                 }
