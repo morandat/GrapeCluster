@@ -32,6 +32,7 @@ class Daemon(Thread):
     def run(self):
         nb_stack = 0
         nb_slave = 0
+        value = 1
         while True:
             print("Broadcasting cpu request")
             self.__udp_comm.broadcast("1;", self.__master.get_cluster_ip_addresses())
@@ -46,6 +47,8 @@ class Daemon(Thread):
                     #To-do : check for ip_address conflict, implement some kind of simple DHCP. May look for DHCP Py libs
                     new_slave = Slave(nb_stack + RASP_CLASS_ADDRESSES[nb_slave], nb_stack, "AA:AA:AA:AA:AA:AA", addr[0], len(stack.get_pi_devices()))
                     self.__master.get_stack(nb_stack).add_pi_device(new_slave)
+                    self.__master.get_stack(nb_stack).update_pi_enable(new_slave, value)
+                    value = value + 1
                     self.__udp_comm.send("0;" + addr[0] + ";", new_slave.get_ip_address())
                     print("Configured new slave of ip_addr {}".format(addr[0]))
                     nb_slave = nb_slave + 1
@@ -58,7 +61,13 @@ class Daemon(Thread):
 
             elif data[:4] == b"cpu:":
                 self.__master.get_slave_by_ip(addr[0]).cpu_usage = data[4:]
+                self.__master.get_stack(nb_stack).update_pi_enable(self.__master.get_slave_by_ip(addr[0]), value)
+                value = value + 1
                 print("Received cpu_usage ({}) from slave {}, updating value".format(addr[0], data[4:]))
+                if (value > 1000):
+                    self.__master.get_stack(nb_stack).test_rasp_exists(value)
+                    value = 1
+                    self.__master.get_stack(nb_stack).reset_pi_enable(value)
 
 
     def get_master(self):
@@ -76,7 +85,7 @@ class Daemon(Thread):
         """
         self.__master.enable_alim()
 
-    def disbale_alimentation_stack(self, stack):
+    def disable_alimentation_stack(self, stack):
         """ TODO for all the stack
         Only for one stack
         """
