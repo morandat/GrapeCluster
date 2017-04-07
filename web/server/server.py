@@ -124,7 +124,7 @@ def getStack(id=None):
             #master = daemon.get_master()
             
             stackJSON = {
-                'heat': stack.get_heat(),
+                'heat': 0,#stack.get_heat(),
                 'rasps': {}
             }
         
@@ -153,6 +153,16 @@ def getRasp(id=None):
         if DEBUG:
             return rasp
         else:
+            print({
+                'id': rasp.get_id(),
+                'name' : 'Name',
+                'address' : rasp.get_i2c(),
+                'stack' : 1,
+                'os' : rasp.get_os(),
+                'ip' : rasp.get_ip_address(),
+                'cpu' : rasp.get_cpu_usage(),
+                'ram' : rasp.get_ram_usage()
+            })
             return {
                 'id': rasp.get_id(),
                 'name' : 'Name',
@@ -171,7 +181,7 @@ def getRasp(id=None):
         else:
             return None
     else:
-        rasps = getRasppObject()
+        rasps = getRaspObject()
         for raspId in rasps:
             rasps[raspId] = renderRasp(rasps[raspId])
         return rasps

@@ -65,10 +65,11 @@ class Daemon(Thread):
                     nb_slave = 0
 
 
-            elif data[:4] == b"cpu:":
-                self.__master.get_slave_by_ip(addr[0]).cpu_usage = data[4:]
+            elif data[:4] == b"cpu;":
+                cpu_value = data.decode().split(";")[1]
+                self.__master.get_slave_by_ip(addr[0]).set_cpu_usage(cpu_value)
                 value = value + 1
-                print("Received cpu_usage ({}) from slave {}, updating value".format(addr[0], data[4:]))
+                print("Received cpu_usage ({}) from slave {}, updating value".format(addr[0], cpu_value))
                 
 
 
