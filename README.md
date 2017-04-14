@@ -1,6 +1,7 @@
-#Grape Cluster
+# Grape Cluster
 
-##Contributors
+## Contributors
+
 Cyril Bos
 Paul Breton
 Benjamin Dos Santos
